@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String
+  priceCents  Int
+  currency    String    @default("usd")
+  imageUrl    String
+  stock       Int       @default(0)
+  material    String?
+  gemstone    String?
+  weightGrams Float?
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  sku         String?   // stock keeping unit; shown in inventory
+  variants    Variant[]
+  createdAt   DateTime  @default(now())
+
+  buyable               Boolean   @default(true)
+  rentable              Boolean   @default(false)
+  rentPricingType       String?   // "daily" | "tiered" | "fixed"
+  rentDailyCents        Int?
+  rentFixedCents        Int?
+  rentFixedDurationDays Int?
+  rentCopiesCount       Int       @default(0)
+  waiverFeeCents        Int?
+  rentalTiers           RentalTier[]
+  bookings              Booking[]
+
+  // Catalog / merchandising
+  featured           Boolean        @default(false)
+  position           Int            @default(0)
+  seoTitle           String?
+  seoDescription     String?
+  lowStockThreshold  Int?
+  images             ProductImage[]
+  rentalCopies       RentalCopy[]
+
+  @@index([sku])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  position  Int     @default(0)
+
+  @@index([productId, position])
+}
+
+model RentalCopy {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  status    String   @default("available") // "available" | "out" | "maintenance" | "retired"
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([productId, status])
+}
+
+model RentalTier {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label      String
+  days       Int
+  priceCents Int
+}
+
+model Booking {
+  id                  String   @id @default(cuid())
+  productId           String
+  product             Product  @relation(fields: [productId], references: [id])
+  startDate           DateTime
+  endDate             DateTime
+  status              String   // "pending" | "confirmed" | "active" | "returned" | "canceled"
+  fulfillment         String   // "ship" | "pickup"
+  email               String
+  customerName        String
+  shippingAddressJson String?
+  pickupSlot          DateTime?
+  waiverIncluded      Boolean  @default(false)
+  waiverFeeCents      Int      @default(0)
+  rentalCents         Int
+  totalCents          Int
+  currency            String   @default("usd")
+  stripeSessionId     String?  @unique
+  createdAt           DateTime @default(now())
+  customerId          String?
+  customer            Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([productId, startDate, endDate])
+  @@index([customerId])
+}
+
+model Variant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  sku       String?
+  stock     Int     @default(0)
+
+  @@index([sku])
+}
+
+model Settings {
+  id                  String   @id @default("singleton")
+  stripeSecretKey     String?
+  stripeWebhookSecret String?
+  totpSecret          String?
+  totpEnabled         Boolean  @default(false)
+  shopHomeJson        String?
+  rentalHomeJson      String?
+  updatedAt           DateTime @updatedAt
+}
+
+model Order {
+  id               String   @id @default(cuid())
+  stripeSessionId  String   @unique
+  status           String
+  amountTotalCents Int
+  currency         String
+  email            String?
+  itemsJson        String
+  createdAt        DateTime @default(now())
+  customerId       String?
+  customer         Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("staff") // "owner" | "staff" | "viewer"
+  totpSecret   String?
+  totpEnabled  Boolean  @default(false)
+  disabled     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  lastLoginAt  DateTime?
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  username    String   // captured at write-time so logs survive user deletion
+  action      String   // "create" | "update" | "delete" | "stock_adjust" | "login" | ...
+  entityType  String   // "Product" | "Category" | "Booking" | "Settings" | "AdminUser" | ...
+  entityId    String?
+  beforeJson  String?
+  afterJson   String?
+  metaJson    String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, createdAt])
+  @@index([userId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+  bookings  Booking[]
+}

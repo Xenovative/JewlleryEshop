@@ -1,0 +1,19 @@
+{
+  "name": "lumiere-monorepo",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:shop": "dotenv -e .env -- npm run -w @lumiere/shop dev",
+    "dev:rent": "dotenv -e .env -- npm run -w @lumiere/rent dev",
+    "build:shop": "dotenv -e .env -- npm run -w @lumiere/shop build",
+    "build:rent": "dotenv -e .env -- npm run -w @lumiere/rent build",
+    "build": "npm run build:shop && npm run build:rent",
+    "db:push": "dotenv -e .env -- npm run -w @lumiere/db push",
+    "db:seed": "dotenv -e .env -- npm run -w @lumiere/db seed",
+    "db:backfill": "dotenv -e .env -- npm run -w @lumiere/db backfill",
+    "db:generate": "npm run -w @lumiere/db generate"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.4"
+  }
+}
