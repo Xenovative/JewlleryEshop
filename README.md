@@ -29,6 +29,17 @@ Build: `npm run build` (both apps).
 
 ## VPS deploy (Nginx + SSL)
 
+Quickest path (guided):
+
+```bash
+chmod +x deploy/easy-deploy.sh deploy/vps-deploy.sh
+bash deploy/easy-deploy.sh
+```
+
+The easy script asks only the essentials, auto-detects the project root, escalates to sudo, and runs the full deploy.
+
+Advanced/non-interactive:
+
 Use the included script to deploy on an Ubuntu/Debian VPS with systemd, Nginx reverse proxy, and Let's Encrypt:
 
 ```bash

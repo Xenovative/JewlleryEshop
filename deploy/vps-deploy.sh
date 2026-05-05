@@ -72,6 +72,19 @@ prompt_yes_no() {
 }
 
 collect_inputs() {
+  if [[ "${NONINTERACTIVE:-0}" == "1" ]]; then
+    [[ -n "${SHOP_DOMAIN}" ]] || err "SHOP_DOMAIN is required in NONINTERACTIVE mode"
+    [[ -n "${LETSENCRYPT_EMAIL}" ]] || err "LETSENCRYPT_EMAIL is required in NONINTERACTIVE mode"
+    log "Step 1/8: Using non-interactive mode"
+    log "  APP_DIR=${APP_DIR}"
+    log "  APP_USER=${APP_USER}"
+    log "  SOURCE_DIR=${SOURCE_DIR:-"(none)"}"
+    log "  SHOP_DOMAIN=${SHOP_DOMAIN}"
+    log "  RENT_DOMAIN=${RENT_DOMAIN:-"(none)"}"
+    log "  LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}"
+    return
+  fi
+
   echo
   log "Step 1/8: Collect deployment settings"
   prompt_with_default APP_DIR "App directory on VPS" "${APP_DIR}"
