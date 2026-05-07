@@ -1,16 +1,20 @@
 # Copy this template to /etc/nginx/sites-available/lumiere.conf
 # Replace values in angle brackets, then symlink into sites-enabled.
 #
-# Also install http-wide header buffers (fixes ChunkLoadError when chunks return 400):
-#   sudo tee /etc/nginx/conf.d/00-lumiere-large-client-headers.conf <<'EOF'
+# Snippet (valid inside server {} only if conf.d is not under http {} on your host):
+#   sudo mkdir -p /etc/nginx/snippets
+#   sudo tee /etc/nginx/snippets/lumiere-large-client-headers.conf <<'EOF'
 #   client_header_buffer_size 16k;
 #   large_client_header_buffers 4 32k;
 #   EOF
+# After certbot adds listen 443 ssl, add the same `include ...lumiere-large-client-headers.conf`
+# inside each HTTPS server block if missing.
 
 server {
     listen 80;
     listen [::]:80;
     server_name <SHOP_DOMAIN>;
+    include /etc/nginx/snippets/lumiere-large-client-headers.conf;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -29,6 +33,7 @@ server {
     listen 80;
     listen [::]:80;
     server_name <RENT_DOMAIN>;
+    include /etc/nginx/snippets/lumiere-large-client-headers.conf;
 
     location / {
         proxy_pass http://127.0.0.1:3001;
