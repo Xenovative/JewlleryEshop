@@ -3,6 +3,9 @@ node_modules
 out
 .env
 .env.local
+
+# Optional VPS sync target (see deploy/sync-site.sh)
+deploy/.sync-host
 *.log
 .DS_Store
 prisma/dev.db

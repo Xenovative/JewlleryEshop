@@ -80,6 +80,69 @@ export const dict = {
     "cancel.body": "No charge was made. The dates you picked are released.",
     "cancel.cta": "Back to browse",
 
+    "browse.title": "Browse rentable pieces",
+    "browse.subtitle": "Every piece below is available on the rental storefront. Open an item to choose dates and book.",
+    "browse.back": "← Back to home",
+    "browse.empty": "No rentable items yet.",
+
+    "item.noCopiesYet":
+      "This piece is marked for rental but has no rental copies in the fleet yet. Add copies in the admin inventory, or try again later.",
+
+    "rental.hero.eyebrow": "Lumière Rental",
+    "rental.hero.title": "Wear the heirloom. Skip the vault.",
+    "rental.hero.subtitle":
+      "Insured, expertly cleaned fine jewellery for your night, your wedding, your shoot. Delivered, tried on, returned.",
+    "rental.hero.primaryCta": "Browse rentable pieces",
+    "rental.hero.secondaryCta": "How rental works",
+    "rental.howItWorks.title": "How rental works",
+    "rental.howItWorks.subtitle":
+      "Three simple steps. No surprises, no hidden fees, no apologies needed at customs.",
+    "rental.steps.1.title": "1. Reserve",
+    "rental.steps.1.body":
+      "Pick the piece and rental window. We confirm availability the same day.",
+    "rental.steps.2.title": "2. Wear",
+    "rental.steps.2.body":
+      "We ship insured (or arrange pickup). Wear it with the same care you'd give an heirloom.",
+    "rental.steps.3.title": "3. Return",
+    "rental.steps.3.body":
+      "Drop in our prepaid courier sleeve. Done. We handle the rest, including cleaning.",
+    "rental.featured.title": "Featured rentable pieces",
+    "rental.featured.subtitle":
+      "A short list this season. Each piece can be reserved for a single night, a weekend, or up to seven days.",
+    "rental.featured.empty":
+      "Our rental atelier is taking new pieces in. Check back shortly.",
+    "rental.policies.title": "Why our clients trust us",
+    "rental.policies.subtitle":
+      "Real fine jewellery, fully insured, handled by people who restore heirlooms for a living.",
+    "rental.policy.insurance.title": "Insured edge to edge",
+    "rental.policy.insurance.body":
+      "Every reservation includes full transit and wear insurance. You sign once and we handle the rest.",
+    "rental.policy.cleaning.title": "Pro cleaning between renters",
+    "rental.policy.cleaning.body":
+      "Each piece is ultrasonic-cleaned and inspected by our atelier between renters.",
+    "rental.policy.flexibility.title": "Flexible windows",
+    "rental.policy.flexibility.body":
+      "1, 4, or 7-day rentals. Need more time? Extend in one click before the return date.",
+    "rental.cta.title": "Have a black-tie event coming up?",
+    "rental.cta.body":
+      "Reserve now and we'll set the piece aside. Most reservations confirm within an hour during business days.",
+    "rental.cta.button": "Reserve a piece",
+    "rental.trust.insured": "Fully insured rentals",
+    "rental.trust.delivery": "Door-to-door delivery",
+    "rental.trust.returns": "Prepaid returns included",
+    "rental.title": "Lumière Rental",
+    "rental.metadata.description":
+      "Insured fine jewellery rental from Lumière. Reserve heirloom-quality pieces for your evening, your wedding, or your shoot.",
+    "rental.snapshot.available": "Rentable pieces",
+    "rental.snapshot.copies": "Total rental copies",
+    "rental.snapshot.tiers": "Tiered rental options",
+    "rental.card.from": "From {price}",
+    "rental.card.daily": "{price} / day",
+    "rental.card.fixed": "{price} for {days} days",
+    "rental.card.view": "View details",
+    "rental.badge.copies": "{n} copies",
+    "rental.badge.tiers": "{n} tiers",
+
     "lang.switchLabel": "Language",
   },
   "zh-Hant": {
@@ -151,6 +214,64 @@ export const dict = {
     "cancel.title": "結帳已取消",
     "cancel.body": "尚未產生任何費用,您所選的日期已釋出。",
     "cancel.cta": "返回瀏覽",
+
+    "browse.title": "瀏覽可租賃商品",
+    "browse.subtitle": "以下每件作品皆可在租賃前台預訂。開啟商品頁即可選擇日期並完成預約。",
+    "browse.back": "← 返回首頁",
+    "browse.empty": "目前尚無可租商品。",
+
+    "item.noCopiesYet":
+      "此商品已標記為可租賃,但尚未建立可租實體庫存。請於後台庫存新增實體,或稍後再試。",
+
+    "rental.hero.eyebrow": "Lumière 租賃服務",
+    "rental.hero.title": "戴出傳家寶,不必鎖在保險箱。",
+    "rental.hero.subtitle":
+      "全程保險、專業清潔的高級珠寶租賃,為您的晚宴、婚禮、外景拍攝送達、配戴、回收。",
+    "rental.hero.primaryCta": "瀏覽可租賃商品",
+    "rental.hero.secondaryCta": "了解租賃流程",
+    "rental.howItWorks.title": "租賃流程",
+    "rental.howItWorks.subtitle": "三個簡單步驟,沒有意外、沒有隱藏費用、不必在海關尷尬解釋。",
+    "rental.steps.1.title": "1. 預約",
+    "rental.steps.1.body": "選擇商品與租賃日期,我們當日完成可用性確認。",
+    "rental.steps.2.title": "2. 配戴",
+    "rental.steps.2.body":
+      "我們以保險方式寄送(或安排自取)。請以對待傳家寶的態度配戴。",
+    "rental.steps.3.title": "3. 寄回",
+    "rental.steps.3.body": "投入我們提供的預付運送袋即可,後續清潔由我們處理。",
+    "rental.featured.title": "本季精選租賃",
+    "rental.featured.subtitle":
+      "本季精選租賃單品,可選擇單晚、週末或最長七天的租賃方案。",
+    "rental.featured.empty": "目前正在引進新作品,請稍後再回來看看。",
+    "rental.policies.title": "顧客為何放心選擇我們",
+    "rental.policies.subtitle":
+      "真正的高級珠寶,全程保險,並由專業修復傳家寶的工坊團隊維護。",
+    "rental.policy.insurance.title": "全程保險",
+    "rental.policy.insurance.body":
+      "每筆預約皆包含運送與配戴保險,只需簽署一次,後續由我們處理。",
+    "rental.policy.cleaning.title": "出借前後專業清潔",
+    "rental.policy.cleaning.body": "每件作品於每次出借前後皆經超音波清潔與工坊檢查。",
+    "rental.policy.flexibility.title": "彈性方案",
+    "rental.policy.flexibility.body":
+      "可選 1、4 或 7 天的租賃,需要更長時間?歸還日前一鍵延長即可。",
+    "rental.cta.title": "近期有重要的正式場合?",
+    "rental.cta.body":
+      "立即預約,我們會為您保留商品,大多數預約於工作日一小時內完成確認。",
+    "rental.cta.button": "立即預約",
+    "rental.trust.insured": "全程保險",
+    "rental.trust.delivery": "宅配到府",
+    "rental.trust.returns": "退件運費已含",
+    "rental.title": "Lumière 租賃服務",
+    "rental.metadata.description":
+      "Lumière 提供全程保險的高級珠寶租賃,為您的晚宴、婚禮或拍攝預訂傳家級工藝作品。",
+    "rental.snapshot.available": "可租賃商品",
+    "rental.snapshot.copies": "可租賃實體總數",
+    "rental.snapshot.tiers": "分級租賃方案",
+    "rental.card.from": "{price} 起",
+    "rental.card.daily": "{price} / 天",
+    "rental.card.fixed": "{days} 天 {price}",
+    "rental.card.view": "查看詳情",
+    "rental.badge.copies": "{n} 件實體",
+    "rental.badge.tiers": "{n} 種方案",
 
     "lang.switchLabel": "語言",
   },

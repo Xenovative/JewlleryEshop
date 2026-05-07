@@ -85,21 +85,27 @@ export default async function ItemPage({
         </dl>
 
         <div className="mt-8">
-          <BookingForm
-            productId={product.id}
-            productName={product.name}
-            currency={product.currency}
-            pricingType={product.rentPricingType ?? ""}
-            rentDailyCents={product.rentDailyCents}
-            rentFixedCents={product.rentFixedCents}
-            rentFixedDurationDays={product.rentFixedDurationDays}
-            tiers={product.rentalTiers.map((t) => ({
-              days: t.days,
-              priceCents: t.priceCents,
-              label: t.label,
-            }))}
-            waiverFeeCents={product.waiverFeeCents}
-          />
+          {product.rentCopiesCount > 0 ? (
+            <BookingForm
+              productId={product.id}
+              productName={product.name}
+              currency={product.currency}
+              pricingType={product.rentPricingType ?? ""}
+              rentDailyCents={product.rentDailyCents}
+              rentFixedCents={product.rentFixedCents}
+              rentFixedDurationDays={product.rentFixedDurationDays}
+              tiers={product.rentalTiers.map((tier) => ({
+                days: tier.days,
+                priceCents: tier.priceCents,
+                label: tier.label,
+              }))}
+              waiverFeeCents={product.waiverFeeCents}
+            />
+          ) : (
+            <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+              {t("item.noCopiesYet")}
+            </p>
+          )}
         </div>
       </div>
     </div>

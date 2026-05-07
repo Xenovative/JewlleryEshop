@@ -38,7 +38,7 @@ export default async function RootLayout({
                 <span className="px-2 py-1 rounded bg-brand-600 text-white">Rental</span>
               </div>
               <nav className="flex gap-6 text-sm items-center">
-                <Link href="/" className="hover:text-brand-600">
+                <Link href="/browse" className="hover:text-brand-600">
                   {t("nav.browse")}
                 </Link>
                 <Link href="/how-it-works" className="hover:text-brand-600">
