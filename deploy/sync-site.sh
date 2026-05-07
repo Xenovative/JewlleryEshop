@@ -15,8 +15,18 @@ set -euo pipefail
 # Remote targets (user@host:path) use rsync over ssh — ssh must be installed.
 # Local targets do not use ssh.
 #
+# SSH keys: use the SAME host string as in ~/.ssh/config (e.g. if you have
+#   Host jewel
+#     HostName jewel.xenovative-ltd.com
+#     IdentityFile ~/.ssh/id_ed25519
+# then set SYNC_TARGET=deploy@jewel:/var/www/lumiere — not the FQDN — so that
+# Host block matches. This script only reads Port from ssh -G; it does not
+# rewrite your host to the canonical name (that would skip IdentityFile).
+#
 # Optional:
 #   VPS_PORT=22
+#   RSYNC_RSH — full rsync transport, e.g. "ssh" or "ssh -i /path/key -p 22"
+#               (default: ssh -p $VPS_PORT)
 #   REMOTE_POST_SYNC — shell command run AFTER sync; only for remote targets (ssh).
 #                        Set empty to skip. Default restarts lumiere-shop.
 #   DRY_RUN=1
@@ -91,40 +101,16 @@ is_remote_rsync_target() {
   [[ "$1" =~ ^[^@]+@[^:]+:.+ ]]
 }
 
-# For user@host, optionally expand host/user/port via ssh -G when candidate is a Host alias.
-resolve_remote_target() {
-  local raw="$1"
-  local user_part="" host_part="" path_part=""
-
-  if [[ "${raw}" =~ ^([^@]+)@([^:]+):(.+)$ ]]; then
-    user_part="${BASH_REMATCH[1]}"
-    host_part="${BASH_REMATCH[2]}"
-    path_part="${BASH_REMATCH[3]}"
-  else
-    err "Invalid remote SYNC_TARGET (expected user@host:path): ${raw}"
-  fi
-
-  local candidate="${host_part}"
-  if out="$(ssh -G "${candidate}" 2>/dev/null)"; then
-    local h u p
-    h="$(printf '%s\n' "${out}" | awk 'tolower($1)=="hostname"{print $2; exit}')"
-    u="$(printf '%s\n' "${out}" | awk 'tolower($1)=="user"{print $2; exit}')"
+# Apply Port from ssh -G only — keep host string unchanged so ~/.ssh/config Host matches.
+apply_ssh_config_port_only() {
+  local host_part="$1"
+  local out p
+  if out="$(ssh -G "${host_part}" 2>/dev/null)"; then
     p="$(printf '%s\n' "${out}" | awk 'tolower($1)=="port"{print $2; exit}')"
-    if [[ -n "${h}" ]]; then
-      host_part="${h}"
-      if [[ -n "${u}" ]]; then
-        if [[ "${candidate}" =~ @ ]] || [[ "${h}" != "${candidate}" ]]; then
-          user_part="${u}"
-        fi
-      fi
-      if [[ "${VPS_PORT_WAS_EXPLICIT}" -eq 0 ]] && [[ -n "${p}" ]]; then
-        VPS_PORT="${p}"
-      fi
-      log "Resolved SSH host \"${candidate}\" -> ${user_part}@${host_part} port ${VPS_PORT}"
+    if [[ "${VPS_PORT_WAS_EXPLICIT}" -eq 0 ]] && [[ -n "${p}" ]]; then
+      VPS_PORT="${p}"
     fi
   fi
-
-  printf '%s@%s:%s' "${user_part}" "${host_part}" "${path_part}"
 }
 
 gather_sync_target() {
@@ -174,7 +160,8 @@ gather_sync_target() {
   val="$(dotenv_get SYNC_SSH_ALIAS 2>/dev/null || true)"
   if [[ -n "${val}" ]]; then
     require_cmd ssh
-    SYNC_TARGET="$(resolve_remote_target "${VPS_USER}@${val}:${VPS_APP_DIR}/")"
+    SYNC_TARGET="${VPS_USER}@${val}:${VPS_APP_DIR}/"
+    apply_ssh_config_port_only "${val}"
     return 0
   fi
 
@@ -234,24 +221,14 @@ if is_remote_rsync_target "${SYNC_TARGET}"; then
   if [[ "${SYNC_TARGET}" =~ ^([^@]+)@([^:]+):(.+)$ ]]; then
     VPS_USER="${BASH_REMATCH[1]}"
     _host="${BASH_REMATCH[2]}"
-    _path="${BASH_REMATCH[3]}"
-    if out="$(ssh -G "${_host}" 2>/dev/null)"; then
-      h="$(printf '%s\n' "${out}" | awk 'tolower($1)=="hostname"{print $2; exit}')"
-      u="$(printf '%s\n' "${out}" | awk 'tolower($1)=="user"{print $2; exit}')"
-      p="$(printf '%s\n' "${out}" | awk 'tolower($1)=="port"{print $2; exit}')"
-      if [[ -n "${h}" ]]; then
-        if [[ -n "${u}" ]] && { [[ "${_host}" =~ @ ]] || [[ "${h}" != "${_host}" ]]; }; then
-          VPS_USER="${u}"
-        fi
-        if [[ "${VPS_PORT_WAS_EXPLICIT}" -eq 0 ]] && [[ -n "${p}" ]]; then
-          VPS_PORT="${p}"
-        fi
-        SYNC_TARGET="${VPS_USER}@${h}:${_path}"
-        log "Using rsync target ${SYNC_TARGET}"
-      fi
-    fi
+    apply_ssh_config_port_only "${_host}"
   fi
-  RSYNC_SHELL=(-e "ssh -p ${VPS_PORT}")
+  log "Using rsync target ${SYNC_TARGET}"
+  if [[ -n "${RSYNC_RSH:-}" ]]; then
+    RSYNC_SHELL=(-e "${RSYNC_RSH}")
+  else
+    RSYNC_SHELL=(-e "ssh -p ${VPS_PORT}")
+  fi
 else
   log "Local rsync target (no ssh): ${SYNC_TARGET}"
 fi
@@ -273,7 +250,12 @@ if [[ "${REMOTE_RUN}" -eq 1 ]] && [[ -n "${REMOTE_POST_SYNC}" ]]; then
     _u="${BASH_REMATCH[1]}"
     _h="${BASH_REMATCH[2]}"
     log "Running remote post-sync"
-    ssh -p "${VPS_PORT}" "${_u}@${_h}" "${REMOTE_POST_SYNC}"
+    if [[ -n "${RSYNC_RSH:-}" ]]; then
+      # shellcheck disable=SC2086
+      ${RSYNC_RSH} "${_u}@${_h}" "${REMOTE_POST_SYNC}"
+    else
+      ssh -p "${VPS_PORT}" "${_u}@${_h}" "${REMOTE_POST_SYNC}"
+    fi
   fi
 elif [[ "${REMOTE_RUN}" -eq 0 ]] && [[ -n "${REMOTE_POST_SYNC:-}" ]]; then
   log "Skipping REMOTE_POST_SYNC (local target). Run build/restart on the server yourself if needed."
