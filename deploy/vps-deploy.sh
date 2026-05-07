@@ -222,7 +222,9 @@ configure_env_file() {
   if [[ ! -f "${APP_DIR}/.env" ]]; then
     if [[ -f "${APP_DIR}/.env.example" ]]; then
       log "Creating .env from .env.example (fill real secrets before production traffic)"
-      sudo -u "${APP_USER}" -H bash -lc "cp '${APP_DIR}/.env.example' '${APP_DIR}/.env'"
+      # Copy as root first; APP_DIR may be in a root-owned path.
+      cp "${APP_DIR}/.env.example" "${APP_DIR}/.env"
+      chown "${APP_USER}:${APP_USER}" "${APP_DIR}/.env"
     else
       err "No .env or .env.example found at ${APP_DIR}"
     fi
@@ -236,6 +238,13 @@ configure_env_file() {
   fi
   sed -i -E "s#^NEXT_PUBLIC_BASE_URL=.*#NEXT_PUBLIC_BASE_URL=\"https://${SHOP_DOMAIN}\"#g" "${APP_DIR}/.env" || true
   sed -i -E "s#^RENT_BASE_URL=.*#RENT_BASE_URL=\"${rent_url}\"#g" "${APP_DIR}/.env" || true
+}
+
+check_app_user_access() {
+  # Ensure the service user can traverse/read APP_DIR; common failure when APP_DIR is under /root.
+  if ! sudo -u "${APP_USER}" -H bash -lc "test -x '${APP_DIR}' && test -r '${APP_DIR}'"; then
+    err "APP_USER='${APP_USER}' cannot access APP_DIR='${APP_DIR}'. If APP_DIR is under /root, move it to a shared path (e.g. /srv/lumiere or /var/www/lumiere) or set APP_USER=root."
+  fi
 }
 
 build_apps() {
@@ -401,6 +410,7 @@ require_cmd npm
 log "Step 4/8: Ensure deploy user and project files"
 ensure_user
 setup_repo
+check_app_user_access
 log "Step 5/8: Configure environment file"
 configure_env_file
 log "Step 6/8: Install dependencies and build apps"

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { prisma, getSettings } from "@lumiere/db";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
@@ -13,6 +12,9 @@ import { TrustStripSection } from "@/components/home/TrustStripSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PolicyHighlightsSection } from "@/components/home/PolicyHighlightsSection";
 import { CtaBannerSection } from "@/components/home/CtaBannerSection";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
+import { rentItemUrl } from "@/lib/rentBase";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RentalHomePage() {
+  await enforceShopFrontendEnabled();
   const t = await getT();
   const locale = await getLocale();
   const intl = intlLocale(locale);
   const settings = await getSettings();
+  if (!settings.rentalEnabled) {
+    redirect("/");
+  }
   const config = parseRentalHomeConfig(settings.rentalHomeJson);
 
   const featuredOrder =
@@ -185,12 +191,12 @@ export default async function RentalHomePage() {
                                 {p.rentalTiers.length} tiers
                               </span>
                             </div>
-                            <Link
-                              href={`/product/${p.slug}`}
+                            <a
+                              href={rentItemUrl(p.slug)}
                               className="inline-block mt-3 text-sm font-medium text-brand-700 hover:underline"
                             >
                               {t("rental.card.view")} →
-                            </Link>
+                            </a>
                           </div>
                         </div>
                       </article>

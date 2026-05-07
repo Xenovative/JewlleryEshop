@@ -11,7 +11,8 @@
     "db:push": "dotenv -e .env -- npm run -w @lumiere/db push",
     "db:seed": "dotenv -e .env -- npm run -w @lumiere/db seed",
     "db:backfill": "dotenv -e .env -- npm run -w @lumiere/db backfill",
-    "db:generate": "npm run -w @lumiere/db generate"
+    "db:generate": "npm run -w @lumiere/db generate",
+    "sync:site": "bash deploy/sync-site.sh"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.4"

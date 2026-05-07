@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SortSelect } from "@/components/SortSelect";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ sort?: string }>;
 }) {
+  await enforceShopFrontendEnabled();
   const { slug } = await params;
   const { sort } = await searchParams;
   const category = await prisma.category.findUnique({ where: { slug } });

@@ -5,6 +5,7 @@ import { CartIndicator } from "@/components/CartIndicator";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { getLocale, getT } from "@/lib/i18n.server";
+import { rentPublicBaseUrl } from "@/lib/rentBase";
 
 export const metadata: Metadata = {
   title: "Lumière Jewellery",
@@ -18,6 +19,8 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const t = await getT();
+  const rentBase = rentPublicBaseUrl();
+  const rentEntryHref = rentBase ?? "/rental";
 
   return (
     <html lang={locale === "zh-Hant" ? "zh-Hant" : "en"}>
@@ -28,6 +31,15 @@ export default async function RootLayout({
               <Link href="/" className="font-serif text-2xl text-brand-700">
                 {t("brand.name")}
               </Link>
+              <div className="hidden md:flex items-center gap-2 text-xs">
+                <span className="px-2 py-1 rounded bg-brand-600 text-white">Shop</span>
+                <a
+                  href={rentEntryHref}
+                  className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
+                >
+                  Rental
+                </a>
+              </div>
               <nav className="flex gap-6 text-sm">
                 <Link href="/category/rings" className="hover:text-brand-600">
                   {t("nav.rings")}
@@ -41,9 +53,15 @@ export default async function RootLayout({
                 <Link href="/category/bracelets" className="hover:text-brand-600">
                   {t("nav.bracelets")}
                 </Link>
-                <Link href="/rental" className="hover:text-brand-600 font-medium">
-                  {t("nav.rental")}
-                </Link>
+                {rentBase ? (
+                  <a href={rentBase} className="hover:text-brand-600 font-medium">
+                    {t("nav.rental")}
+                  </a>
+                ) : (
+                  <Link href="/rental" className="hover:text-brand-600 font-medium">
+                    {t("nav.rental")}
+                  </Link>
+                )}
               </nav>
               <div className="flex items-center gap-3">
                 <LangSwitcher />

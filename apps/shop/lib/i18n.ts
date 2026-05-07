@@ -546,6 +546,11 @@ export const dict = {
     "admin.settings.setupFailed": "Setup failed",
     "admin.settings.enableFailed": "Enable failed",
     "admin.settings.disableFailed": "Disable failed",
+    "admin.settings.frontendModes": "Frontend availability",
+    "admin.settings.frontendModesBlurb":
+      "Toggle customer-facing storefronts. When one frontend is disabled, visitors are redirected to the other storefront automatically.",
+    "admin.settings.shopFrontend": "Shop frontend",
+    "admin.settings.rentalFrontend": "Rental frontend",
     "admin.settings.signOut": "Sign out",
   },
   "zh-Hant": {
@@ -1074,6 +1079,11 @@ export const dict = {
     "admin.settings.setupFailed": "設定失敗",
     "admin.settings.enableFailed": "啟用失敗",
     "admin.settings.disableFailed": "停用失敗",
+    "admin.settings.frontendModes": "前台可用性",
+    "admin.settings.frontendModesBlurb":
+      "可切換顧客前台的開關。當其中一個前台停用時，訪客會自動導向另一個前台。",
+    "admin.settings.shopFrontend": "商城前台",
+    "admin.settings.rentalFrontend": "租賃前台",
     "admin.settings.signOut": "登出",
   },
 } as const;

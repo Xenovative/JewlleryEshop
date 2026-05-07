@@ -4,6 +4,7 @@ import { prisma } from "@lumiere/db";
 import { BookingForm } from "@/components/BookingForm";
 import { ItemGallery } from "@/components/ItemGallery";
 import { getT } from "@/lib/i18n.server";
+import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,7 @@ export default async function ItemPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await enforceRentalFrontendEnabled();
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
@@ -60,6 +62,9 @@ export default async function ItemPage({
       />
 
       <div>
+        <span className="inline-block text-xs uppercase tracking-wide px-2 py-1 rounded bg-brand-50 text-brand-700 border border-brand-100 mb-2">
+          Rental
+        </span>
         <p className="text-sm text-brand-600">{product.category.name}</p>
         <h1 className="font-serif text-3xl mt-1">{product.name}</h1>
         <p className="mt-4 text-gray-700 leading-relaxed">{product.description}</p>

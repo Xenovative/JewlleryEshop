@@ -14,6 +14,8 @@ export async function updateSettings(
     stripeWebhookSecret: string | null;
     totpSecret: string | null;
     totpEnabled: boolean;
+    shopEnabled: boolean;
+    rentalEnabled: boolean;
     shopHomeJson: string | null;
     rentalHomeJson: string | null;
   }>

@@ -19,6 +19,8 @@ export default async function AdminSettingsPage() {
       stripeWebhookSecretEnvFallback={
         !s.stripeWebhookSecret && !!process.env.STRIPE_WEBHOOK_SECRET
       }
+      shopEnabled={s.shopEnabled}
+      rentalEnabled={s.rentalEnabled}
       totpEnabled={!!me?.totpEnabled}
     />
   );

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ClearCartOnMount } from "@/components/ClearCartOnMount";
 import { getT } from "@/lib/i18n.server";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
 
 export default async function SuccessPage() {
+  await enforceShopFrontendEnabled();
   const t = await getT();
   return (
     <div className="text-center py-16">

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { getT } from "@/lib/i18n.server";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
 
 export default async function CancelPage() {
+  await enforceShopFrontendEnabled();
   const t = await getT();
   return (
     <div className="text-center py-16">

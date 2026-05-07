@@ -17,6 +17,7 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const t = await getT();
+  const shopUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   return (
     <html lang={locale === "zh-Hant" ? "zh-Hant" : "en"}>
       <body className="min-h-screen flex flex-col">
@@ -27,6 +28,15 @@ export default async function RootLayout({
                 {t("brand.name")}{" "}
                 <span className="text-brand-500 text-base">{t("brand.tagline")}</span>
               </Link>
+              <div className="hidden md:flex items-center gap-2 text-xs">
+                <a
+                  href={shopUrl}
+                  className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
+                >
+                  Shop
+                </a>
+                <span className="px-2 py-1 rounded bg-brand-600 text-white">Rental</span>
+              </div>
               <nav className="flex gap-6 text-sm items-center">
                 <Link href="/" className="hover:text-brand-600">
                   {t("nav.browse")}
@@ -35,7 +45,7 @@ export default async function RootLayout({
                   {t("nav.howItWorks")}
                 </Link>
                 <a
-                  href="http://localhost:3000"
+                  href={shopUrl}
                   className="hover:text-brand-600"
                   target="_blank"
                   rel="noreferrer"

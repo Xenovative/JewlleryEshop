@@ -1,6 +1,8 @@
 import { getT } from "@/lib/i18n.server";
+import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
 
 export default async function HowItWorksPage() {
+  await enforceRentalFrontendEnabled();
   const t = await getT();
   const steps: Array<["how.s1" | "how.s2" | "how.s3" | "how.s4", "how.s1.body" | "how.s2.body" | "how.s3.body" | "how.s4.body"]> = [
     ["how.s1", "how.s1.body"],

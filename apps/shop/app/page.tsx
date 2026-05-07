@@ -7,6 +7,7 @@ import { TrustStripSection } from "@/components/home/TrustStripSection";
 import { CategoryGridSection } from "@/components/home/CategoryGridSection";
 import { ProductGridSection } from "@/components/home/ProductGridSection";
 import { CtaBannerSection } from "@/components/home/CtaBannerSection";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ const CAT_KEYS: Record<string, DictKey> = {
 };
 
 export default async function HomePage() {
+  await enforceShopFrontendEnabled();
   const t = await getT();
   const locale = await getLocale();
   const settings = await getSettings();

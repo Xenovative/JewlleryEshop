@@ -74,6 +74,31 @@ What it does:
 
 If you only deploy shop, omit `RENT_DOMAIN`.
 
+### Sync updates to VPS
+
+After initial deployment, sync local changes to your VPS:
+
+```bash
+chmod +x deploy/sync-site.sh
+VPS_HOST=203.0.113.10 \
+VPS_USER=deploy \
+VPS_APP_DIR=/var/www/lumiere \
+bash deploy/sync-site.sh
+```
+
+This script uses `rsync --delete` (excluding `.git`, `node_modules`, `.next`) and then runs:
+- `npm ci`
+- `npm run build`
+- `sudo systemctl restart lumiere-shop`
+
+To restart both apps:
+
+```bash
+VPS_HOST=203.0.113.10 \
+REMOTE_POST_SYNC="cd /var/www/lumiere && npm ci && npm run build && sudo systemctl restart lumiere-shop lumiere-rent" \
+bash deploy/sync-site.sh
+```
+
 ## Env (single root `.env`)
 
 | Variable                | Purpose                                            |

@@ -3,12 +3,14 @@ import { prisma } from "@lumiere/db";
 import { formatPrice } from "@/lib/format";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
 
 type T = (key: DictKey, vars?: Record<string, string | number>) => string;
 
 export const dynamic = "force-dynamic";
 
 export default async function RentHomePage() {
+  await enforceRentalFrontendEnabled();
   const t = await getT();
   const locale = await getLocale();
   const intl = intlLocale(locale);

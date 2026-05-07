@@ -130,6 +130,8 @@ model Settings {
   stripeWebhookSecret String?
   totpSecret          String?
   totpEnabled         Boolean  @default(false)
+  shopEnabled         Boolean  @default(true)
+  rentalEnabled       Boolean  @default(true)
   shopHomeJson        String?
   rentalHomeJson      String?
   updatedAt           DateTime @updatedAt

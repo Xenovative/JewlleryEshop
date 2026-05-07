@@ -7,6 +7,7 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductGallery } from "@/components/ProductGallery";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await enforceShopFrontendEnabled();
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
@@ -72,6 +74,9 @@ export default async function ProductPage({
       />
 
       <div>
+        <span className="inline-block text-xs uppercase tracking-wide px-2 py-1 rounded bg-brand-50 text-brand-700 border border-brand-100 mb-3">
+          Shop
+        </span>
         <Link
           href={`/category/${product.category.slug}`}
           className="text-sm text-brand-600 hover:underline"

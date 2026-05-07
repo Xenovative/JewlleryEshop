@@ -9,6 +9,8 @@ type Props = {
   stripeWebhookSecretMasked: string | null;
   stripeSecretKeyEnvFallback: boolean;
   stripeWebhookSecretEnvFallback: boolean;
+  shopEnabled: boolean;
+  rentalEnabled: boolean;
   totpEnabled: boolean;
 };
 
@@ -20,6 +22,8 @@ export function SettingsAdmin(props: Props) {
   const [savingStripe, setSavingStripe] = useState(false);
   const [stripeMsg, setStripeMsg] = useState<string | null>(null);
   const [savedFlag, setSavedFlag] = useState(false);
+  const [shopEnabled, setShopEnabled] = useState(props.shopEnabled);
+  const [rentalEnabled, setRentalEnabled] = useState(props.rentalEnabled);
 
   const saveStripe = async () => {
     setSavingStripe(true);
@@ -31,6 +35,8 @@ export function SettingsAdmin(props: Props) {
       body: JSON.stringify({
         ...(stripeKey !== "" ? { stripeSecretKey: stripeKey } : {}),
         ...(webhookSecret !== "" ? { stripeWebhookSecret: webhookSecret } : {}),
+        ...(shopEnabled !== props.shopEnabled ? { shopEnabled } : {}),
+        ...(rentalEnabled !== props.rentalEnabled ? { rentalEnabled } : {}),
       }),
     });
     setSavingStripe(false);
@@ -111,13 +117,50 @@ export function SettingsAdmin(props: Props) {
           )}
           <button
             onClick={saveStripe}
-            disabled={savingStripe || (!stripeKey && !webhookSecret)}
+            disabled={
+              savingStripe ||
+              (!stripeKey &&
+                !webhookSecret &&
+                shopEnabled === props.shopEnabled &&
+                rentalEnabled === props.rentalEnabled)
+            }
             className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm"
           >
             {savingStripe
               ? t("admin.settings.saving")
               : t("admin.settings.saveStripe")}
           </button>
+        </div>
+      </section>
+
+      <section className="bg-white border border-brand-100 rounded-lg p-6">
+        <h2 className="font-serif text-xl">{t("admin.settings.frontendModes")}</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          {t("admin.settings.frontendModesBlurb")}
+        </p>
+        <div className="mt-4 space-y-3 text-sm">
+          <label className="flex items-center justify-between gap-3 border border-brand-100 rounded p-3">
+            <span>
+              <strong>{t("admin.settings.shopFrontend")}</strong>
+            </span>
+            <input
+              type="checkbox"
+              checked={shopEnabled}
+              onChange={(e) => setShopEnabled(e.target.checked)}
+              className="h-4 w-4 accent-brand-600"
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3 border border-brand-100 rounded p-3">
+            <span>
+              <strong>{t("admin.settings.rentalFrontend")}</strong>
+            </span>
+            <input
+              type="checkbox"
+              checked={rentalEnabled}
+              onChange={(e) => setRentalEnabled(e.target.checked)}
+              className="h-4 w-4 accent-brand-600"
+            />
+          </label>
         </div>
       </section>
 
