@@ -22,6 +22,9 @@ set -euo pipefail
 # - If APP_DIR is missing, set SOURCE_DIR to copy files from a local path.
 # - RENT_DOMAIN is optional. If omitted, only the shop app is exposed.
 # - Ensure DNS for domains points to this VPS before running certbot.
+#
+# Nuclear rebuild (stop services, wipe node_modules/.next, re-run this script):
+#   See deploy/nuclear-redeploy.sh
 
 log() {
   echo "[deploy] $*"
@@ -310,10 +313,13 @@ install_nginx_large_client_header_buffers_snippet() {
   rm -f /etc/nginx/conf.d/00-lumiere-large-client-headers.conf
   mkdir -p /etc/nginx/snippets
   cat >/etc/nginx/snippets/lumiere-large-client-headers.conf <<'HDR_EOF'
-# Next.js + session cookies often exceed nginx defaults → 400 on chunk URLs.
-# Allowed in `server` context (included from lumiere site blocks).
-client_header_buffer_size 16k;
-large_client_header_buffers 4 32k;
+# Next.js + many cookies: defaults cause 400 on /_next/static (shop + rent).
+# HTTP/1.1
+client_header_buffer_size 32k;
+large_client_header_buffers 8 64k;
+# HTTP/2 (browsers use h2 to :443; small defaults → 400 on asset requests)
+http2_max_field_size 64k;
+http2_max_header_size 256k;
 HDR_EOF
 }
 
