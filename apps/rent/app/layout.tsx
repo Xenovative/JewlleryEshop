@@ -4,6 +4,7 @@ import Link from "next/link";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { getLocale, getT } from "@/lib/i18n.server";
+import { getSettings } from "@lumiere/db";
 
 export const metadata: Metadata = {
   title: "Lumière Rentals",
@@ -17,7 +18,9 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const t = await getT();
+  const settings = await getSettings();
   const shopUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const backofficeUrl = `${shopUrl.replace(/\/$/, "")}/backoffice`;
   return (
     <html lang={locale === "zh-Hant" ? "zh-Hant" : "en"}>
       <body className="min-h-screen flex flex-col">
@@ -28,15 +31,23 @@ export default async function RootLayout({
                 {t("brand.name")}{" "}
                 <span className="text-brand-500 text-base">{t("brand.tagline")}</span>
               </Link>
-              <div className="hidden md:flex items-center gap-2 text-xs">
-                <a
-                  href={shopUrl}
-                  className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
-                >
-                  Shop
-                </a>
-                <span className="px-2 py-1 rounded bg-brand-600 text-white">Rental</span>
-              </div>
+              {(settings.shopEnabled || settings.rentalEnabled) && (
+                <div className="hidden md:flex items-center gap-2 text-xs">
+                  {settings.shopEnabled && (
+                    <a
+                      href={shopUrl}
+                      className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
+                    >
+                      Shop
+                    </a>
+                  )}
+                  {settings.rentalEnabled && (
+                    <span className="px-2 py-1 rounded bg-brand-600 text-white">
+                      Rental
+                    </span>
+                  )}
+                </div>
+              )}
               <nav className="flex gap-6 text-sm items-center">
                 <Link href="/browse" className="hover:text-brand-600">
                   {t("nav.browse")}
@@ -44,22 +55,29 @@ export default async function RootLayout({
                 <Link href="/how-it-works" className="hover:text-brand-600">
                   {t("nav.howItWorks")}
                 </Link>
-                <a
-                  href={shopUrl}
-                  className="hover:text-brand-600"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t("nav.buyAt")}
-                </a>
+                {settings.shopEnabled && (
+                  <a
+                    href={shopUrl}
+                    className="hover:text-brand-600"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("nav.buyAt")}
+                  </a>
+                )}
                 <LangSwitcher />
               </nav>
             </div>
           </header>
           <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">{children}</main>
           <footer className="border-t border-brand-100 mt-12">
-            <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500">
-              © {new Date().getFullYear()} {t("footer.copyright")}
+            <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500 flex justify-between">
+              <span>
+                © {new Date().getFullYear()} {t("footer.copyright")}
+              </span>
+              <a href={backofficeUrl} className="hover:text-brand-600">
+                {t("nav.admin")}
+              </a>
             </div>
           </footer>
         </I18nProvider>

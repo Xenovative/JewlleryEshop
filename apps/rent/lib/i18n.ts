@@ -12,6 +12,7 @@ export const dict = {
     "nav.browse": "Browse",
     "nav.howItWorks": "How it works",
     "nav.buyAt": "Buy at Lumière →",
+    "nav.admin": "Admin",
     "footer.copyright": "Lumière Rentals",
 
     "home.hero.title": "Wear something extraordinary.",
@@ -151,6 +152,7 @@ export const dict = {
     "nav.browse": "瀏覽",
     "nav.howItWorks": "租借流程",
     "nav.buyAt": "前往 Lumière 商城 →",
+    "nav.admin": "管理後台",
     "footer.copyright": "Lumière 租賃",
 
     "home.hero.title": "為重要時刻,戴上不凡。",

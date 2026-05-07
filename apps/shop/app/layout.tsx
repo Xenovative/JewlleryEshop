@@ -6,6 +6,7 @@ import { I18nProvider } from "@/components/I18nProvider";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { getLocale, getT } from "@/lib/i18n.server";
 import { rentStorefrontHomeUrl } from "@/lib/rentBase";
+import { getSettings } from "@lumiere/db";
 
 export const metadata: Metadata = {
   title: "Lumière Jewellery",
@@ -19,6 +20,7 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const t = await getT();
+  const settings = await getSettings();
   const rentEntryHref = rentStorefrontHomeUrl();
 
   return (
@@ -30,15 +32,23 @@ export default async function RootLayout({
               <Link href="/" className="font-serif text-2xl text-brand-700">
                 {t("brand.name")}
               </Link>
-              <div className="hidden md:flex items-center gap-2 text-xs">
-                <span className="px-2 py-1 rounded bg-brand-600 text-white">Shop</span>
-                <a
-                  href={rentEntryHref}
-                  className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
-                >
-                  Rental
-                </a>
-              </div>
+              {(settings.shopEnabled || settings.rentalEnabled) && (
+                <div className="hidden md:flex items-center gap-2 text-xs">
+                  {settings.shopEnabled && (
+                    <span className="px-2 py-1 rounded bg-brand-600 text-white">
+                      Shop
+                    </span>
+                  )}
+                  {settings.rentalEnabled && (
+                    <a
+                      href={rentEntryHref}
+                      className="px-2 py-1 rounded border border-brand-200 text-brand-700 hover:bg-brand-50"
+                    >
+                      Rental
+                    </a>
+                  )}
+                </div>
+              )}
               <nav className="flex gap-6 text-sm">
                 <Link href="/category/rings" className="hover:text-brand-600">
                   {t("nav.rings")}
@@ -52,9 +62,14 @@ export default async function RootLayout({
                 <Link href="/category/bracelets" className="hover:text-brand-600">
                   {t("nav.bracelets")}
                 </Link>
-                <a href={rentEntryHref} className="hover:text-brand-600 font-medium">
-                  {t("nav.rental")}
-                </a>
+                {settings.rentalEnabled && (
+                  <a
+                    href={rentEntryHref}
+                    className="hover:text-brand-600 font-medium"
+                  >
+                    {t("nav.rental")}
+                  </a>
+                )}
               </nav>
               <div className="flex items-center gap-3">
                 <LangSwitcher />
