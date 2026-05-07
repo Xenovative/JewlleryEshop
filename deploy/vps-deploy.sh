@@ -312,6 +312,10 @@ server {
     listen [::]:80;
     server_name ${SHOP_DOMAIN};
 
+    # Next.js + auth cookies can exceed nginx default header limits → 400 on /_next/static/*
+    client_header_buffer_size 16k;
+    large_client_header_buffers 4 32k;
+
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -332,6 +336,9 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${RENT_DOMAIN};
+
+    client_header_buffer_size 16k;
+    large_client_header_buffers 4 32k;
 
     location / {
         proxy_pass http://127.0.0.1:3001;
@@ -380,6 +387,8 @@ print_summary() {
   fi
   echo
   echo "Useful checks:"
+  echo "  If /_next/static/*.js returns 400 after SSL: add the same client_header_buffer_size /"
+  echo "  large_client_header_buffers lines to the :443 server block certbot created, then nginx -t && reload."
   echo "  systemctl status lumiere-shop"
   if [[ -n "${RENT_DOMAIN}" ]]; then
     echo "  systemctl status lumiere-rent"
