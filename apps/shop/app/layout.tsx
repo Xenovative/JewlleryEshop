@@ -5,7 +5,7 @@ import { CartIndicator } from "@/components/CartIndicator";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { getLocale, getT } from "@/lib/i18n.server";
-import { rentPublicBaseUrl } from "@/lib/rentBase";
+import { rentStorefrontHomeUrl } from "@/lib/rentBase";
 
 export const metadata: Metadata = {
   title: "Lumière Jewellery",
@@ -19,8 +19,7 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const t = await getT();
-  const rentBase = rentPublicBaseUrl();
-  const rentEntryHref = rentBase ?? "/rental";
+  const rentEntryHref = rentStorefrontHomeUrl();
 
   return (
     <html lang={locale === "zh-Hant" ? "zh-Hant" : "en"}>
@@ -53,15 +52,9 @@ export default async function RootLayout({
                 <Link href="/category/bracelets" className="hover:text-brand-600">
                   {t("nav.bracelets")}
                 </Link>
-                {rentBase ? (
-                  <a href={rentBase} className="hover:text-brand-600 font-medium">
-                    {t("nav.rental")}
-                  </a>
-                ) : (
-                  <Link href="/rental" className="hover:text-brand-600 font-medium">
-                    {t("nav.rental")}
-                  </Link>
-                )}
+                <a href={rentEntryHref} className="hover:text-brand-600 font-medium">
+                  {t("nav.rental")}
+                </a>
               </nav>
               <div className="flex items-center gap-3">
                 <LangSwitcher />

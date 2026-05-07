@@ -28,9 +28,12 @@ const SECTION_LABEL_KEYS: Record<string, DictKey> = {
 export function StorefrontEditor({
   initialShop,
   initialRental,
+  rentStorefrontHomeUrl: rentHomeUrl,
 }: {
   initialShop: ShopHomeConfig;
   initialRental: RentalHomeConfig;
+  /** Public rental app origin (e.g. NEXT_PUBLIC or server-passed RENT_BASE_URL). */
+  rentStorefrontHomeUrl: string;
 }) {
   const t = useT();
   const [tab, setTab] = useState<Tab>("shop");
@@ -110,7 +113,7 @@ export function StorefrontEditor({
         <div className="ml-auto flex items-center gap-3 pb-2 text-sm">
           <a
             className="text-brand-600 hover:underline"
-            href={tab === "shop" ? "/" : "/rental"}
+            href={tab === "shop" ? "/" : rentHomeUrl}
             target="_blank"
             rel="noopener noreferrer"
           >

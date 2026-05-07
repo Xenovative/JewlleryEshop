@@ -8,6 +8,7 @@ import { CategoryGridSection } from "@/components/home/CategoryGridSection";
 import { ProductGridSection } from "@/components/home/ProductGridSection";
 import { CtaBannerSection } from "@/components/home/CtaBannerSection";
 import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
+import { rentStorefrontHomeUrl } from "@/lib/rentBase";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,7 @@ export default async function HomePage() {
   const trustToShow = trustItems.length > 0 ? trustItems : trustFallback;
 
   const intl = intlLocale(locale);
+  const rentHome = rentStorefrontHomeUrl();
 
   const sections = config.sections.filter((s) => s.enabled);
 
@@ -68,7 +70,7 @@ export default async function HomePage() {
           primaryCtaLabel: t("home.hero.primaryCta"),
           primaryCtaHref: SHOP_HOME_DEFAULT.hero.primaryCtaHref,
           secondaryCtaLabel: t("home.hero.secondaryCta"),
-          secondaryCtaHref: SHOP_HOME_DEFAULT.hero.secondaryCtaHref,
+          secondaryCtaHref: rentHome,
         }}
         variant="shop"
       />
@@ -109,7 +111,7 @@ export default async function HomePage() {
                   config.rentalPromo.ctaLabel || t("home.rentalPromo.cta")
                 }
                 ctaHref={config.rentalPromo.ctaHref}
-                defaultHref="/rental"
+                defaultHref={rentHome}
                 variant="rental"
               />
             );

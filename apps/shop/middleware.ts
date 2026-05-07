@@ -5,6 +5,14 @@ export const config = {
   matcher: ["/backoffice/:path*", "/api/backoffice/:path*"],
 };
 
+const BO_PATH_HEADER = "x-lumiere-bo-path";
+
+function nextWithBoPath(req: NextRequest) {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set(BO_PATH_HEADER, req.nextUrl.pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
@@ -13,12 +21,12 @@ export async function middleware(req: NextRequest) {
     path === "/backoffice/login" ||
     path.startsWith("/api/backoffice/auth/")
   ) {
-    return NextResponse.next();
+    return nextWithBoPath(req);
   }
 
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = await verifySessionToken(token);
-  if (session) return NextResponse.next();
+  if (session) return nextWithBoPath(req);
 
   if (path.startsWith("/api/")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

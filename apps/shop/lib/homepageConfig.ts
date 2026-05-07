@@ -98,7 +98,7 @@ export const SHOP_HOME_DEFAULT: ShopHomeConfig = {
     primaryCtaLabel: "",
     primaryCtaHref: "/category/rings",
     secondaryCtaLabel: "",
-    secondaryCtaHref: "/rental",
+    secondaryCtaHref: "",
     imageUrl: "",
   },
   trustStrip: [{ label: "" }, { label: "" }, { label: "" }],
@@ -108,7 +108,7 @@ export const SHOP_HOME_DEFAULT: ShopHomeConfig = {
     title: "",
     body: "",
     ctaLabel: "",
-    ctaHref: "/rental",
+    ctaHref: "",
   },
   ctaBanner: {
     title: "",

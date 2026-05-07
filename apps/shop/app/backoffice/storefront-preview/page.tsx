@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { rentStorefrontHomeUrl } from "@/lib/rentBase";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ type PreviewRow = { name: string; qty: number; lineCents: number };
 export default async function StorefrontPreviewPage() {
   const t = await getT();
   const intl = intlLocale(await getLocale());
+  const rentHome = rentStorefrontHomeUrl();
   const demoEmail = "customer@example.com";
   const demoOrderId = "demo-ORD-10042";
   const demoWhen = new Date("2026-05-01T14:30:00");
@@ -44,7 +46,7 @@ export default async function StorefrontPreviewPage() {
             </a>
           </li>
           <li>
-            <a className={extLink} href="/rental" target="_blank" rel="noopener noreferrer">
+            <a className={extLink} href={rentHome} target="_blank" rel="noopener noreferrer">
               {t("nav.rental")} ↗
             </a>
           </li>

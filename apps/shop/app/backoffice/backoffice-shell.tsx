@@ -54,7 +54,7 @@ const NAV: NavGroup[] = [
   },
 ];
 
-export default async function AdminLayout({
+export async function BackofficeShell({
   children,
 }: {
   children: React.ReactNode;

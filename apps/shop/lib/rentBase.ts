@@ -8,6 +8,11 @@ export function rentPublicBaseUrl(): string | null {
   return raw.replace(/\/$/, "");
 }
 
+/** Rental Next.js app origin (no trailing slash). Dev fallback matches monorepo rent port. */
+export function rentStorefrontHomeUrl(): string {
+  return rentPublicBaseUrl() ?? "http://localhost:3001";
+}
+
 /**
  * URL for a rentable item on the rental app (`/item/[slug]`).
  * Falls back to local dev port when `RENT_BASE_URL` is unset (monorepo default).
