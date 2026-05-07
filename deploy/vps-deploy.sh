@@ -327,6 +327,27 @@ server {
     server_name ${SHOP_DOMAIN};
     include /etc/nginx/snippets/lumiere-large-client-headers.conf;
 
+    # Next.js assets (explicit so no other vhost / regex steals /_next/*)
+    location ^~ /_next/static {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Port \$server_port;
+    }
+    location ^~ /_next/image {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -334,6 +355,8 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Port \$server_port;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
     }
@@ -349,6 +372,26 @@ server {
     server_name ${RENT_DOMAIN};
     include /etc/nginx/snippets/lumiere-large-client-headers.conf;
 
+    location ^~ /_next/static {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Port \$server_port;
+    }
+    location ^~ /_next/image {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
@@ -356,6 +399,8 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Port \$server_port;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
     }
@@ -396,8 +441,10 @@ print_summary() {
   fi
   echo
   echo "Useful checks:"
-  echo "  ChunkLoadError / 400 on /_next/static: ensure each lumiere server {} includes snippets/lumiere-large-client-headers.conf (incl. certbot :443), nginx -t && reload."
-  echo "  curl -sI https://${SHOP_DOMAIN}/ | head -1   # and spot-check a chunk URL from DevTools"
+  echo "  If CSS/JS do not load over HTTPS: certbot often leaves :443 without the /_next/static"
+  echo "  locations — copy them from the :80 server into each listen 443 ssl server, then nginx -t && reload."
+  echo "  Quick checks: curl -sI http://127.0.0.1:3000/ | head -1   # Node must be up"
+  echo "  curl -sI https://${SHOP_DOMAIN}/_next/static/ | head -5"
   echo "  systemctl status lumiere-shop"
   if [[ -n "${RENT_DOMAIN}" ]]; then
     echo "  systemctl status lumiere-rent"
