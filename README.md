@@ -76,28 +76,24 @@ If you only deploy shop, omit `RENT_DOMAIN`.
 
 ### Sync updates to VPS
 
-After initial deployment, sync local changes to your VPS:
+The sync script only **copies your working tree** with `rsync` (run `git commit` / `git push` yourself first if you use git). It does **not** run git.
+
+**Local destination** (no SSH) — e.g. VPS disk mounted on your machine:
 
 ```bash
-chmod +x deploy/sync-site.sh
-VPS_HOST=203.0.113.10 \
-VPS_USER=deploy \
-VPS_APP_DIR=/var/www/lumiere \
+SYNC_TARGET=/path/to/mounted/lumiere bash deploy/sync-site.sh
+```
+
+**Remote destination** (`user@host:path`) — uses `rsync` over SSH:
+
+```bash
+SYNC_TARGET=deploy@203.0.113.10:/var/www/lumiere \
 bash deploy/sync-site.sh
 ```
 
-This script uses `rsync --delete` (excluding `.git`, `node_modules`, `.next`) and then runs:
-- `npm ci`
-- `npm run build`
-- `sudo systemctl restart lumiere-shop`
+You can also set `VPS_HOST`, or a single line in `deploy/.sync-host`, or `SYNC_TARGET` / `VPS_HOST` in root `.env`. See comments in `deploy/sync-site.sh`.
 
-To restart both apps:
-
-```bash
-VPS_HOST=203.0.113.10 \
-REMOTE_POST_SYNC="cd /var/www/lumiere && npm ci && npm run build && sudo systemctl restart lumiere-shop lumiere-rent" \
-bash deploy/sync-site.sh
-```
+After a **remote** sync, the default post-step is `npm ci`, `npm run build`, and `systemctl restart lumiere-shop`. Override with `REMOTE_POST_SYNC`, or set `REMOTE_POST_SYNC=` to copy only. For **local** targets, post-sync is skipped (run build/restart on the server yourself if needed).
 
 ## Env (single root `.env`)
 

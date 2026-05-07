@@ -1,31 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Sync local project files to VPS and optionally run remote steps.
+# Copy the project tree to a destination (no git commands — run those yourself first).
+# Uses rsync --delete with the same excludes as before.
 #
-# Host detection (first match wins for SYNC_CANDIDATE; then one ssh -G pass):
-#   1. Environment variable VPS_HOST
-#   2. First non-empty line in deploy/.sync-host (IP, hostname, user@host, or SSH config alias)
-#   3. Environment variable SYNC_SSH_ALIAS (SSH config Host alias)
-#   4. Root .env: VPS_HOST= or SYNC_SSH_ALIAS=
-#   5. Hostname taken from NEXT_PUBLIC_BASE_URL in .env (e.g. https://shop.example.com)
-#   6. Interactive prompt
+# Destination (first match wins):
+#   1. SYNC_TARGET — full rsync destination, either:
+#        - Local dir (mounted disk, WSL path, etc.): /mnt/lumiere/  or  W:/lumiere/
+#        - Remote: user@host:/var/www/lumiere/
+#   2. VPS_HOST + VPS_USER + VPS_APP_DIR  ->  ${VPS_USER}@${VPS_HOST}:${VPS_APP_DIR}/
+#   3. First line of deploy/.sync-host (same formats as SYNC_TARGET)
+#   4. .env SYNC_TARGET= or VPS_HOST= (see dotenv_get below)
 #
-# When the candidate is an SSH config alias (or any name `ssh -G` understands), the script
-# resolves HostName, User, and Port from your OpenSSH configuration.
-#
-# Example:
-#   echo 'lumiere-vps' > deploy/.sync-host
-#   bash deploy/sync-site.sh
-#
-# Or:
-#   VPS_HOST=203.0.113.10 VPS_USER=deploy VPS_APP_DIR=/var/www/lumiere \
-#   bash deploy/sync-site.sh
+# Remote targets (user@host:path) use rsync over ssh — ssh must be installed.
+# Local targets do not use ssh.
 #
 # Optional:
 #   VPS_PORT=22
-#   REMOTE_POST_SYNC="cd /var/www/lumiere && npm ci && npm run build && sudo systemctl restart lumiere-shop lumiere-rent"
+#   REMOTE_POST_SYNC — shell command run AFTER sync; only for remote targets (ssh).
+#                        Set empty to skip. Default restarts lumiere-shop.
 #   DRY_RUN=1
+#
+# Examples:
+#   SYNC_TARGET=/Volumes/my-vps-mount/lumiere bash deploy/sync-site.sh
+#   SYNC_TARGET=deploy@203.0.113.10:/var/www/lumiere bash deploy/sync-site.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -37,16 +35,16 @@ if [[ -v VPS_PORT ]]; then
 fi
 VPS_PORT="${VPS_PORT:-22}"
 VPS_APP_DIR="${VPS_APP_DIR:-/var/www/lumiere}"
-# Connection target before ssh -G (env, file, .env, or prompt); VPS_HOST is set by apply_candidate_host.
-SYNC_CANDIDATE="${VPS_HOST:-}"
-VPS_HOST=""
-DRY_RUN="${DRY_RUN:-0}"
+VPS_HOST="${VPS_HOST:-}"
+SYNC_TARGET="${SYNC_TARGET:-}"
 
 REMOTE_POST_SYNC_DEFAULT="cd '${VPS_APP_DIR}' && npm ci && npm run build && sudo systemctl restart lumiere-shop"
 REMOTE_POST_SYNC="${REMOTE_POST_SYNC:-${REMOTE_POST_SYNC_DEFAULT}}"
 
+DRY_RUN="${DRY_RUN:-0}"
+
 log() {
-  echo "[sync-site] $*"
+  echo "[sync-site] $*" >&2
 }
 
 err() {
@@ -58,7 +56,6 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || err "Missing command: $1"
 }
 
-# Read KEY=value from project .env (simple unquoted or single/double-quoted value).
 dotenv_get() {
   local key="$1"
   local file="${PROJECT_ROOT}/.env"
@@ -89,80 +86,95 @@ extract_host_from_url() {
   printf '%s' "${url}"
 }
 
-# Apply host candidate: prefer ssh -G canonicalization, else treat as literal host (optional user@).
-apply_candidate_host() {
-  local candidate="$1"
-  local source="$2"
+# user@host:/path or user@host:path -> remote (ssh). Everything else -> local.
+is_remote_rsync_target() {
+  [[ "$1" =~ ^[^@]+@[^:]+:.+ ]]
+}
 
-  candidate="${candidate%%#*}"
-  candidate="${candidate#"${candidate%%[![:space:]]*}"}"
-  candidate="${candidate%"${candidate##*[![:space:]]}"}"
-  [[ -n "${candidate}" ]] || return 1
+# For user@host, optionally expand host/user/port via ssh -G when candidate is a Host alias.
+resolve_remote_target() {
+  local raw="$1"
+  local user_part="" host_part="" path_part=""
 
-  local out h u p
+  if [[ "${raw}" =~ ^([^@]+)@([^:]+):(.+)$ ]]; then
+    user_part="${BASH_REMATCH[1]}"
+    host_part="${BASH_REMATCH[2]}"
+    path_part="${BASH_REMATCH[3]}"
+  else
+    err "Invalid remote SYNC_TARGET (expected user@host:path): ${raw}"
+  fi
+
+  local candidate="${host_part}"
   if out="$(ssh -G "${candidate}" 2>/dev/null)"; then
+    local h u p
     h="$(printf '%s\n' "${out}" | awk 'tolower($1)=="hostname"{print $2; exit}')"
     u="$(printf '%s\n' "${out}" | awk 'tolower($1)=="user"{print $2; exit}')"
     p="$(printf '%s\n' "${out}" | awk 'tolower($1)=="port"{print $2; exit}')"
     if [[ -n "${h}" ]]; then
-      VPS_HOST="${h}"
-      # Only take User from ssh -G when the candidate is user@… or ssh resolved an alias
-      # (raw IP/hostname would otherwise pick the local login name from ssh defaults).
+      host_part="${h}"
       if [[ -n "${u}" ]]; then
         if [[ "${candidate}" =~ @ ]] || [[ "${h}" != "${candidate}" ]]; then
-          VPS_USER="${u}"
+          user_part="${u}"
         fi
       fi
       if [[ "${VPS_PORT_WAS_EXPLICIT}" -eq 0 ]] && [[ -n "${p}" ]]; then
         VPS_PORT="${p}"
       fi
-      log "Resolved \"${candidate}\" -> ${VPS_USER}@${VPS_HOST} port ${VPS_PORT} (${source}, ssh -G)"
-      return 0
+      log "Resolved SSH host \"${candidate}\" -> ${user_part}@${host_part} port ${VPS_PORT}"
     fi
   fi
 
-  if [[ "${candidate}" =~ ^([^@]+)@(.+)$ ]]; then
-    VPS_USER="${BASH_REMATCH[1]}"
-    VPS_HOST="${BASH_REMATCH[2]}"
-  else
-    VPS_HOST="${candidate}"
-  fi
-  log "Using ${VPS_USER}@${VPS_HOST} port ${VPS_PORT} (${source}, literal)"
-  return 0
+  printf '%s@%s:%s' "${user_part}" "${host_part}" "${path_part}"
 }
 
-# Fill SYNC_CANDIDATE from file / .env when not already set (e.g. from VPS_HOST env).
-gather_sync_candidate() {
-  [[ -n "${SYNC_CANDIDATE}" ]] && return 0
+gather_sync_target() {
+  local val line sync_file
 
-  local sync_file="${PROJECT_ROOT}/deploy/.sync-host"
-  local line val
+  if [[ -n "${SYNC_TARGET}" ]]; then
+    return 0
+  fi
 
+  if [[ -n "${VPS_HOST}" ]]; then
+    SYNC_TARGET="${VPS_USER}@${VPS_HOST}:${VPS_APP_DIR}/"
+    return 0
+  fi
+
+  sync_file="${PROJECT_ROOT}/deploy/.sync-host"
   if [[ -f "${sync_file}" ]]; then
     line="$(head -n 1 "${sync_file}")"
     line="${line%%#*}"
     line="${line#"${line%%[![:space:]]*}"}"
     line="${line%"${line##*[![:space:]]}"}"
     if [[ -n "${line}" ]]; then
-      SYNC_CANDIDATE="${line}"
-      return 0
+      if is_remote_rsync_target "${line}"; then
+        SYNC_TARGET="${line}"
+      elif [[ "${line}" =~ ^[^@]+@[^@]+$ ]]; then
+        # user@host with no path
+        SYNC_TARGET="${line}:${VPS_APP_DIR}/"
+      elif [[ -n "${line}" ]]; then
+        # Bare hostname or IP -> build user@host:appdir
+        SYNC_TARGET="${VPS_USER}@${line}:${VPS_APP_DIR}/"
+      fi
+      [[ -n "${SYNC_TARGET}" ]] && return 0
     fi
   fi
 
-  if [[ -n "${SYNC_SSH_ALIAS:-}" ]]; then
-    SYNC_CANDIDATE="${SYNC_SSH_ALIAS}"
+  val="$(dotenv_get SYNC_TARGET 2>/dev/null || true)"
+  if [[ -n "${val}" ]]; then
+    SYNC_TARGET="${val}"
     return 0
   fi
 
   val="$(dotenv_get VPS_HOST 2>/dev/null || true)"
   if [[ -n "${val}" ]]; then
-    SYNC_CANDIDATE="${val}"
+    SYNC_TARGET="${VPS_USER}@${val}:${VPS_APP_DIR}/"
     return 0
   fi
 
   val="$(dotenv_get SYNC_SSH_ALIAS 2>/dev/null || true)"
   if [[ -n "${val}" ]]; then
-    SYNC_CANDIDATE="${val}"
+    require_cmd ssh
+    SYNC_TARGET="$(resolve_remote_target "${VPS_USER}@${val}:${VPS_APP_DIR}/")"
     return 0
   fi
 
@@ -171,7 +183,7 @@ gather_sync_candidate() {
     local h
     h="$(extract_host_from_url "${val}")"
     if [[ -n "${h}" ]]; then
-      SYNC_CANDIDATE="${h}"
+      SYNC_TARGET="${VPS_USER}@${h}:${VPS_APP_DIR}/"
       return 0
     fi
   fi
@@ -179,26 +191,24 @@ gather_sync_candidate() {
   return 1
 }
 
-prompt_sync_candidate_if_empty() {
-  local prompt_text="$1"
+prompt_sync_target_if_empty() {
   local input_value
 
-  if [[ -n "${SYNC_CANDIDATE}" ]]; then
+  if [[ -n "${SYNC_TARGET}" ]]; then
     return
   fi
 
-  read -r -p "${prompt_text}: " input_value
-  [[ -n "${input_value}" ]] || err "VPS host is required"
-  SYNC_CANDIDATE="${input_value}"
+  read -r -p "SYNC_TARGET (local path or user@host:/remote/path): " input_value
+  [[ -n "${input_value}" ]] || err "SYNC_TARGET is required"
+  SYNC_TARGET="${input_value}"
 }
 
 require_cmd rsync
-require_cmd ssh
 
-gather_sync_candidate || true
-prompt_sync_candidate_if_empty "VPS host or IP (or SSH alias — see deploy/.sync-host)"
+gather_sync_target || true
+prompt_sync_target_if_empty
 
-apply_candidate_host "${SYNC_CANDIDATE}" "target"
+[[ -n "${SYNC_TARGET}" ]] || err "Set SYNC_TARGET or VPS_HOST (or deploy/.sync-host)"
 
 RSYNC_FLAGS=(
   -az
@@ -215,20 +225,58 @@ if [[ "${DRY_RUN}" == "1" ]]; then
   RSYNC_FLAGS+=(--dry-run)
 fi
 
-SSH_CMD="ssh -p ${VPS_PORT}"
-TARGET="${VPS_USER}@${VPS_HOST}:${VPS_APP_DIR}/"
+REMOTE_RUN=0
+RSYNC_SHELL=()
 
-log "Syncing ${PROJECT_ROOT} -> ${TARGET}"
-rsync "${RSYNC_FLAGS[@]}" -e "${SSH_CMD}" "${PROJECT_ROOT}/" "${TARGET}"
+if is_remote_rsync_target "${SYNC_TARGET}"; then
+  require_cmd ssh
+  REMOTE_RUN=1
+  if [[ "${SYNC_TARGET}" =~ ^([^@]+)@([^:]+):(.+)$ ]]; then
+    VPS_USER="${BASH_REMATCH[1]}"
+    _host="${BASH_REMATCH[2]}"
+    _path="${BASH_REMATCH[3]}"
+    if out="$(ssh -G "${_host}" 2>/dev/null)"; then
+      h="$(printf '%s\n' "${out}" | awk 'tolower($1)=="hostname"{print $2; exit}')"
+      u="$(printf '%s\n' "${out}" | awk 'tolower($1)=="user"{print $2; exit}')"
+      p="$(printf '%s\n' "${out}" | awk 'tolower($1)=="port"{print $2; exit}')"
+      if [[ -n "${h}" ]]; then
+        if [[ -n "${u}" ]] && { [[ "${_host}" =~ @ ]] || [[ "${h}" != "${_host}" ]]; }; then
+          VPS_USER="${u}"
+        fi
+        if [[ "${VPS_PORT_WAS_EXPLICIT}" -eq 0 ]] && [[ -n "${p}" ]]; then
+          VPS_PORT="${p}"
+        fi
+        SYNC_TARGET="${VPS_USER}@${h}:${_path}"
+        log "Using rsync target ${SYNC_TARGET}"
+      fi
+    fi
+  fi
+  RSYNC_SHELL=(-e "ssh -p ${VPS_PORT}")
+else
+  log "Local rsync target (no ssh): ${SYNC_TARGET}"
+fi
+
+log "Syncing ${PROJECT_ROOT}/ -> ${SYNC_TARGET}"
+if [[ "${#RSYNC_SHELL[@]}" -gt 0 ]]; then
+  rsync "${RSYNC_FLAGS[@]}" "${RSYNC_SHELL[@]}" "${PROJECT_ROOT}/" "${SYNC_TARGET}"
+else
+  rsync "${RSYNC_FLAGS[@]}" "${PROJECT_ROOT}/" "${SYNC_TARGET}"
+fi
 
 if [[ "${DRY_RUN}" == "1" ]]; then
-  log "Dry run complete. No remote command executed."
+  log "Dry run complete."
   exit 0
 fi
 
-if [[ -n "${REMOTE_POST_SYNC}" ]]; then
-  log "Running remote post-sync command"
-  ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" "${REMOTE_POST_SYNC}"
+if [[ "${REMOTE_RUN}" -eq 1 ]] && [[ -n "${REMOTE_POST_SYNC}" ]]; then
+  if [[ "${SYNC_TARGET}" =~ ^([^@]+)@([^:]+): ]]; then
+    _u="${BASH_REMATCH[1]}"
+    _h="${BASH_REMATCH[2]}"
+    log "Running remote post-sync"
+    ssh -p "${VPS_PORT}" "${_u}@${_h}" "${REMOTE_POST_SYNC}"
+  fi
+elif [[ "${REMOTE_RUN}" -eq 0 ]] && [[ -n "${REMOTE_POST_SYNC:-}" ]]; then
+  log "Skipping REMOTE_POST_SYNC (local target). Run build/restart on the server yourself if needed."
 fi
 
 log "Sync complete."
