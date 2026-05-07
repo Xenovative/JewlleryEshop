@@ -304,17 +304,24 @@ EOF
   fi
 }
 
+install_nginx_large_client_header_buffers() {
+  log "Installing nginx http-wide client header buffers (avoids 400 on /_next/static → ChunkLoadError)"
+  cat >/etc/nginx/conf.d/00-lumiere-large-client-headers.conf <<'HDR_EOF'
+# Next.js + session cookies often exceed nginx defaults → 400 Bad Request on chunk URLs.
+# In `http` context this applies to every server block, including certbot :443.
+client_header_buffer_size 16k;
+large_client_header_buffers 4 32k;
+HDR_EOF
+}
+
 write_nginx_config() {
   log "Writing nginx site config"
+  install_nginx_large_client_header_buffers
   cat >/etc/nginx/sites-available/lumiere.conf <<EOF
 server {
     listen 80;
     listen [::]:80;
     server_name ${SHOP_DOMAIN};
-
-    # Next.js + auth cookies can exceed nginx default header limits → 400 on /_next/static/*
-    client_header_buffer_size 16k;
-    large_client_header_buffers 4 32k;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -336,9 +343,6 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${RENT_DOMAIN};
-
-    client_header_buffer_size 16k;
-    large_client_header_buffers 4 32k;
 
     location / {
         proxy_pass http://127.0.0.1:3001;
@@ -387,8 +391,8 @@ print_summary() {
   fi
   echo
   echo "Useful checks:"
-  echo "  If /_next/static/*.js returns 400 after SSL: add the same client_header_buffer_size /"
-  echo "  large_client_header_buffers lines to the :443 server block certbot created, then nginx -t && reload."
+  echo "  ChunkLoadError / 400 on /_next/static: ensure /etc/nginx/conf.d/00-lumiere-large-client-headers.conf exists, then nginx -t && reload."
+  echo "  curl -sI https://${SHOP_DOMAIN}/ | head -1   # and spot-check a chunk URL from DevTools"
   echo "  systemctl status lumiere-shop"
   if [[ -n "${RENT_DOMAIN}" ]]; then
     echo "  systemctl status lumiere-rent"
