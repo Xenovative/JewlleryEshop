@@ -6,8 +6,6 @@
 #   sudo tee /etc/nginx/snippets/lumiere-large-client-headers.conf <<'EOF'
 #   client_header_buffer_size 32k;
 #   large_client_header_buffers 8 64k;
-#   http2_max_field_size 64k;
-#   http2_max_header_size 256k;
 #   EOF
 # After certbot adds listen 443 ssl, copy the same `include`, `/_next/*`, and `location /`
 # blocks into each HTTPS server block (certbot often only adjusts :80).
