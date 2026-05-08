@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/components/I18nProvider";
 
@@ -11,6 +11,8 @@ type Props = {
   stripeWebhookSecretEnvFallback: boolean;
   shopEnabled: boolean;
   rentalEnabled: boolean;
+  rental4DayPercentOfPrice: number;
+  rental7DayPercentOfPrice: number;
   totpEnabled: boolean;
 };
 
@@ -22,13 +24,36 @@ export function SettingsAdmin(props: Props) {
   const [savingStripe, setSavingStripe] = useState(false);
   const [stripeMsg, setStripeMsg] = useState<string | null>(null);
   const [savedFlag, setSavedFlag] = useState(false);
+  const [savingRentPct, setSavingRentPct] = useState(false);
+  const [rentPctMsg, setRentPctMsg] = useState<string | null>(null);
   const [shopEnabled, setShopEnabled] = useState(props.shopEnabled);
   const [rentalEnabled, setRentalEnabled] = useState(props.rentalEnabled);
+  const [rentalPct4, setRentalPct4] = useState(String(props.rental4DayPercentOfPrice));
+  const [rentalPct7, setRentalPct7] = useState(String(props.rental7DayPercentOfPrice));
+
+  useEffect(() => {
+    setRentalPct4(String(props.rental4DayPercentOfPrice));
+    setRentalPct7(String(props.rental7DayPercentOfPrice));
+  }, [props.rental4DayPercentOfPrice, props.rental7DayPercentOfPrice]);
+
+  const pct4n = Number(rentalPct4);
+  const pct7n = Number(rentalPct7);
+  const rentalPct4Changed =
+    Number.isInteger(pct4n) &&
+    pct4n >= 1 &&
+    pct4n <= 100 &&
+    pct4n !== props.rental4DayPercentOfPrice;
+  const rentalPct7Changed =
+    Number.isInteger(pct7n) &&
+    pct7n >= 1 &&
+    pct7n <= 100 &&
+    pct7n !== props.rental7DayPercentOfPrice;
 
   const saveStripe = async () => {
     setSavingStripe(true);
     setStripeMsg(null);
     setSavedFlag(false);
+
     const res = await fetch("/api/backoffice/settings", {
       method: "PUT",
       headers: { "content-type": "application/json" },
@@ -49,6 +74,28 @@ export function SettingsAdmin(props: Props) {
     setWebhookSecret("");
     setSavedFlag(true);
     setStripeMsg(t("admin.settings.savedDot"));
+    router.refresh();
+  };
+
+  const saveRentPct = async () => {
+    if (!rentalPct4Changed && !rentalPct7Changed) return;
+    setSavingRentPct(true);
+    setRentPctMsg(null);
+    const res = await fetch("/api/backoffice/settings", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...(rentalPct4Changed ? { rental4DayPercentOfPrice: pct4n } : {}),
+        ...(rentalPct7Changed ? { rental7DayPercentOfPrice: pct7n } : {}),
+      }),
+    });
+    setSavingRentPct(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setRentPctMsg(data.error ?? t("admin.settings.saveFailed"));
+      return;
+    }
+    setRentPctMsg(t("admin.settings.savedDot"));
     router.refresh();
   };
 
@@ -131,6 +178,54 @@ export function SettingsAdmin(props: Props) {
               : t("admin.settings.saveStripe")}
           </button>
         </div>
+      </section>
+
+      <section className="bg-white border border-brand-100 rounded-lg p-6">
+        <h2 className="font-serif text-xl">{t("admin.settings.rentalPricing")}</h2>
+        <p className="text-sm text-gray-500 mt-1">{t("admin.settings.rentalPricingBlurb")}</p>
+        <div className="mt-4 grid sm:grid-cols-2 gap-4">
+          <label className="block text-sm">
+            <span className="text-gray-600">{t("admin.settings.rentalPct4")}</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={rentalPct4}
+              onChange={(e) => setRentalPct4(e.target.value)}
+              className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-gray-600">{t("admin.settings.rentalPct7")}</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={rentalPct7}
+              onChange={(e) => setRentalPct7(e.target.value)}
+              className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+            />
+          </label>
+        </div>
+        {rentPctMsg && (
+          <p
+            className={`text-sm mt-3 ${
+              rentPctMsg === t("admin.settings.savedDot") ? "text-green-700" : "text-red-600"
+            }`}
+          >
+            {rentPctMsg}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={saveRentPct}
+          disabled={
+            savingRentPct || (!rentalPct4Changed && !rentalPct7Changed)
+          }
+          className="mt-4 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm"
+        >
+          {savingRentPct ? t("admin.settings.saving") : t("admin.settings.saveRentPct")}
+        </button>
       </section>
 
       <section className="bg-white border border-brand-100 rounded-lg p-6">

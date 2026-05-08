@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@lumiere/db";
-import { getStripe } from "@lumiere/db";
+import { prisma, getStripe, FOB_HONG_KONG_OFFICE, CHECKOUT_CURRENCY } from "@lumiere/db";
 
 const Body = z.object({
   items: z
@@ -37,7 +36,7 @@ export async function POST(req: Request) {
     price_data: {
       currency: string;
       unit_amount: number;
-      product_data: { name: string; images?: string[] };
+      product_data: { name: string; description?: string; images?: string[] };
     };
   };
   const lineItems: LineItem[] = [];
@@ -74,13 +73,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const baseName = variantLabel ? `${p.name} (${variantLabel})` : p.name;
     lineItems.push({
       quantity: item.qty,
       price_data: {
-        currency: p.currency,
+        currency: CHECKOUT_CURRENCY,
         unit_amount: p.priceCents,
         product_data: {
-          name: variantLabel ? `${p.name} (${variantLabel})` : p.name,
+          name: baseName,
+          description: FOB_HONG_KONG_OFFICE,
           images: [p.imageUrl],
         },
       },

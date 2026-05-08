@@ -1,39 +1,33 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { formatPrice, isoDate, fromIsoDate, addDays } from "@/lib/format";
-import { quote } from "@/lib/pricing";
+import { quoteRetailPlan, type RentalPlanDays } from "@/lib/rentalPlanPricing";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
-
-type Tier = { days: number; priceCents: number; label: string };
+import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 
 type Props = {
   productId: string;
   productName: string;
-  currency: string;
-  pricingType: string;
-  rentDailyCents: number | null;
-  rentFixedCents: number | null;
-  rentFixedDurationDays: number | null;
-  tiers: Tier[];
-  waiverFeeCents: number | null;
+  sellPriceCents: number;
+  rental4DayPercentOfPrice: number;
+  rental7DayPercentOfPrice: number;
 };
 
 export function BookingForm(props: Props) {
+  const router = useRouter();
   const t = useT();
   const intl = intlLocale(useLocale());
-  const fmt = (cents: number) => formatPrice(cents, props.currency, intl);
+  const fmt = (cents: number) => formatPrice(cents, CHECKOUT_CURRENCY, intl);
 
   const today = useMemo(() => isoDate(new Date()), []);
   const [start, setStart] = useState(today);
-  const [end, setEnd] = useState<string>("");
+  const [planDays, setPlanDays] = useState<RentalPlanDays>(4);
   const [fullyBooked, setFullyBooked] = useState<Set<string>>(new Set());
-  const [fulfillment, setFulfillment] = useState<"ship" | "pickup">("ship");
-  const [waiver, setWaiver] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
   const [pickupSlot, setPickupSlot] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,43 +39,30 @@ export function BookingForm(props: Props) {
       .catch(() => undefined);
   }, [props.productId]);
 
-  useEffect(() => {
-    if (props.pricingType === "fixed" && props.rentFixedDurationDays && start) {
-      const e = addDays(fromIsoDate(start), props.rentFixedDurationDays - 1);
-      setEnd(isoDate(e));
-    }
-  }, [props.pricingType, props.rentFixedDurationDays, start]);
-
   const priceQuote = useMemo(() => {
     if (!start) return null;
-    return quote(
-      {
-        rentPricingType: props.pricingType,
-        rentDailyCents: props.rentDailyCents,
-        rentFixedCents: props.rentFixedCents,
-        rentFixedDurationDays: props.rentFixedDurationDays,
-        rentalTiers: props.tiers,
-      },
-      fromIsoDate(start),
-      end ? fromIsoDate(end) : null
+    return quoteRetailPlan(
+      props.sellPriceCents,
+      planDays,
+      props.rental4DayPercentOfPrice,
+      props.rental7DayPercentOfPrice,
+      fromIsoDate(start)
     );
-  }, [start, end, props]);
+  }, [start, planDays, props]);
+
+  const endIso =
+    priceQuote && priceQuote.ok ? isoDate(priceQuote.endDate) : "";
 
   const rangeHasBookedDay = useMemo(() => {
-    if (!start || !end) return false;
+    if (!start || !endIso || !priceQuote?.ok) return false;
     let d = fromIsoDate(start);
-    const final = fromIsoDate(end);
+    const final = fromIsoDate(endIso);
     while (d <= final) {
       if (fullyBooked.has(isoDate(d))) return true;
       d = addDays(d, 1);
     }
     return false;
-  }, [start, end, fullyBooked]);
-
-  const waiverAvailable = props.waiverFeeCents != null && props.waiverFeeCents > 0;
-  const waiverCents = waiver && waiverAvailable ? (props.waiverFeeCents ?? 0) : 0;
-  const subtotal =
-    priceQuote && priceQuote.ok ? priceQuote.rentalCents + waiverCents : 0;
+  }, [start, endIso, fullyBooked, priceQuote]);
 
   const blockedDates = Array.from(fullyBooked).sort();
 
@@ -99,29 +80,22 @@ export function BookingForm(props: Props) {
       setError(t("book.errNameEmail"));
       return;
     }
-    if (fulfillment === "ship" && !address) {
-      setError(t("book.errAddress"));
-      return;
-    }
-    if (fulfillment === "pickup" && !pickupSlot) {
+    if (!pickupSlot) {
       setError(t("book.errPickup"));
       return;
     }
 
     setBusy(true);
-    const res = await fetch("/api/book", {
+    const res = await fetch("/api/book/prepare", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         productId: props.productId,
         startDate: start,
-        endDate: isoDate(priceQuote.endDate),
-        fulfillment,
+        planDays,
         email,
         customerName: name,
-        shippingAddress: fulfillment === "ship" ? address : null,
-        pickupSlot: fulfillment === "pickup" ? pickupSlot : null,
-        waiver,
+        pickupSlot,
       }),
     });
     const data = await res.json();
@@ -130,32 +104,20 @@ export function BookingForm(props: Props) {
       setError(data.error ?? t("book.errCheckout"));
       return;
     }
-    window.location.href = data.url;
+    router.push(`/checkout/review?bookingId=${encodeURIComponent(data.bookingId)}`);
   };
 
-  const priceLabel = (() => {
-    if (props.pricingType === "daily" && props.rentDailyCents != null) {
-      return t("book.priceLabel.daily", { price: fmt(props.rentDailyCents) });
-    }
-    if (props.pricingType === "fixed" && props.rentFixedCents != null) {
-      return t("book.priceLabel.fixed", {
-        price: fmt(props.rentFixedCents),
-        days: props.rentFixedDurationDays ?? 0,
-      });
-    }
-    if (props.pricingType === "tiered" && props.tiers.length > 0) {
-      return props.tiers
-        .map((tier) => `${tier.label}: ${fmt(tier.priceCents)}`)
-        .join(t("book.priceLabel.tieredJoin"));
-    }
-    return t("book.priceLabel.none");
-  })();
+  const planHint = t("book.planHint", {
+    pct4: props.rental4DayPercentOfPrice,
+    pct7: props.rental7DayPercentOfPrice,
+  });
 
   return (
     <div className="space-y-4">
       <div>
         <h2 className="font-serif text-xl">{t("book.title")}</h2>
-        <p className="text-sm text-gray-500">{priceLabel}</p>
+        <p className="text-sm text-gray-500">{planHint}</p>
+        <p className="text-sm text-gray-600 mt-1">{t("book.pickupOnly")}</p>
       </div>
 
       {blockedDates.length > 0 && (
@@ -169,37 +131,73 @@ export function BookingForm(props: Props) {
         </details>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className="text-sm">
-          <span className="text-gray-600">{t("book.startDate")}</span>
-          <input
-            type="date"
-            min={today}
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
-          />
-        </label>
-        <label className="text-sm">
-          <span className="text-gray-600">
-            {props.pricingType === "fixed" ? t("book.endDateAuto") : t("book.endDate")}
-          </span>
-          <input
-            type="date"
-            min={start || today}
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-            disabled={props.pricingType === "fixed"}
-            className="mt-1 block w-full border border-brand-200 rounded px-3 py-2 disabled:bg-gray-100"
-          />
-        </label>
-      </div>
+      <fieldset className="text-sm">
+        <legend className="text-gray-600 mb-2">{t("book.rentalPlan")}</legend>
+        <div className="space-y-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="plan"
+              checked={planDays === 4}
+              onChange={() => setPlanDays(4)}
+            />
+            <span>
+              {t("book.plan4")} —{" "}
+              {priceQuote?.ok && planDays === 4
+                ? fmt(priceQuote.rentalCents)
+                : fmt(
+                    Math.max(
+                      1,
+                      Math.round(
+                        (props.sellPriceCents * props.rental4DayPercentOfPrice) / 100
+                      )
+                    )
+                  )}
+            </span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="plan"
+              checked={planDays === 7}
+              onChange={() => setPlanDays(7)}
+            />
+            <span>
+              {t("book.plan7")} —{" "}
+              {priceQuote?.ok && planDays === 7
+                ? fmt(priceQuote.rentalCents)
+                : fmt(
+                    Math.max(
+                      1,
+                      Math.round(
+                        (props.sellPriceCents * props.rental7DayPercentOfPrice) / 100
+                      )
+                    )
+                  )}
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <label className="text-sm block">
+        <span className="text-gray-600">{t("book.startDate")}</span>
+        <input
+          type="date"
+          min={today}
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+          className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+        />
+      </label>
 
       {priceQuote && priceQuote.ok && (
         <p className="text-sm">
-          {t("book.daysSummary", {
+          {t("book.periodSummary", {
+            start,
+            end: endIso,
             days: priceQuote.days,
             price: fmt(priceQuote.rentalCents),
+            pct: priceQuote.percentUsed,
           })}
         </p>
       )}
@@ -207,47 +205,15 @@ export function BookingForm(props: Props) {
         <p className="text-sm text-amber-700">{priceQuote.error}</p>
       )}
 
-      <fieldset className="text-sm">
-        <legend className="text-gray-600 mb-1">{t("book.fulfillment")}</legend>
-        <label className="mr-4">
-          <input
-            type="radio"
-            checked={fulfillment === "ship"}
-            onChange={() => setFulfillment("ship")}
-          />{" "}
-          {t("book.ship")}
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={fulfillment === "pickup"}
-            onChange={() => setFulfillment("pickup")}
-          />{" "}
-          {t("book.pickup")}
-        </label>
-      </fieldset>
-
-      {fulfillment === "ship" ? (
-        <label className="text-sm block">
-          <span className="text-gray-600">{t("book.shippingAddress")}</span>
-          <textarea
-            rows={3}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
-          />
-        </label>
-      ) : (
-        <label className="text-sm block">
-          <span className="text-gray-600">{t("book.pickupSlot")}</span>
-          <input
-            type="datetime-local"
-            value={pickupSlot}
-            onChange={(e) => setPickupSlot(e.target.value)}
-            className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
-          />
-        </label>
-      )}
+      <label className="text-sm block">
+        <span className="text-gray-600">{t("book.pickupSlot")}</span>
+        <input
+          type="datetime-local"
+          value={pickupSlot}
+          onChange={(e) => setPickupSlot(e.target.value)}
+          className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+        />
+      </label>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm">
@@ -269,33 +235,20 @@ export function BookingForm(props: Props) {
         </label>
       </div>
 
-      {waiverAvailable && (
-        <label className="flex items-start gap-2 text-sm bg-brand-50 rounded p-3">
-          <input
-            type="checkbox"
-            checked={waiver}
-            onChange={(e) => setWaiver(e.target.checked)}
-            className="mt-1"
-          />
-          <span>{t("book.waiver", { price: fmt(props.waiverFeeCents ?? 0) })}</span>
-        </label>
-      )}
-
       {priceQuote && priceQuote.ok && (
         <div className="border-t border-brand-100 pt-3 text-sm space-y-1">
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-2">
             <span>{t("book.rental")}</span>
-            <span>{fmt(priceQuote.rentalCents)}</span>
+            <span className="text-right">
+              {fmt(priceQuote.rentalCents)}
+              <span className="block text-xs text-gray-500 font-normal">
+                {t("book.fobTerms")}
+              </span>
+            </span>
           </div>
-          {waiverCents > 0 && (
-            <div className="flex justify-between">
-              <span>{t("book.damageWaiver")}</span>
-              <span>{fmt(waiverCents)}</span>
-            </div>
-          )}
           <div className="flex justify-between font-medium">
             <span>{t("book.total")}</span>
-            <span>{fmt(subtotal)}</span>
+            <span>{fmt(priceQuote.rentalCents)}</span>
           </div>
         </div>
       )}
@@ -307,7 +260,7 @@ export function BookingForm(props: Props) {
         disabled={busy}
         className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-medium py-3 rounded transition"
       >
-        {busy ? t("book.redirecting") : t("book.cta")}
+        {busy ? t("book.redirecting") : t("book.ctaReview")}
       </button>
     </div>
   );

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { prisma } from "@lumiere/db";
+import { prisma, getSettings } from "@lumiere/db";
 import { BookingForm } from "@/components/BookingForm";
 import { ItemGallery } from "@/components/ItemGallery";
 import { getT } from "@/lib/i18n.server";
@@ -46,13 +46,13 @@ export default async function ItemPage({
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
-      rentalTiers: { orderBy: { days: "asc" } },
       category: true,
       images: { orderBy: { position: "asc" } },
     },
   });
   if (!product || !product.rentable) notFound();
 
+  const settings = await getSettings();
   const t = await getT();
   return (
     <div className="grid md:grid-cols-2 gap-10">
@@ -89,17 +89,9 @@ export default async function ItemPage({
             <BookingForm
               productId={product.id}
               productName={product.name}
-              currency={product.currency}
-              pricingType={product.rentPricingType ?? ""}
-              rentDailyCents={product.rentDailyCents}
-              rentFixedCents={product.rentFixedCents}
-              rentFixedDurationDays={product.rentFixedDurationDays}
-              tiers={product.rentalTiers.map((tier) => ({
-                days: tier.days,
-                priceCents: tier.priceCents,
-                label: tier.label,
-              }))}
-              waiverFeeCents={product.waiverFeeCents}
+              sellPriceCents={product.priceCents}
+              rental4DayPercentOfPrice={settings.rental4DayPercentOfPrice}
+              rental7DayPercentOfPrice={settings.rental7DayPercentOfPrice}
             />
           ) : (
             <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">

@@ -17,6 +17,8 @@ export async function GET() {
     totpEnabled: s.totpEnabled,
     shopEnabled: s.shopEnabled,
     rentalEnabled: s.rentalEnabled,
+    rental4DayPercentOfPrice: s.rental4DayPercentOfPrice,
+    rental7DayPercentOfPrice: s.rental7DayPercentOfPrice,
   });
 }
 
@@ -25,6 +27,8 @@ const Body = z.object({
   stripeWebhookSecret: z.string().optional(),
   shopEnabled: z.boolean().optional(),
   rentalEnabled: z.boolean().optional(),
+  rental4DayPercentOfPrice: z.number().int().min(1).max(100).optional(),
+  rental7DayPercentOfPrice: z.number().int().min(1).max(100).optional(),
 });
 
 export async function PUT(req: Request) {
@@ -36,7 +40,7 @@ export async function PUT(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
-  const data: Record<string, string | boolean | null> = {};
+  const data: Record<string, string | boolean | number | null> = {};
   // Empty string clears the value (falls back to env). Undefined leaves untouched.
   if (parsed.data.stripeSecretKey !== undefined) {
     data.stripeSecretKey = parsed.data.stripeSecretKey || null;
@@ -50,12 +54,21 @@ export async function PUT(req: Request) {
   if (parsed.data.rentalEnabled !== undefined) {
     data.rentalEnabled = parsed.data.rentalEnabled;
   }
+  if (parsed.data.rental4DayPercentOfPrice !== undefined) {
+    data.rental4DayPercentOfPrice = parsed.data.rental4DayPercentOfPrice;
+  }
+  if (parsed.data.rental7DayPercentOfPrice !== undefined) {
+    data.rental7DayPercentOfPrice = parsed.data.rental7DayPercentOfPrice;
+  }
   await updateSettings(data);
   await audit(user, "update", "Settings", "singleton", undefined, {
     stripeSecretKeyChanged: parsed.data.stripeSecretKey !== undefined,
     stripeWebhookSecretChanged: parsed.data.stripeWebhookSecret !== undefined,
     shopEnabledChanged: parsed.data.shopEnabled !== undefined,
     rentalEnabledChanged: parsed.data.rentalEnabled !== undefined,
+    rentalPercentsChanged:
+      parsed.data.rental4DayPercentOfPrice !== undefined ||
+      parsed.data.rental7DayPercentOfPrice !== undefined,
   });
   return NextResponse.json({ ok: true });
 }

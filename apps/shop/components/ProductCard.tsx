@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
+import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 
 type Props = {
   slug: string;
@@ -14,7 +15,7 @@ export function ProductCard({
   slug,
   name,
   priceCents,
-  currency,
+  currency: _currency,
   imageUrl,
   locale = "en-US",
 }: Props) {
@@ -33,7 +34,9 @@ export function ProductCard({
       </div>
       <div className="p-4">
         <h3 className="font-serif text-lg">{name}</h3>
-        <p className="text-brand-700 mt-1">{formatPrice(priceCents, currency, locale)}</p>
+        <p className="text-brand-700 mt-1">
+          {formatPrice(priceCents, CHECKOUT_CURRENCY, locale)}
+        </p>
       </div>
     </Link>
   );

@@ -46,7 +46,6 @@ export default async function RentHomePage() {
     where: { rentable: true },
     orderBy: featuredOrder,
     take: 8,
-    include: { rentalTiers: true },
   });
 
   const rentableCount = await prisma.product.count({ where: { rentable: true } });
@@ -55,16 +54,13 @@ export default async function RentHomePage() {
     _sum: { rentCopiesCount: true },
   });
   const totalCopies = copiesSum._sum.rentCopiesCount ?? 0;
-  const tierCount = await prisma.rentalTier.count({
-    where: { product: { rentable: true } },
-  });
 
   const trustItems = config.trustStrip
     .map((it) => it.label.trim())
     .filter(Boolean);
   const trustFallback = [
     t("rental.trust.insured"),
-    t("rental.trust.delivery"),
+    t("rental.trust.pickup"),
     t("rental.trust.returns"),
   ];
   const trustToShow = trustItems.length > 0 ? trustItems : trustFallback;
@@ -146,8 +142,8 @@ export default async function RentHomePage() {
                     value={String(totalCopies)}
                   />
                   <SnapshotCard
-                    label={t("rental.snapshot.tiers")}
-                    value={String(tierCount)}
+                    label={t("rental.snapshot.plans")}
+                    value={t("rental.snapshot.planLengths")}
                   />
                 </div>
 
@@ -181,14 +177,22 @@ export default async function RentHomePage() {
                           <div className="flex-1 min-w-0">
                             <h3 className="font-serif text-lg leading-tight">{p.name}</h3>
                             <p className="text-sm text-brand-700 mt-1">
-                              {rentalPriceTeaser(p, t, intl)}
+                              {rentalPriceTeaser(
+                                p,
+                                {
+                                  rental4DayPercentOfPrice: settings.rental4DayPercentOfPrice,
+                                  rental7DayPercentOfPrice: settings.rental7DayPercentOfPrice,
+                                },
+                                t,
+                                intl
+                              )}
                             </p>
                             <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
                               <span className="px-2 py-1 rounded bg-brand-50 border border-brand-100">
                                 {t("rental.badge.copies", { n: p.rentCopiesCount })}
                               </span>
                               <span className="px-2 py-1 rounded bg-brand-50 border border-brand-100">
-                                {t("rental.badge.tiers", { n: p.rentalTiers.length })}
+                                {t("rental.badge.plans")}
                               </span>
                             </div>
                             <Link

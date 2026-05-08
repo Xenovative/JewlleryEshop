@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { prisma } from "@lumiere/db";
+import { prisma, getSettings } from "@lumiere/db";
 import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
@@ -22,9 +22,9 @@ export default async function BrowsePage() {
   const locale = await getLocale();
   const intl = intlLocale(locale);
 
+  const settings = await getSettings();
   const products = await prisma.product.findMany({
     where: { rentable: true },
-    include: { rentalTiers: { orderBy: { days: "asc" } } },
     orderBy: [
       { featured: "desc" },
       { position: "asc" },
@@ -65,7 +65,15 @@ export default async function BrowsePage() {
               <div className="p-4">
                 <h2 className="font-serif text-lg">{p.name}</h2>
                 <p className="text-brand-700 mt-1 text-sm">
-                  {rentalPriceTeaser(p, t, intl)}
+                  {rentalPriceTeaser(
+                    p,
+                    {
+                      rental4DayPercentOfPrice: settings.rental4DayPercentOfPrice,
+                      rental7DayPercentOfPrice: settings.rental7DayPercentOfPrice,
+                    },
+                    t,
+                    intl
+                  )}
                 </p>
               </div>
             </Link>

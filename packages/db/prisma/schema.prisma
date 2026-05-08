@@ -20,7 +20,7 @@ model Product {
   name        String
   description String
   priceCents  Int
-  currency    String    @default("usd")
+  currency    String    @default("hkd")
   imageUrl    String
   stock       Int       @default(0)
   material    String?
@@ -103,7 +103,7 @@ model Booking {
   waiverFeeCents      Int      @default(0)
   rentalCents         Int
   totalCents          Int
-  currency            String   @default("usd")
+  currency            String   @default("hkd")
   stripeSessionId     String?  @unique
   createdAt           DateTime @default(now())
   customerId          String?
@@ -134,6 +134,10 @@ model Settings {
   rentalEnabled       Boolean  @default(true)
   shopHomeJson        String?
   rentalHomeJson      String?
+  /// Whole-number percent of product selling price (priceCents) for 4-day rental
+  rental4DayPercentOfPrice Int @default(10)
+  /// Whole-number percent of product selling price for 7-day rental
+  rental7DayPercentOfPrice Int @default(18)
   updatedAt           DateTime @updatedAt
 }
 
@@ -142,7 +146,7 @@ model Order {
   stripeSessionId  String   @unique
   status           String
   amountTotalCents Int
-  currency         String
+  currency         String   @default("hkd")
   email            String?
   itemsJson        String
   createdAt        DateTime @default(now())

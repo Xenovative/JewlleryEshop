@@ -114,10 +114,24 @@ export const dict = {
     "cart.summary": "Summary",
     "cart.subtotal": "Subtotal",
     "cart.shippingNote": "Shipping and taxes calculated at checkout.",
+    "cart.pricingNote":
+      "Prices shown in HKD. Terms for each line: FOB - Hong Kong Office.",
+    "cart.proceedCheckout": "Proceed to checkout",
     "cart.checkout": "Checkout",
     "cart.redirecting": "Redirecting…",
     "cart.remove": "Remove",
     "cart.loading": "Loading…",
+
+    "checkout.title": "Checkout",
+    "checkout.intro":
+      "Review your items and totals below, then continue to secure payment with Stripe.",
+    "checkout.summary": "Order summary",
+    "checkout.allPricesNote":
+      "All amounts in HKD. Each item is priced FOB - Hong Kong Office.",
+    "checkout.stripeNote":
+      "You will finish payment on Stripe’s secure hosted checkout.",
+    "checkout.payStripe": "Pay with Stripe",
+    "checkout.backToCart": "Back to cart",
 
     "success.title": "Thank you for your order!",
     "success.body":
@@ -551,6 +565,12 @@ export const dict = {
       "Toggle customer-facing storefronts. When one frontend is disabled, visitors are redirected to the other storefront automatically.",
     "admin.settings.shopFrontend": "Shop frontend",
     "admin.settings.rentalFrontend": "Rental frontend",
+    "admin.settings.rentalPricing": "Rental plan pricing",
+    "admin.settings.rentalPricingBlurb":
+      "4-day and 7-day rental prices are computed as this percentage of each product’s selling price (price in admin). Whole numbers 1–100.",
+    "admin.settings.rentalPct4": "4-day plan (% of selling price)",
+    "admin.settings.rentalPct7": "7-day plan (% of selling price)",
+    "admin.settings.saveRentPct": "Save rental percentages",
     "admin.settings.signOut": "Sign out",
   },
   "zh-Hant": {
@@ -652,10 +672,20 @@ export const dict = {
     "cart.summary": "結帳摘要",
     "cart.subtotal": "小計",
     "cart.shippingNote": "運費與稅金將於結帳時計算。",
+    "cart.pricingNote": "價格以港幣顯示。各品項條款：FOB - Hong Kong Office。",
+    "cart.proceedCheckout": "前往結帳頁",
     "cart.checkout": "前往結帳",
     "cart.redirecting": "前往付款頁面…",
     "cart.remove": "移除",
     "cart.loading": "載入中…",
+
+    "checkout.title": "結帳",
+    "checkout.intro": "請確認以下商品與金額,然後以 Stripe 安全付款。",
+    "checkout.summary": "訂單摘要",
+    "checkout.allPricesNote": "金額均以港幣計。各品項條款：FOB - Hong Kong Office。",
+    "checkout.stripeNote": "付款將於 Stripe 安全結帳頁完成。",
+    "checkout.payStripe": "使用 Stripe 付款",
+    "checkout.backToCart": "返回購物車",
 
     "success.title": "感謝您的訂購!",
     "success.body": "我們已收到您的付款,訂單確認信即將寄達。",
@@ -1084,6 +1114,12 @@ export const dict = {
       "可切換顧客前台的開關。當其中一個前台停用時，訪客會自動導向另一個前台。",
     "admin.settings.shopFrontend": "商城前台",
     "admin.settings.rentalFrontend": "租賃前台",
+    "admin.settings.rentalPricing": "租賃方案定價",
+    "admin.settings.rentalPricingBlurb":
+      "4 天與 7 天租金依各商品售價(後台標價)乘以以下百分比計算。請填 1–100 的整數。",
+    "admin.settings.rentalPct4": "4 天方案（售價之 %）",
+    "admin.settings.rentalPct7": "7 天方案（售價之 %）",
+    "admin.settings.saveRentPct": "儲存租賃百分比",
     "admin.settings.signOut": "登出",
   },
 } as const;

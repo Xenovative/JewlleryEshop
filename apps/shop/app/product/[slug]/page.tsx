@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@lumiere/db";
+import { CHECKOUT_CURRENCY, FOB_HONG_KONG_OFFICE } from "@lumiere/db/commerce";
 import { formatPrice } from "@/lib/format";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductGallery } from "@/components/ProductGallery";
@@ -85,8 +86,9 @@ export default async function ProductPage({
         </Link>
         <h1 className="font-serif text-3xl mt-2">{product.name}</h1>
         <p className="text-2xl text-brand-700 mt-2">
-          {formatPrice(product.priceCents, product.currency, intlLocale(locale))}
+          {formatPrice(product.priceCents, CHECKOUT_CURRENCY, intlLocale(locale))}
         </p>
+        <p className="text-xs text-gray-500 mt-1">{FOB_HONG_KONG_OFFICE}</p>
 
         <p className="mt-6 text-gray-700 leading-relaxed">{product.description}</p>
 

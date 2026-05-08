@@ -28,6 +28,7 @@ async function main() {
       slug: "solitaire-diamond-ring",
       name: "Solitaire Diamond Ring",
       description: "A classic solitaire diamond ring set in 18k yellow gold.",
+      currency: "hkd",
       priceCents: 129900,
       imageUrl: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800",
       stock: 0,
@@ -46,6 +47,7 @@ async function main() {
       slug: "pearl-pendant-necklace",
       name: "Pearl Pendant Necklace",
       description: "Freshwater pearl on a delicate sterling silver chain.",
+      currency: "hkd",
       priceCents: 8900,
       imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800",
       stock: 12,
@@ -58,6 +60,7 @@ async function main() {
       slug: "ruby-stud-earrings",
       name: "Ruby Stud Earrings",
       description: "Brilliant-cut rubies in a classic 4-prong setting.",
+      currency: "hkd",
       priceCents: 24500,
       imageUrl: "https://images.unsplash.com/photo-1635767582909-345c6c0fa4f1?w=800",
       stock: 6,
@@ -70,6 +73,7 @@ async function main() {
       slug: "tennis-bracelet",
       name: "Tennis Bracelet",
       description: "A timeless line of cubic zirconia in rhodium-plated silver.",
+      currency: "hkd",
       priceCents: 15900,
       imageUrl: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800",
       stock: 8,
@@ -79,16 +83,16 @@ async function main() {
       categoryId: bracelets.id,
       buyable: true,
       rentable: true,
-      rentPricingType: "daily",
-      rentDailyCents: 1500,
+      rentPricingType: "tiered",
       rentCopiesCount: 3,
-      waiverFeeCents: 1500,
+      waiverFeeCents: null,
     },
     {
       slug: "emerald-statement-necklace",
       name: "Emerald Statement Necklace",
       description: "A red-carpet emerald necklace, set in 18k gold. Available for rent only.",
-      priceCents: 0,
+      currency: "hkd",
+      priceCents: 2500000,
       imageUrl: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=800",
       stock: 0,
       material: "18k gold",
@@ -99,18 +103,14 @@ async function main() {
       rentable: true,
       rentPricingType: "tiered",
       rentCopiesCount: 1,
-      waiverFeeCents: 4500,
-      tiers: [
-        { label: "Weekend (3 days)", days: 3, priceCents: 14900 },
-        { label: "Week (7 days)", days: 7, priceCents: 24900 },
-        { label: "Two weeks", days: 14, priceCents: 39900 },
-      ],
+      waiverFeeCents: null,
     },
     {
       slug: "diamond-tiara",
       name: "Diamond Tiara",
       description: "An heirloom-quality diamond tiara for the most important occasions.",
-      priceCents: 0,
+      currency: "hkd",
+      priceCents: 8800000,
       imageUrl: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800",
       stock: 0,
       material: "platinum",
@@ -119,11 +119,9 @@ async function main() {
       categoryId: necklaces.id,
       buyable: false,
       rentable: true,
-      rentPricingType: "fixed",
-      rentFixedCents: 49900,
-      rentFixedDurationDays: 4,
+      rentPricingType: "tiered",
       rentCopiesCount: 1,
-      waiverFeeCents: 9900,
+      waiverFeeCents: null,
     },
   ];
 
@@ -148,6 +146,8 @@ async function main() {
       for (const t of tiers) {
         await prisma.rentalTier.create({ data: { ...t, productId: product.id } });
       }
+    } else {
+      await prisma.rentalTier.deleteMany({ where: { productId: product.id } });
     }
   }
 

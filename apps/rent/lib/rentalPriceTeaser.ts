@@ -1,36 +1,20 @@
 import { formatPrice } from "@/lib/format";
 import type { DictKey } from "@/lib/i18n";
+import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 
 export function rentalPriceTeaser(
-  product: {
-    priceCents: number;
-    rentPricingType: string | null;
-    rentDailyCents: number | null;
-    rentFixedCents: number | null;
-    rentFixedDurationDays: number | null;
-    rentalTiers: { priceCents: number }[];
-    currency: string;
-  },
+  product: { priceCents: number },
+  settings: { rental4DayPercentOfPrice: number; rental7DayPercentOfPrice: number },
   t: (key: DictKey, vars?: Record<string, string | number>) => string,
   locale: string
 ): string {
-  if (product.rentPricingType === "fixed" && product.rentFixedCents) {
-    return t("rental.card.fixed", {
-      days: product.rentFixedDurationDays ?? 1,
-      price: formatPrice(product.rentFixedCents, product.currency, locale),
-    });
+  if (product.priceCents <= 0) {
+    return t("rental.card.priceOnRequest");
   }
-  if (product.rentPricingType === "daily" && product.rentDailyCents) {
-    return t("rental.card.daily", {
-      price: formatPrice(product.rentDailyCents, product.currency, locale),
-    });
-  }
-  const tierMin =
-    product.rentalTiers.length > 0
-      ? Math.min(...product.rentalTiers.map((x) => x.priceCents))
-      : null;
-  const base = tierMin ?? product.rentDailyCents ?? product.priceCents;
-  return t("rental.card.from", {
-    price: formatPrice(base, product.currency, locale),
+  const p4 = Math.max(1, Math.round((product.priceCents * settings.rental4DayPercentOfPrice) / 100));
+  const p7 = Math.max(1, Math.round((product.priceCents * settings.rental7DayPercentOfPrice) / 100));
+  return t("rental.card.plans", {
+    price4: formatPrice(p4, CHECKOUT_CURRENCY, locale),
+    price7: formatPrice(p7, CHECKOUT_CURRENCY, locale),
   });
 }

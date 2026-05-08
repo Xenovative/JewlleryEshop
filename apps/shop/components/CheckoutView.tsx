@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { readCart, updateQty, removeFromCart, type CartItem } from "@/lib/cart";
-import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
@@ -21,10 +21,12 @@ type ResolvedItem = {
   stock: number;
 };
 
-export function CartView() {
+export function CheckoutView() {
   const t = useT();
   const localeCode = intlLocale(useLocale());
   const [items, setItems] = useState<ResolvedItem[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = async () => {
     const local = readCart();
@@ -47,6 +49,24 @@ export function CartView() {
     window.addEventListener("cart:changed", handler);
     return () => window.removeEventListener("cart:changed", handler);
   }, []);
+
+  const pay = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ items: readCart() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Checkout failed");
+      window.location.href = data.url;
+    } catch (e) {
+      setError((e as Error).message);
+      setLoading(false);
+    }
+  };
 
   if (items === null) return <p>{t("cart.loading")}</p>;
   if (items.length === 0) {
@@ -115,7 +135,8 @@ export function CartView() {
       </div>
 
       <aside className="bg-white border border-brand-100 rounded-lg p-6 h-fit">
-        <h2 className="font-serif text-xl">{t("cart.summary")}</h2>
+        <h2 className="font-serif text-xl">{t("checkout.summary")}</h2>
+        <p className="text-xs text-gray-500 mt-2">{t("checkout.allPricesNote")}</p>
         <div className="mt-4 flex justify-between gap-2">
           <span>{t("cart.subtotal")}</span>
           <span className="text-right">
@@ -125,12 +146,20 @@ export function CartView() {
             </span>
           </span>
         </div>
-        <p className="text-xs text-gray-500 mt-2">{t("cart.pricingNote")}</p>
-        <Link
-          href="/checkout"
-          className="mt-6 block w-full text-center bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 rounded transition"
+        <p className="text-xs text-gray-500 mt-3">{t("checkout.stripeNote")}</p>
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        <button
+          onClick={pay}
+          disabled={loading}
+          className="mt-6 w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-medium py-3 rounded transition"
         >
-          {t("cart.proceedCheckout")}
+          {loading ? t("cart.redirecting") : t("checkout.payStripe")}
+        </button>
+        <Link
+          href="/cart"
+          className="mt-3 block text-center text-sm text-brand-600 hover:underline"
+        >
+          {t("checkout.backToCart")}
         </Link>
       </aside>
     </div>

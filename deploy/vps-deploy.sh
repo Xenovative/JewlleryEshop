@@ -165,6 +165,23 @@ setup_repo() {
     [[ -f "${dir}/package.json" && -d "${dir}/apps/shop" && -d "${dir}/packages/db" ]]
   }
 
+  # If SOURCE_DIR is provided, always sync first so APP_DIR has latest code.
+  # Keep server-local env/db files intact during sync.
+  if [[ -n "${SOURCE_DIR}" && -f "${SOURCE_DIR}/package.json" ]]; then
+    log "Syncing source from ${SOURCE_DIR} -> ${APP_DIR}"
+    mkdir -p "${APP_DIR}"
+    rsync -a --delete \
+      --exclude .git \
+      --exclude node_modules \
+      --exclude .next \
+      --exclude .env \
+      --exclude "*.db" \
+      --exclude "*.db-shm" \
+      --exclude "*.db-wal" \
+      "${SOURCE_DIR}/" "${APP_DIR}/"
+    chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
+  fi
+
   # 1) If APP_DIR is already the root, use it.
   if is_repo_root "${APP_DIR}"; then
     log "Using existing local project at ${APP_DIR}"
@@ -202,18 +219,6 @@ setup_repo() {
   if [[ -n "${candidate}" ]]; then
     log "Detected project root at ${candidate} (updating APP_DIR)"
     APP_DIR="${candidate}"
-    chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
-    return
-  fi
-
-  if [[ -n "${SOURCE_DIR}" && -f "${SOURCE_DIR}/package.json" ]]; then
-    log "Copying local source from ${SOURCE_DIR} -> ${APP_DIR}"
-    mkdir -p "${APP_DIR}"
-    rsync -a --delete \
-      --exclude .git \
-      --exclude node_modules \
-      --exclude .next \
-      "${SOURCE_DIR}/" "${APP_DIR}/"
     chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
     return
   fi

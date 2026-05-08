@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN "rental4DayPercentOfPrice" INTEGER NOT NULL DEFAULT 10;
+ALTER TABLE "Settings" ADD COLUMN "rental7DayPercentOfPrice" INTEGER NOT NULL DEFAULT 18;

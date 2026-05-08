@@ -21,6 +21,8 @@ export default async function AdminSettingsPage() {
       }
       shopEnabled={s.shopEnabled}
       rentalEnabled={s.rentalEnabled}
+      rental4DayPercentOfPrice={s.rental4DayPercentOfPrice}
+      rental7DayPercentOfPrice={s.rental7DayPercentOfPrice}
       totpEnabled={!!me?.totpEnabled}
     />
   );
