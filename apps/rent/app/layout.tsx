@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import Link from "next/link";
+import { FaMapMarkerAlt, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { ProductSearchBar } from "@/components/ProductSearchBar";
@@ -9,8 +10,26 @@ import { getLocale, getT } from "@/lib/i18n.server";
 import { getSettings } from "@lumiere/db";
 
 export const metadata: Metadata = {
-  title: "Lumière Rentals",
+  title: "Lumière By Dynasty Jewelry Rentals",
   description: "Rent fine jewellery for any occasion.",
+  icons: {
+    icon: [
+      { url: "/api/brand-assets/favicon.ico" },
+      {
+        url: "/api/brand-assets/favicon-32x32.png",
+        type: "image/png",
+        sizes: "32x32",
+      },
+      {
+        url: "/api/brand-assets/favicon-16x16.png",
+        type: "image/png",
+        sizes: "16x16",
+      },
+    ],
+    apple: [{ url: "/api/brand-assets/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: ["/api/brand-assets/favicon.ico"],
+  },
+  manifest: "/api/brand-assets/site.webmanifest",
 };
 
 export default async function RootLayout({
@@ -23,6 +42,11 @@ export default async function RootLayout({
   const settings = await getSettings();
   const shopUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
   const backofficeUrl = `${shopUrl.replace(/\/$/, "")}/backoffice`;
+  const address = t("footer.contact.address");
+  const phone = t("footer.contact.phone");
+  const mapsHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+  const telHref = `tel:${phone.replace(/\s+/g, "")}`;
+  const whatsappHref = "https://api.whatsapp.com/send/?phone=85223682618";
   return (
     <html lang={locale === "en" ? "en" : locale}>
       <body className="min-h-screen flex flex-col">
@@ -30,9 +54,12 @@ export default async function RootLayout({
           <header className="border-b border-brand-100 bg-white">
             <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <Link href="/" className="font-serif text-2xl text-brand-700 min-w-0">
-                  {t("brand.name")}{" "}
-                  <span className="text-brand-500 text-base">{t("brand.tagline")}</span>
+                <Link
+                  href="/"
+                  className="min-w-0 text-brand-700 leading-tight"
+                >
+                  <span className="block font-serif text-2xl">{t("brand.name")}</span>
+                  <span className="block text-[11px] text-brand-500">{t("brand.byline")}</span>
                 </Link>
                 {(settings.shopEnabled || settings.rentalEnabled) && (
                   <div className="hidden md:flex items-center gap-2 text-xs shrink-0">
@@ -82,13 +109,55 @@ export default async function RootLayout({
           </header>
           <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">{children}</main>
           <footer className="border-t border-brand-100 mt-12">
-            <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-500 flex justify-between">
-              <span>
-                © {new Date().getFullYear()} {t("footer.copyright")}
-              </span>
-              <a href={backofficeUrl} className="hover:text-brand-600">
-                {t("nav.admin")}
-              </a>
+            <div className="max-w-6xl mx-auto px-6 py-6">
+              <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div className="flex gap-3">
+                  <span className="w-11 h-11 rounded-xl bg-brand-50 text-brand-400 flex items-center justify-center shrink-0">
+                    <FaMapMarkerAlt className="text-lg" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-gray-500">{t("footer.contact.addressLabel")}</p>
+                    <a href={mapsHref} target="_blank" rel="noreferrer" className="hover:text-brand-600 hover:underline">
+                      {address}
+                    </a>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-11 h-11 rounded-xl bg-brand-50 text-brand-400 flex items-center justify-center shrink-0">
+                    <FaPhoneAlt className="text-base" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-gray-500">{t("footer.contact.phoneLabel")}</p>
+                    <a href={telHref} className="hover:text-brand-600 hover:underline">
+                      {phone}
+                    </a>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-11 h-11 rounded-xl bg-brand-50 text-brand-400 flex items-center justify-center shrink-0">
+                    <FaWhatsapp className="text-lg" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-gray-500">{t("footer.contact.whatsappLabel")}</p>
+                    <a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-brand-600 hover:underline">
+                      {phone}
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-5 pt-5 border-t border-brand-100 text-sm text-gray-500 flex justify-between">
+                <span>
+                  © {new Date().getFullYear()} {t("footer.copyright")}
+                </span>
+                <div className="flex items-center gap-4">
+                  <Link href="/terms" className="hover:text-brand-600">
+                    {t("nav.terms")}
+                  </Link>
+                  <a href={backofficeUrl} className="hover:text-brand-600">
+                    {t("nav.admin")}
+                  </a>
+                </div>
+              </div>
             </div>
           </footer>
         </I18nProvider>

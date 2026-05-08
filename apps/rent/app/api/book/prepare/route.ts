@@ -7,17 +7,21 @@ import {
   CHECKOUT_CURRENCY,
 } from "@lumiere/db";
 import { fromIsoDate, isoDate } from "@/lib/format";
-import { quoteRetailPlan } from "@/lib/rentalPlanPricing";
+import {
+  quoteRetailPlan,
+  MIN_RENTAL_PLAN_DAYS,
+  MAX_RENTAL_PLAN_DAYS,
+  type RentalPlanDays,
+} from "@/lib/rentalPlanPricing";
 import { computeRentalDepositCents } from "@/lib/rentalDeposit";
 
 const Body = z.object({
   productId: z.string().min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  planDays: z.union([z.literal(4), z.literal(7)]),
+  planDays: z.number().int().min(MIN_RENTAL_PLAN_DAYS).max(MAX_RENTAL_PLAN_DAYS),
   email: z.string().email(),
   customerName: z.string().trim().min(1),
   customerPhone: z.string().trim().min(5).max(40),
-  pickupSlot: z.string().min(1),
   returnSlot: z.string().min(1),
 });
 
@@ -42,9 +46,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Start cannot be in the past" }, { status: 400 });
   }
 
+  const planDays = data.planDays as RentalPlanDays;
   const q = quoteRetailPlan(
     product.priceCents,
-    data.planDays,
+    planDays,
     settings.rental4DayPercentOfPrice,
     settings.rental7DayPercentOfPrice,
     start
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
       customerPhone: data.customerPhone.trim(),
       customerId,
       shippingAddressJson: null,
-      pickupSlot: new Date(data.pickupSlot),
+      pickupSlot: start,
       returnSlot: returnAt,
       waiverIncluded: false,
       waiverFeeCents: 0,

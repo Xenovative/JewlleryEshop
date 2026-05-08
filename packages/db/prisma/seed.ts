@@ -8,6 +8,7 @@ async function main() {
     { slug: "necklaces", name: "Necklaces" },
     { slug: "earrings", name: "Earrings" },
     { slug: "bracelets", name: "Bracelets" },
+    { slug: "other", name: "Other" },
   ];
 
   for (const c of categories) {

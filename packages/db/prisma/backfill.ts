@@ -11,6 +11,24 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+async function ensureDefaultCategories() {
+  const categories = [
+    { slug: "rings", name: "Rings" },
+    { slug: "necklaces", name: "Necklaces" },
+    { slug: "earrings", name: "Earrings" },
+    { slug: "bracelets", name: "Bracelets" },
+    { slug: "other", name: "Other" },
+  ];
+  for (const c of categories) {
+    await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: {},
+      create: c,
+    });
+  }
+  console.log("[backfill] default categories ensured.");
+}
+
 async function expandRentalCopies() {
   const products = await prisma.product.findMany({
     where: { rentable: true },
@@ -93,6 +111,7 @@ async function ensureOwner() {
 }
 
 async function main() {
+  await ensureDefaultCategories();
   await expandRentalCopies();
   await upsertCustomers();
   await ensureOwner();

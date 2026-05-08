@@ -3,6 +3,7 @@ import { prisma } from "@lumiere/db";
 import { formatPrice } from "@/lib/format";
 import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { DataTransferControls } from "@/components/backoffice/DataTransferControls";
 
 export const dynamic = "force-dynamic";
 
@@ -38,17 +39,23 @@ export default async function CustomersPage({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-serif text-2xl">{t("bo.customers.title")}</h1>
-        <form className="flex gap-2 items-center">
-          <input
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder={t("bo.customers.searchPlaceholder")}
-            className="border border-brand-200 rounded px-2 py-1 text-sm"
+        <div className="flex gap-3 items-center">
+          <DataTransferControls
+            exportHref="/api/backoffice/customers/export"
+            importHref="/api/backoffice/customers/import"
           />
-          <button className="text-sm text-brand-600">
-            {t("bo.customers.search")}
-          </button>
-        </form>
+          <form className="flex gap-2 items-center">
+            <input
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder={t("bo.customers.searchPlaceholder")}
+              className="border border-brand-200 rounded px-2 py-1 text-sm"
+            />
+            <button className="text-sm text-brand-600">
+              {t("bo.customers.search")}
+            </button>
+          </form>
+        </div>
       </div>
 
       {customers.length === 0 ? (

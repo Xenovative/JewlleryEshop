@@ -1,5 +1,6 @@
 import { prisma } from "@lumiere/db";
 import { ProductsAdmin } from "@/components/backoffice/ProductsAdmin";
+import { DataTransferControls } from "@/components/backoffice/DataTransferControls";
 
 export const dynamic = "force-dynamic";
 
@@ -16,5 +17,15 @@ export default async function AdminProductsPage() {
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
-  return <ProductsAdmin initialProducts={products} categories={categories} />;
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <DataTransferControls
+          exportHref="/api/backoffice/products/export"
+          importHref="/api/backoffice/products/import"
+        />
+      </div>
+      <ProductsAdmin initialProducts={products} categories={categories} />
+    </div>
+  );
 }

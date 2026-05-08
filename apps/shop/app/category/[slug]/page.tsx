@@ -13,6 +13,7 @@ const CAT_KEYS: Record<string, DictKey> = {
   necklaces: "nav.necklaces",
   earrings: "nav.earrings",
   bracelets: "nav.bracelets",
+  other: "nav.other",
 };
 
 export default async function CategoryPage({

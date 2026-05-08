@@ -17,7 +17,7 @@ export function CategoryGridSection({ categories, title, catKeyMap, t }: Props) 
       <div className="flex items-baseline justify-between mb-5">
         <h2 className="font-serif text-2xl md:text-3xl">{title}</h2>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {categories.map((c) => {
           const key = catKeyMap[c.slug];
           return (

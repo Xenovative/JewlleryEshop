@@ -100,7 +100,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
               />
             </>
           ) : (
-            <DecorativeMonogram tone={isRental ? "light" : "dark"} />
+            <FallbackShopLogo tone={isRental ? "light" : "dark"} />
           )}
         </div>
       </div>
@@ -108,32 +108,21 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
   );
 }
 
-function DecorativeMonogram({ tone }: { tone: "light" | "dark" }) {
-  const stroke = tone === "light" ? "rgba(255,255,255,0.45)" : "rgba(135,86,42,0.35)";
+function FallbackShopLogo({ tone }: { tone: "light" | "dark" }) {
+  const ringStroke = tone === "light" ? "rgba(255,255,255,0.4)" : "rgba(135,86,42,0.35)";
   return (
-    <svg
-      viewBox="0 0 200 200"
-      className="absolute inset-0 w-full h-full"
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id="heroGlowRent" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor={stroke} stopOpacity="0.6" />
-          <stop offset="100%" stopColor={stroke} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <circle cx="100" cy="100" r="80" fill="url(#heroGlowRent)" />
-      <text
-        x="50%"
-        y="55%"
-        textAnchor="middle"
-        fontFamily="serif"
-        fontSize="120"
-        fill={stroke}
-        opacity="0.55"
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div
+        className="w-56 h-56 md:w-72 md:h-72 rounded-full border overflow-hidden bg-white/90"
+        style={{ borderColor: ringStroke }}
       >
-        L
-      </text>
-    </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/api/brand-assets/shoplogo.png"
+          alt="Lumière logo"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </div>
   );
 }

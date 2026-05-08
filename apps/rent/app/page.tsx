@@ -24,6 +24,7 @@ const CAT_KEYS: Record<string, DictKey> = {
   necklaces: "nav.necklaces",
   earrings: "nav.earrings",
   bracelets: "nav.bracelets",
+  other: "nav.other",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -59,13 +60,6 @@ export default async function RentHomePage() {
       take: 8,
     }),
   ]);
-
-  const rentableCount = await prisma.product.count({ where: { rentable: true } });
-  const copiesSum = await prisma.product.aggregate({
-    where: { rentable: true },
-    _sum: { rentCopiesCount: true },
-  });
-  const totalCopies = copiesSum._sum.rentCopiesCount ?? 0;
 
   const trustItems = config.trustStrip
     .map((it) => it.label.trim())
@@ -154,21 +148,6 @@ export default async function RentHomePage() {
           case "featuredRentals":
             return (
               <section key={s.id} id="featuredRentals" className="scroll-mt-20 space-y-6">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <SnapshotCard
-                    label={t("rental.snapshot.available")}
-                    value={String(rentableCount)}
-                  />
-                  <SnapshotCard
-                    label={t("rental.snapshot.copies")}
-                    value={String(totalCopies)}
-                  />
-                  <SnapshotCard
-                    label={t("rental.snapshot.plans")}
-                    value={t("rental.snapshot.planLengths")}
-                  />
-                </div>
-
                 <div>
                   <h2 className="font-serif text-2xl md:text-3xl">
                     {t("rental.featured.title")}
@@ -256,15 +235,6 @@ export default async function RentHomePage() {
             return null;
         }
       })}
-    </div>
-  );
-}
-
-function SnapshotCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-white border border-brand-100 rounded-lg px-4 py-3">
-      <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
-      <div className="text-2xl font-serif text-brand-700 mt-1">{value}</div>
     </div>
   );
 }

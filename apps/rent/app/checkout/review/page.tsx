@@ -23,13 +23,7 @@ export default async function RentCheckoutReviewPage({
   });
   if (!booking || booking.status !== "pending") redirect("/");
 
-  const pickupSlot =
-    booking.pickupSlot != null
-      ? booking.pickupSlot.toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })
-      : "—";
+  const pickupSlot = isoDate(booking.startDate);
 
   const returnSlot =
     booking.returnSlot != null

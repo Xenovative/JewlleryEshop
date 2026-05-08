@@ -9,6 +9,7 @@ export const LOCALE_COOKIE = "locale";
 export const dict = {
   en: {
     "brand.name": "Lumière",
+    "brand.byline": "By Dynasty Jewelry",
     "brand.tagline": "Rentals",
     "nav.browse": "Browse",
     "nav.howItWorks": "How it works",
@@ -16,9 +17,16 @@ export const dict = {
     "nav.necklaces": "Necklaces",
     "nav.earrings": "Earrings",
     "nav.bracelets": "Bracelets",
+    "nav.other": "Other",
     "nav.buyAt": "Buy at Lumière →",
     "nav.admin": "Admin",
-    "footer.copyright": "Lumière Rentals",
+    "nav.terms": "Terms & Conditions",
+    "footer.copyright": "Lumière By Dynasty Jewelry Rentals",
+    "footer.contact.addressLabel": "Address",
+    "footer.contact.address": "Suite 726, 7/F, Ocean Centre, Harbour City, 5 Canton Rd, Tsim Sha Tsui",
+    "footer.contact.phoneLabel": "Phone",
+    "footer.contact.phone": "2368 2618",
+    "footer.contact.whatsappLabel": "WhatsApp",
 
     "home.hero.title": "Wear something extraordinary.",
     "home.hero.subtitle":
@@ -50,7 +58,8 @@ export const dict = {
     "book.endDate": "End date",
     "book.endDateAuto": "End date (auto)",
     "book.daysSummary": "{days} day(s) · {price} rental",
-    "book.planHint": "4-day plan: {pct4}% of retail · 7-day plan: {pct7}% (HKD)",
+    "book.planHint":
+      "4–8 day plans. 4 days use {pct4}% of retail; day-7 anchor is {pct7}% (HKD), and day 8 scales from that rate.",
     "book.pickupOnly":
       "Rentals are collected and returned in person at our Hong Kong office only — we do not ship rental items or accept mail-in returns.",
     "book.deposit": "Refundable deposit",
@@ -144,7 +153,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière Rental",
     "rental.hero.title": "Wear the heirloom. Skip the vault.",
     "rental.hero.subtitle":
-      "Insured, expertly cleaned fine jewellery for your night, your wedding, or your shoot — 4 or 7 day rentals, collected at our Hong Kong office.",
+      "Expertly cleaned fine jewellery for your night, your wedding, or your shoot — flexible 4 to 8 day rentals, collected at our Hong Kong office.",
     "rental.hero.primaryCta": "Browse rentable pieces",
     "rental.hero.secondaryCta": "How rental works",
     "rental.howItWorks.title": "How rental works",
@@ -161,26 +170,26 @@ export const dict = {
       "Collect at our Hong Kong office, enjoy your dates, then return in person by the end date — a specialist inspects the piece and refunds your deposit on site.",
     "rental.featured.title": "Featured rentable pieces",
     "rental.featured.subtitle":
-      "A short list this season. Each piece offers 4-day or 7-day rentals as a percentage of its retail value, with pickup at our Hong Kong office.",
+      "A short list this season. Each piece offers 4 to 8 day rentals as a percentage of its retail value, with pickup at our Hong Kong office.",
     "rental.featured.empty":
       "Our rental atelier is taking new pieces in. Check back shortly.",
     "rental.policies.title": "Why our clients trust us",
     "rental.policies.subtitle":
-      "Real fine jewellery, fully insured, handled by people who restore heirlooms for a living.",
-    "rental.policy.insurance.title": "Insured edge to edge",
+      "Real fine jewellery, quality guaranteed, handled by people who restore heirlooms for a living.",
+    "rental.policy.insurance.title": "Guaranteed item quality",
     "rental.policy.insurance.body":
-      "Every reservation includes full transit and wear insurance. You sign once and we handle the rest.",
+      "Every piece is authenticated, professionally cleaned, and quality-checked by our atelier before handover.",
     "rental.policy.cleaning.title": "Pro cleaning between renters",
     "rental.policy.cleaning.body":
       "Each piece is ultrasonic-cleaned and inspected by our atelier between renters.",
     "rental.policy.flexibility.title": "Flexible windows",
     "rental.policy.flexibility.body":
-      "4-day or 7-day rentals. Need more time? Ask us about extending before your return date.",
+      "Flexible 4 to 8 day rentals. Need more time? Ask us about extending before your return date.",
     "rental.cta.title": "Have a black-tie event coming up?",
     "rental.cta.body":
       "Reserve now and we'll set the piece aside. Most reservations confirm within an hour during business days.",
     "rental.cta.button": "Reserve a piece",
-    "rental.trust.insured": "Fully insured rentals",
+    "rental.trust.insured": "Quality-guaranteed pieces",
     "rental.trust.delivery": "Door-to-door delivery",
     "rental.trust.pickup": "Hong Kong office pickup",
     "rental.trust.returns": "In-person returns",
@@ -191,21 +200,22 @@ export const dict = {
     "rental.snapshot.copies": "Total rental copies",
     "rental.snapshot.tiers": "Tiered rental options",
     "rental.snapshot.plans": "Rental plans",
-    "rental.snapshot.planLengths": "4 & 7 days",
+    "rental.snapshot.planLengths": "4–8 days",
     "rental.card.from": "From {price}",
     "rental.card.daily": "{price} / day",
     "rental.card.fixed": "{price} for {days} days",
-    "rental.card.plans": "4 days: {price4} · 7 days: {price7}",
+    "rental.card.plans": "4 days: {price4} · 8 days: {price8}",
     "rental.card.priceOnRequest": "Price on request",
     "rental.card.view": "View details",
     "rental.badge.copies": "{n} copies",
     "rental.badge.tiers": "{n} tiers",
-    "rental.badge.plans": "4 & 7 days",
+    "rental.badge.plans": "4–8 days",
 
     "lang.switchLabel": "Language",
   },
   "zh-Hant": {
     "brand.name": "Lumière",
+    "brand.byline": "By Dynasty Jewelry",
     "brand.tagline": "租賃",
     "nav.browse": "瀏覽",
     "nav.howItWorks": "租借流程",
@@ -213,9 +223,16 @@ export const dict = {
     "nav.necklaces": "項鍊",
     "nav.earrings": "耳環",
     "nav.bracelets": "手鍊",
+    "nav.other": "其他",
     "nav.buyAt": "前往 Lumière 商城 →",
     "nav.admin": "管理後台",
+    "nav.terms": "條款與細則",
     "footer.copyright": "Lumière 租賃",
+    "footer.contact.addressLabel": "地址",
+    "footer.contact.address": "尖沙咀廣東道 5 號海港城海洋中心 7 樓 726 室",
+    "footer.contact.phoneLabel": "電話",
+    "footer.contact.phone": "2368 2618",
+    "footer.contact.whatsappLabel": "WhatsApp",
 
     "home.hero.title": "為重要時刻,戴上不凡。",
     "home.hero.subtitle":
@@ -246,7 +263,8 @@ export const dict = {
     "book.endDate": "結束日期",
     "book.endDateAuto": "結束日期(自動)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
-    "book.planHint": "4 天方案：定價之 {pct4}% · 7 天方案：{pct7}%（港幣）",
+    "book.planHint":
+      "提供 4 至 8 天方案。4 天按定價 {pct4}% 計算；第 7 天錨點為 {pct7}%（港幣），第 8 天依同斜率延伸。",
     "book.pickupOnly":
       "租賃僅限於香港辦公室現場取件與歸還,不提供寄送,亦不接受郵寄退件。",
     "book.deposit": "可退還保證金",
@@ -338,7 +356,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière 租賃服務",
     "rental.hero.title": "戴出傳家寶,不必鎖在保險箱。",
     "rental.hero.subtitle":
-      "全程保險、專業清潔的高級珠寶租賃 — 4 或 7 天方案,於香港辦公室取件。",
+      "專業清潔、品質保證的高級珠寶租賃 — 彈性 4 至 8 天方案,於香港辦公室取件。",
     "rental.hero.primaryCta": "瀏覽可租賃商品",
     "rental.hero.secondaryCta": "了解租賃流程",
     "rental.howItWorks.title": "租賃流程",
@@ -352,24 +370,24 @@ export const dict = {
       "至香港辦公室取件,於租期內配戴,結束日前親自歸還；專人驗收後於現場退還保證金。",
     "rental.featured.title": "本季精選租賃",
     "rental.featured.subtitle":
-      "本季精選租賃單品,提供 4 天或 7 天方案（按定價百分比計算）,於香港辦公室取件。",
+      "本季精選租賃單品,提供 4 至 8 天方案（按定價百分比計算）,於香港辦公室取件。",
     "rental.featured.empty": "目前正在引進新作品,請稍後再回來看看。",
     "rental.policies.title": "顧客為何放心選擇我們",
     "rental.policies.subtitle":
-      "真正的高級珠寶,全程保險,並由專業修復傳家寶的工坊團隊維護。",
-    "rental.policy.insurance.title": "全程保險",
+      "真正的高級珠寶,品質有保證,並由專業修復傳家寶的工坊團隊維護。",
+    "rental.policy.insurance.title": "品質保證",
     "rental.policy.insurance.body":
-      "每筆預約皆包含運送與配戴保險,只需簽署一次,後續由我們處理。",
+      "每件作品於交付前皆經真偽鑑定、專業清潔與工坊品質檢測。",
     "rental.policy.cleaning.title": "出借前後專業清潔",
     "rental.policy.cleaning.body": "每件作品於每次出借前後皆經超音波清潔與工坊檢查。",
     "rental.policy.flexibility.title": "彈性方案",
     "rental.policy.flexibility.body":
-      "可選 4 天或 7 天租賃。需要更長時間請於歸還日前與我們聯絡。",
+      "可選 4 至 8 天租賃。需要更長時間請於歸還日前與我們聯絡。",
     "rental.cta.title": "近期有重要的正式場合?",
     "rental.cta.body":
       "立即預約,我們會為您保留商品,大多數預約於工作日一小時內完成確認。",
     "rental.cta.button": "立即預約",
-    "rental.trust.insured": "全程保險",
+    "rental.trust.insured": "品質保證",
     "rental.trust.delivery": "宅配到府",
     "rental.trust.pickup": "香港辦公室取件",
     "rental.trust.returns": "現場歸還",
@@ -380,21 +398,22 @@ export const dict = {
     "rental.snapshot.copies": "可租賃實體總數",
     "rental.snapshot.tiers": "分級租賃方案",
     "rental.snapshot.plans": "租賃方案",
-    "rental.snapshot.planLengths": "4 與 7 天",
+    "rental.snapshot.planLengths": "4 至 8 天",
     "rental.card.from": "{price} 起",
     "rental.card.daily": "{price} / 天",
     "rental.card.fixed": "{days} 天 {price}",
-    "rental.card.plans": "4 天：{price4} · 7 天：{price7}",
+    "rental.card.plans": "4 天：{price4} · 8 天：{price8}",
     "rental.card.priceOnRequest": "價格另洽",
     "rental.card.view": "查看詳情",
     "rental.badge.copies": "{n} 件實體",
     "rental.badge.tiers": "{n} 種方案",
-    "rental.badge.plans": "4 與 7 天",
+    "rental.badge.plans": "4 至 8 天",
 
     "lang.switchLabel": "語言",
   },
   "zh-Hans": {
     "brand.name": "Lumière",
+    "brand.byline": "By Dynasty Jewelry",
     "brand.tagline": "租赁",
     "nav.browse": "浏览",
     "nav.howItWorks": "租借流程",
@@ -402,9 +421,16 @@ export const dict = {
     "nav.necklaces": "项链",
     "nav.earrings": "耳环",
     "nav.bracelets": "手链",
+    "nav.other": "其他",
     "nav.buyAt": "前往 Lumière 商城 →",
     "nav.admin": "管理后台",
+    "nav.terms": "条款与细则",
     "footer.copyright": "Lumière 租赁",
+    "footer.contact.addressLabel": "地址",
+    "footer.contact.address": "尖沙咀广东道 5 号海港城海洋中心 7 楼 726 室",
+    "footer.contact.phoneLabel": "电话",
+    "footer.contact.phone": "2368 2618",
+    "footer.contact.whatsappLabel": "WhatsApp",
 
     "home.hero.title": "为重要时刻,戴上不凡。",
     "home.hero.subtitle":
@@ -435,7 +461,8 @@ export const dict = {
     "book.endDate": "结束日期",
     "book.endDateAuto": "结束日期(自动)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
-    "book.planHint": "4 天方案：定价之 {pct4}% · 7 天方案：{pct7}%（港币）",
+    "book.planHint":
+      "提供 4 至 8 天方案。4 天按定价 {pct4}% 计算；第 7 天锚点为 {pct7}%（港币），第 8 天按同斜率延伸。",
     "book.pickupOnly":
       "租赁仅限在香港办公室现场取件与归还,不提供寄送,亦不接受邮寄退件。",
     "book.deposit": "可退还保证金",
@@ -527,7 +554,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière 租赁服务",
     "rental.hero.title": "戴出传家宝,不必锁在保险箱。",
     "rental.hero.subtitle":
-      "全程保险、专业清洁的高级珠宝租赁 — 4 或 7 天方案,在香港办公室取件。",
+      "专业清洁、品质有保证的高级珠宝租赁 — 弹性 4 至 8 天方案,在香港办公室取件。",
     "rental.hero.primaryCta": "浏览可租赁商品",
     "rental.hero.secondaryCta": "了解租赁流程",
     "rental.howItWorks.title": "租赁流程",
@@ -541,24 +568,24 @@ export const dict = {
       "至香港办公室取件,在租期内佩戴,结束日前亲自归还；专人验收后于现场退还保证金。",
     "rental.featured.title": "本季精选租赁",
     "rental.featured.subtitle":
-      "本季精选租赁单品,提供 4 天或 7 天方案（按定价百分比计算）,在香港办公室取件。",
+      "本季精选租赁单品,提供 4 至 8 天方案（按定价百分比计算）,在香港办公室取件。",
     "rental.featured.empty": "目前正在引进新作品,请稍后再回来看看。",
     "rental.policies.title": "顾客为何放心选择我们",
     "rental.policies.subtitle":
-      "真正的高级珠宝,全程保险,并由专业修复传家宝的工坊团队维护。",
-    "rental.policy.insurance.title": "全程保险",
+      "真正的高级珠宝,品质有保证,并由专业修复传家宝的工坊团队维护。",
+    "rental.policy.insurance.title": "品质保证",
     "rental.policy.insurance.body":
-      "每笔预约均包含运送与佩戴保险,只需签署一次,后续由我们处理。",
+      "每件作品在交付前均经过真伪鉴定、专业清洁与工坊质量检测。",
     "rental.policy.cleaning.title": "出借前后专业清洁",
     "rental.policy.cleaning.body": "每件作品在每次出借前后均经超声波清洁与工坊检查。",
     "rental.policy.flexibility.title": "弹性方案",
     "rental.policy.flexibility.body":
-      "可选 4 天或 7 天租赁。需要更长时间请在归还日前与我们联系。",
+      "可选 4 至 8 天租赁。需要更长时间请在归还日前与我们联系。",
     "rental.cta.title": "近期有重要的正式场合?",
     "rental.cta.body":
       "立即预约,我们会为您保留商品,大多数预约在工作日一小时内完成确认。",
     "rental.cta.button": "立即预约",
-    "rental.trust.insured": "全程保险",
+    "rental.trust.insured": "品质保证",
     "rental.trust.delivery": "宅配到府",
     "rental.trust.pickup": "香港办公室取件",
     "rental.trust.returns": "现场归还",
@@ -569,16 +596,16 @@ export const dict = {
     "rental.snapshot.copies": "可租赁实体总数",
     "rental.snapshot.tiers": "分级租赁方案",
     "rental.snapshot.plans": "租赁方案",
-    "rental.snapshot.planLengths": "4 与 7 天",
+    "rental.snapshot.planLengths": "4 至 8 天",
     "rental.card.from": "{price} 起",
     "rental.card.daily": "{price} / 天",
     "rental.card.fixed": "{days} 天 {price}",
-    "rental.card.plans": "4 天：{price4} · 7 天：{price7}",
+    "rental.card.plans": "4 天：{price4} · 8 天：{price8}",
     "rental.card.priceOnRequest": "价格另洽",
     "rental.card.view": "查看详情",
     "rental.badge.copies": "{n} 件实体",
     "rental.badge.tiers": "{n} 种方案",
-    "rental.badge.plans": "4 与 7 天",
+    "rental.badge.plans": "4 至 8 天",
 
     "lang.switchLabel": "语言",
   }

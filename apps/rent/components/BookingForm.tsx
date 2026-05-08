@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { formatPrice, isoDate, fromIsoDate, addDays } from "@/lib/format";
-import { quoteRetailPlan, type RentalPlanDays } from "@/lib/rentalPlanPricing";
+import {
+  quoteRetailPlan,
+  type RentalPlanDays,
+  MIN_RENTAL_PLAN_DAYS,
+  MAX_RENTAL_PLAN_DAYS,
+  planPercentForDays,
+} from "@/lib/rentalPlanPricing";
 import { computeRentalDepositCents } from "@/lib/rentalDeposit";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
@@ -31,7 +37,6 @@ export function BookingForm(props: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [pickupSlot, setPickupSlot] = useState("");
   const [returnSlot, setReturnSlot] = useState("");
   const endIsoRef = useRef("");
   const [busy, setBusy] = useState(false);
@@ -107,10 +112,6 @@ export function BookingForm(props: Props) {
       setError(t("book.errPhone"));
       return;
     }
-    if (!pickupSlot) {
-      setError(t("book.errPickup"));
-      return;
-    }
     if (!returnSlot.trim()) {
       setError(t("book.errReturnSlot"));
       return;
@@ -132,7 +133,6 @@ export function BookingForm(props: Props) {
         email: email.trim(),
         customerName: name.trim(),
         customerPhone: phone.trim(),
-        pickupSlot,
         returnSlot,
       }),
     });
@@ -149,6 +149,14 @@ export function BookingForm(props: Props) {
     pct4: props.rental4DayPercentOfPrice,
     pct7: props.rental7DayPercentOfPrice,
   });
+  const planOptions = useMemo(
+    () =>
+      Array.from(
+        { length: MAX_RENTAL_PLAN_DAYS - MIN_RENTAL_PLAN_DAYS + 1 },
+        (_, i) => (MIN_RENTAL_PLAN_DAYS + i) as RentalPlanDays
+      ),
+    []
+  );
 
   return (
     <div className="space-y-4">
@@ -176,50 +184,25 @@ export function BookingForm(props: Props) {
 
       <fieldset className="text-sm">
         <legend className="text-gray-600 mb-2">{t("book.rentalPlan")}</legend>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="plan"
-              checked={planDays === 4}
-              onChange={() => setPlanDays(4)}
-            />
-            <span>
-              {t("book.plan4")} —{" "}
-              {priceQuote?.ok && planDays === 4
-                ? fmt(priceQuote.rentalCents)
-                : fmt(
-                    Math.max(
-                      1,
-                      Math.round(
-                        (props.sellPriceCents * props.rental4DayPercentOfPrice) / 100
-                      )
-                    )
-                  )}
-            </span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="plan"
-              checked={planDays === 7}
-              onChange={() => setPlanDays(7)}
-            />
-            <span>
-              {t("book.plan7")} —{" "}
-              {priceQuote?.ok && planDays === 7
-                ? fmt(priceQuote.rentalCents)
-                : fmt(
-                    Math.max(
-                      1,
-                      Math.round(
-                        (props.sellPriceCents * props.rental7DayPercentOfPrice) / 100
-                      )
-                    )
-                  )}
-            </span>
-          </label>
-        </div>
+        <select
+          value={planDays}
+          onChange={(e) => setPlanDays(Number(e.target.value) as RentalPlanDays)}
+          className="block w-full border border-brand-200 rounded px-3 py-2"
+        >
+          {planOptions.map((days) => {
+            const pct = planPercentForDays(
+              days,
+              props.rental4DayPercentOfPrice,
+              props.rental7DayPercentOfPrice
+            );
+            const cents = Math.max(1, Math.round((props.sellPriceCents * pct) / 100));
+            return (
+              <option key={days} value={days}>
+                {days} {t("review.days")} — {fmt(cents)}
+              </option>
+            );
+          })}
+        </select>
       </fieldset>
 
       <label className="text-sm block">
@@ -247,17 +230,6 @@ export function BookingForm(props: Props) {
       {priceQuote && !priceQuote.ok && (
         <p className="text-sm text-amber-700">{priceQuote.error}</p>
       )}
-
-      <label className="text-sm block">
-        <span className="text-gray-600">{t("book.pickupSlot")}</span>
-        <input
-          type="datetime-local"
-          value={pickupSlot}
-          onChange={(e) => setPickupSlot(e.target.value)}
-          required
-          className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
-        />
-      </label>
 
       <label className="text-sm block">
         <span className="text-gray-600">{t("book.returnSlot")}</span>
