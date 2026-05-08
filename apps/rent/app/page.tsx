@@ -8,14 +8,23 @@ import {
   RENTAL_HOME_DEFAULT,
 } from "@/lib/homepageConfig";
 import { HeroSection } from "@/components/home/HeroSection";
+import { CategoryGridSection } from "@/components/home/CategoryGridSection";
 import { TrustStripSection } from "@/components/home/TrustStripSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PolicyHighlightsSection } from "@/components/home/PolicyHighlightsSection";
 import { CtaBannerSection } from "@/components/home/CtaBannerSection";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
 import { rentalPriceTeaser } from "@/lib/rentalPriceTeaser";
+import type { DictKey } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
+
+const CAT_KEYS: Record<string, DictKey> = {
+  rings: "nav.rings",
+  necklaces: "nav.necklaces",
+  earrings: "nav.earrings",
+  bracelets: "nav.bracelets",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -42,11 +51,14 @@ export default async function RentHomePage() {
           { createdAt: "desc" as const },
         ];
 
-  const featured = await prisma.product.findMany({
-    where: { rentable: true },
-    orderBy: featuredOrder,
-    take: 8,
-  });
+  const [categories, featured] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.product.findMany({
+      where: { rentable: true },
+      orderBy: featuredOrder,
+      take: 8,
+    }),
+  ]);
 
   const rentableCount = await prisma.product.count({ where: { rentable: true } });
   const copiesSum = await prisma.product.aggregate({
@@ -119,6 +131,16 @@ export default async function RentHomePage() {
         switch (s.id) {
           case "trustStrip":
             return <TrustStripSection key={s.id} items={trustToShow} />;
+          case "categoryGrid":
+            return (
+              <CategoryGridSection
+                key={s.id}
+                categories={categories}
+                title={t("rental.shopByCategory")}
+                catKeyMap={CAT_KEYS}
+                t={t}
+              />
+            );
           case "howItWorks":
             return (
               <HowItWorksSection

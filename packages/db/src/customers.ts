@@ -13,14 +13,13 @@ export async function upsertCustomerByEmail(input: {
   const customer = await prisma.customer.upsert({
     where: { email },
     update: {
-      // Don't overwrite a name we already have unless it's empty.
-      name: input.name || undefined,
-      phone: input.phone || undefined,
+      name: input.name?.trim() ? input.name.trim() : undefined,
+      phone: input.phone?.trim() ? input.phone.trim() : undefined,
     },
     create: {
       email,
-      name: input.name || null,
-      phone: input.phone || null,
+      name: input.name?.trim() || null,
+      phone: input.phone?.trim() || null,
     },
   });
   return customer.id;

@@ -147,6 +147,13 @@ export function CheckoutView() {
           </span>
         </div>
         <p className="text-xs text-gray-500 mt-3">{t("checkout.stripeNote")}</p>
+        <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50/40 p-3 text-sm space-y-1">
+          <p>
+            {t("checkout.reserveCta")}
+            <sup className="ml-0.5 text-[10px] align-super">#1</sup>
+          </p>
+          <p className="text-xs text-gray-600">{t("checkout.reserveFeeNote")}</p>
+        </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <button
           onClick={pay}

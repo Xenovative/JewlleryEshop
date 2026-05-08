@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import type Stripe from "stripe";
 import { prisma, getStripe, FOB_HONG_KONG_OFFICE, CHECKOUT_CURRENCY } from "@lumiere/db";
 import { isoDate } from "@/lib/format";
 
@@ -36,23 +37,40 @@ export async function POST(req: Request) {
   }
 
   const desc = `${isoDate(booking.startDate)} → ${isoDate(booking.endDate)} · ${FOB_HONG_KONG_OFFICE}`;
+  const depositCents = booking.depositCents ?? 0;
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      quantity: 1,
+      price_data: {
+        currency: CHECKOUT_CURRENCY,
+        unit_amount: booking.rentalCents,
+        product_data: {
+          name: `Rental: ${booking.product.name}`,
+          description: desc,
+        },
+      },
+    },
+  ];
+  if (depositCents > 0) {
+    lineItems.push({
+      quantity: 1,
+      price_data: {
+        currency: CHECKOUT_CURRENCY,
+        unit_amount: depositCents,
+        product_data: {
+          name: `Refundable deposit: ${booking.product.name}`,
+          description:
+            "Security deposit — refunded at our Hong Kong office after staff inspection when you return the piece.",
+        },
+      },
+    });
+  }
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: CHECKOUT_CURRENCY,
-            unit_amount: booking.rentalCents,
-            product_data: {
-              name: `Rental: ${booking.product.name}`,
-              description: desc,
-            },
-          },
-        },
-      ],
+      line_items: lineItems,
       success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout/cancel?bookingId=${booking.id}`,
       customer_email: booking.email,

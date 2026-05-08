@@ -22,6 +22,7 @@ export type ShopSectionId = (typeof SHOP_SECTION_IDS)[number];
 
 export const RENTAL_SECTION_IDS = [
   "trustStrip",
+  "categoryGrid",
   "howItWorks",
   "featuredRentals",
   "policyHighlights",

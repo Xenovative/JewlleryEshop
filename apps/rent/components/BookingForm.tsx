@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { formatPrice, isoDate, fromIsoDate, addDays } from "@/lib/format";
 import { quoteRetailPlan, type RentalPlanDays } from "@/lib/rentalPlanPricing";
+import { computeRentalDepositCents } from "@/lib/rentalDeposit";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
 import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
@@ -14,6 +15,7 @@ type Props = {
   sellPriceCents: number;
   rental4DayPercentOfPrice: number;
   rental7DayPercentOfPrice: number;
+  rentalDepositPercentOfPrice: number;
 };
 
 export function BookingForm(props: Props) {
@@ -27,8 +29,11 @@ export function BookingForm(props: Props) {
   const [planDays, setPlanDays] = useState<RentalPlanDays>(4);
   const [fullyBooked, setFullyBooked] = useState<Set<string>>(new Set());
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pickupSlot, setPickupSlot] = useState("");
+  const [returnSlot, setReturnSlot] = useState("");
+  const endIsoRef = useRef("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,8 +55,26 @@ export function BookingForm(props: Props) {
     );
   }, [start, planDays, props]);
 
+  const depositCents = useMemo(
+    () =>
+      computeRentalDepositCents(props.sellPriceCents, props.rentalDepositPercentOfPrice),
+    [props.sellPriceCents, props.rentalDepositPercentOfPrice]
+  );
+
   const endIso =
     priceQuote && priceQuote.ok ? isoDate(priceQuote.endDate) : "";
+
+  useEffect(() => {
+    if (!endIso) {
+      endIsoRef.current = "";
+      setReturnSlot("");
+      return;
+    }
+    if (endIsoRef.current !== endIso) {
+      endIsoRef.current = endIso;
+      setReturnSlot(`${endIso}T17:00`);
+    }
+  }, [endIso]);
 
   const rangeHasBookedDay = useMemo(() => {
     if (!start || !endIso || !priceQuote?.ok) return false;
@@ -76,12 +99,25 @@ export function BookingForm(props: Props) {
       setError(t("book.errOverlap"));
       return;
     }
-    if (!name || !email) {
-      setError(t("book.errNameEmail"));
+    if (!name.trim() || !phone.trim() || !email.trim()) {
+      setError(t("book.errContact"));
+      return;
+    }
+    if (phone.trim().length < 5) {
+      setError(t("book.errPhone"));
       return;
     }
     if (!pickupSlot) {
       setError(t("book.errPickup"));
+      return;
+    }
+    if (!returnSlot.trim()) {
+      setError(t("book.errReturnSlot"));
+      return;
+    }
+    const returnDay = returnSlot.trim().split("T")[0] ?? "";
+    if (returnDay !== endIso) {
+      setError(t("book.errReturnDay", { end: endIso }));
       return;
     }
 
@@ -93,9 +129,11 @@ export function BookingForm(props: Props) {
         productId: props.productId,
         startDate: start,
         planDays,
-        email,
-        customerName: name,
+        email: email.trim(),
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
         pickupSlot,
+        returnSlot,
       }),
     });
     const data = await res.json();
@@ -118,6 +156,11 @@ export function BookingForm(props: Props) {
         <h2 className="font-serif text-xl">{t("book.title")}</h2>
         <p className="text-sm text-gray-500">{planHint}</p>
         <p className="text-sm text-gray-600 mt-1">{t("book.pickupOnly")}</p>
+        {props.rentalDepositPercentOfPrice > 0 && (
+          <p className="text-sm text-gray-600 mt-1">
+            {t("book.depositPolicy", { pct: props.rentalDepositPercentOfPrice })}
+          </p>
+        )}
       </div>
 
       {blockedDates.length > 0 && (
@@ -211,25 +254,55 @@ export function BookingForm(props: Props) {
           type="datetime-local"
           value={pickupSlot}
           onChange={(e) => setPickupSlot(e.target.value)}
+          required
           className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
         />
       </label>
 
-      <div className="grid grid-cols-2 gap-3">
+      <label className="text-sm block">
+        <span className="text-gray-600">{t("book.returnSlot")}</span>
+        <input
+          type="datetime-local"
+          value={returnSlot}
+          onChange={(e) => setReturnSlot(e.target.value)}
+          min={endIso ? `${endIso}T00:00` : undefined}
+          max={endIso ? `${endIso}T23:59` : undefined}
+          required
+          className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+        />
+        <span className="mt-1 block text-xs text-gray-500">{t("book.returnSlotHint")}</span>
+      </label>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="text-sm">
           <span className="text-gray-600">{t("book.yourName")}</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
             className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
           />
         </label>
         <label className="text-sm">
+          <span className="text-gray-600">{t("book.phone")}</span>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            autoComplete="tel"
+            className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+          />
+        </label>
+        <label className="text-sm sm:col-span-1">
           <span className="text-gray-600">{t("book.email")}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
             className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
           />
         </label>
@@ -246,9 +319,20 @@ export function BookingForm(props: Props) {
               </span>
             </span>
           </div>
+          {depositCents > 0 && (
+            <div className="flex justify-between gap-2">
+              <span>{t("book.deposit")}</span>
+              <span className="text-right">
+                {fmt(depositCents)}
+                <span className="block text-xs text-gray-500 font-normal">
+                  {t("book.depositRefundHint")}
+                </span>
+              </span>
+            </div>
+          )}
           <div className="flex justify-between font-medium">
             <span>{t("book.total")}</span>
-            <span>{fmt(priceQuote.rentalCents)}</span>
+            <span>{fmt(priceQuote.rentalCents + depositCents)}</span>
           </div>
         </div>
       )}

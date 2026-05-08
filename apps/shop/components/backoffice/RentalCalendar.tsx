@@ -14,7 +14,9 @@ type Booking = {
   endDate: string;
   status: string;
   customerName: string;
+  customerPhone: string | null;
   email: string;
+  returnSlot: string | null;
   totalCents: number;
   currency: string;
   waiverIncluded: boolean;
@@ -130,6 +132,18 @@ export function RentalCalendar({
               {drawerBooking.customerName}
             </h2>
             <p className="text-xs text-gray-500">{drawerBooking.email}</p>
+            {drawerBooking.customerPhone ? (
+              <p className="text-xs text-gray-500">{drawerBooking.customerPhone}</p>
+            ) : null}
+            {drawerBooking.returnSlot ? (
+              <p className="text-xs text-gray-600 mt-1">
+                {t("bo.calendar.return")}:{" "}
+                {new Date(drawerBooking.returnSlot).toLocaleString(intl, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </p>
+            ) : null}
             <p className="text-sm">
               {new Date(drawerBooking.startDate).toLocaleDateString(intl)} →{" "}
               {new Date(drawerBooking.endDate).toLocaleDateString(intl)}

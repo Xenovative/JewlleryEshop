@@ -97,11 +97,16 @@ model Booking {
   fulfillment         String   // "ship" | "pickup"
   email               String
   customerName        String
+  customerPhone       String?
   shippingAddressJson String?
   pickupSlot          DateTime?
+  /// In-office return appointment (typically on rental end date)
+  returnSlot          DateTime?
   waiverIncluded      Boolean  @default(false)
   waiverFeeCents      Int      @default(0)
   rentalCents         Int
+  /// Refundable security deposit (same currency); released at office after return inspection
+  depositCents        Int      @default(0)
   totalCents          Int
   currency            String   @default("hkd")
   stripeSessionId     String?  @unique
@@ -138,6 +143,8 @@ model Settings {
   rental4DayPercentOfPrice Int @default(10)
   /// Whole-number percent of product selling price for 7-day rental
   rental7DayPercentOfPrice Int @default(18)
+  /// Security deposit as % of selling price (0 disables deposit at checkout)
+  rentalDepositPercentOfPrice Int @default(25)
   updatedAt           DateTime @updatedAt
 }
 

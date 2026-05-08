@@ -19,6 +19,7 @@ export async function GET() {
     rentalEnabled: s.rentalEnabled,
     rental4DayPercentOfPrice: s.rental4DayPercentOfPrice,
     rental7DayPercentOfPrice: s.rental7DayPercentOfPrice,
+    rentalDepositPercentOfPrice: s.rentalDepositPercentOfPrice,
   });
 }
 
@@ -29,6 +30,7 @@ const Body = z.object({
   rentalEnabled: z.boolean().optional(),
   rental4DayPercentOfPrice: z.number().int().min(1).max(100).optional(),
   rental7DayPercentOfPrice: z.number().int().min(1).max(100).optional(),
+  rentalDepositPercentOfPrice: z.number().int().min(0).max(100).optional(),
 });
 
 export async function PUT(req: Request) {
@@ -60,6 +62,9 @@ export async function PUT(req: Request) {
   if (parsed.data.rental7DayPercentOfPrice !== undefined) {
     data.rental7DayPercentOfPrice = parsed.data.rental7DayPercentOfPrice;
   }
+  if (parsed.data.rentalDepositPercentOfPrice !== undefined) {
+    data.rentalDepositPercentOfPrice = parsed.data.rentalDepositPercentOfPrice;
+  }
   await updateSettings(data);
   await audit(user, "update", "Settings", "singleton", undefined, {
     stripeSecretKeyChanged: parsed.data.stripeSecretKey !== undefined,
@@ -68,7 +73,8 @@ export async function PUT(req: Request) {
     rentalEnabledChanged: parsed.data.rentalEnabled !== undefined,
     rentalPercentsChanged:
       parsed.data.rental4DayPercentOfPrice !== undefined ||
-      parsed.data.rental7DayPercentOfPrice !== undefined,
+      parsed.data.rental7DayPercentOfPrice !== undefined ||
+      parsed.data.rentalDepositPercentOfPrice !== undefined,
   });
   return NextResponse.json({ ok: true });
 }

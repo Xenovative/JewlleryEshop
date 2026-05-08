@@ -42,7 +42,9 @@ export default async function CalendarPage({
       endDate: true,
       status: true,
       customerName: true,
+      customerPhone: true,
       email: true,
+      returnSlot: true,
       totalCents: true,
       currency: true,
       waiverIncluded: true,
@@ -95,6 +97,7 @@ export default async function CalendarPage({
           ...b,
           startDate: b.startDate.toISOString(),
           endDate: b.endDate.toISOString(),
+          returnSlot: b.returnSlot ? b.returnSlot.toISOString() : null,
         }))}
         intl={intl}
         selectedId={selected ?? null}
@@ -104,6 +107,9 @@ export default async function CalendarPage({
                 ...drawerBooking,
                 startDate: drawerBooking.startDate.toISOString(),
                 endDate: drawerBooking.endDate.toISOString(),
+                returnSlot: drawerBooking.returnSlot
+                  ? drawerBooking.returnSlot.toISOString()
+                  : null,
               }
             : null
         }

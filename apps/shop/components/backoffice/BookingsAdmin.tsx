@@ -11,6 +11,7 @@ type Row = {
   startDate: string;
   endDate: string;
   customerName: string;
+  customerPhone: string | null;
   email: string;
   productName: string;
   fulfillment: string;
@@ -86,11 +87,14 @@ export function BookingsAdmin({
               {initial.map((b) => (
                 <tr key={b.id} className="border-t border-brand-100 align-top">
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {b.startDate.slice(0, 10)} ??{b.endDate.slice(0, 10)}
+                    {b.startDate.slice(0, 10)} → {b.endDate.slice(0, 10)}
                   </td>
                   <td className="px-3 py-2">{b.productName}</td>
                   <td className="px-3 py-2">
                     <div>{b.customerName}</div>
+                    {b.customerPhone ? (
+                      <div className="text-xs text-gray-500">{b.customerPhone}</div>
+                    ) : null}
                     <div className="text-xs text-gray-500">{b.email}</div>
                   </td>
                   <td className="px-3 py-2">

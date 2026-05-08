@@ -22,6 +22,7 @@ export default async function AdminBookingsPage({
         startDate: b.startDate.toISOString(),
         endDate: b.endDate.toISOString(),
         customerName: b.customerName,
+        customerPhone: b.customerPhone,
         email: b.email,
         productName: b.product.name,
         fulfillment: b.fulfillment,

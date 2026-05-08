@@ -16,7 +16,8 @@ export function I18nProvider({
   children: React.ReactNode;
 }) {
   const t: T = (k, vars) => {
-    const raw = dict[locale][k] ?? dict.en[k];
+    const base = dict[locale];
+    const raw = base[k] ?? dict.en[k];
     if (!vars) return raw;
     return raw.replace(/\{(\w+)\}/g, (_, key) =>
       vars[key] !== undefined ? String(vars[key]) : `{${key}}`

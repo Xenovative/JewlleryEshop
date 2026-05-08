@@ -20,6 +20,7 @@ export async function updateSettings(
     rentalHomeJson: string | null;
     rental4DayPercentOfPrice: number;
     rental7DayPercentOfPrice: number;
+    rentalDepositPercentOfPrice: number;
   }>
 ) {
   await getSettings();

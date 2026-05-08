@@ -23,6 +23,7 @@ export default async function AdminSettingsPage() {
       rentalEnabled={s.rentalEnabled}
       rental4DayPercentOfPrice={s.rental4DayPercentOfPrice}
       rental7DayPercentOfPrice={s.rental7DayPercentOfPrice}
+      rentalDepositPercentOfPrice={s.rentalDepositPercentOfPrice}
       totpEnabled={!!me?.totpEnabled}
     />
   );

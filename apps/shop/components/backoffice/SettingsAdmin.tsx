@@ -13,6 +13,7 @@ type Props = {
   rentalEnabled: boolean;
   rental4DayPercentOfPrice: number;
   rental7DayPercentOfPrice: number;
+  rentalDepositPercentOfPrice: number;
   totpEnabled: boolean;
 };
 
@@ -30,14 +31,23 @@ export function SettingsAdmin(props: Props) {
   const [rentalEnabled, setRentalEnabled] = useState(props.rentalEnabled);
   const [rentalPct4, setRentalPct4] = useState(String(props.rental4DayPercentOfPrice));
   const [rentalPct7, setRentalPct7] = useState(String(props.rental7DayPercentOfPrice));
+  const [rentalDepositPct, setRentalDepositPct] = useState(
+    String(props.rentalDepositPercentOfPrice)
+  );
 
   useEffect(() => {
     setRentalPct4(String(props.rental4DayPercentOfPrice));
     setRentalPct7(String(props.rental7DayPercentOfPrice));
-  }, [props.rental4DayPercentOfPrice, props.rental7DayPercentOfPrice]);
+    setRentalDepositPct(String(props.rentalDepositPercentOfPrice));
+  }, [
+    props.rental4DayPercentOfPrice,
+    props.rental7DayPercentOfPrice,
+    props.rentalDepositPercentOfPrice,
+  ]);
 
   const pct4n = Number(rentalPct4);
   const pct7n = Number(rentalPct7);
+  const depositN = Number(rentalDepositPct);
   const rentalPct4Changed =
     Number.isInteger(pct4n) &&
     pct4n >= 1 &&
@@ -48,6 +58,11 @@ export function SettingsAdmin(props: Props) {
     pct7n >= 1 &&
     pct7n <= 100 &&
     pct7n !== props.rental7DayPercentOfPrice;
+  const rentalDepositPctChanged =
+    Number.isInteger(depositN) &&
+    depositN >= 0 &&
+    depositN <= 100 &&
+    depositN !== props.rentalDepositPercentOfPrice;
 
   const saveStripe = async () => {
     setSavingStripe(true);
@@ -78,7 +93,7 @@ export function SettingsAdmin(props: Props) {
   };
 
   const saveRentPct = async () => {
-    if (!rentalPct4Changed && !rentalPct7Changed) return;
+    if (!rentalPct4Changed && !rentalPct7Changed && !rentalDepositPctChanged) return;
     setSavingRentPct(true);
     setRentPctMsg(null);
     const res = await fetch("/api/backoffice/settings", {
@@ -87,6 +102,7 @@ export function SettingsAdmin(props: Props) {
       body: JSON.stringify({
         ...(rentalPct4Changed ? { rental4DayPercentOfPrice: pct4n } : {}),
         ...(rentalPct7Changed ? { rental7DayPercentOfPrice: pct7n } : {}),
+        ...(rentalDepositPctChanged ? { rentalDepositPercentOfPrice: depositN } : {}),
       }),
     });
     setSavingRentPct(false);
@@ -206,6 +222,20 @@ export function SettingsAdmin(props: Props) {
               className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
             />
           </label>
+          <label className="block text-sm sm:col-span-2">
+            <span className="text-gray-600">{t("admin.settings.rentalDepositPct")}</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={rentalDepositPct}
+              onChange={(e) => setRentalDepositPct(e.target.value)}
+              className="mt-1 block w-full border border-brand-200 rounded px-3 py-2"
+            />
+            <span className="mt-1 block text-xs text-gray-500">
+              {t("admin.settings.rentalDepositPctHint")}
+            </span>
+          </label>
         </div>
         {rentPctMsg && (
           <p
@@ -220,7 +250,8 @@ export function SettingsAdmin(props: Props) {
           type="button"
           onClick={saveRentPct}
           disabled={
-            savingRentPct || (!rentalPct4Changed && !rentalPct7Changed)
+            savingRentPct ||
+            (!rentalPct4Changed && !rentalPct7Changed && !rentalDepositPctChanged)
           }
           className="mt-4 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm"
         >

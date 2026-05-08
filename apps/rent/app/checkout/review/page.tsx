@@ -31,6 +31,14 @@ export default async function RentCheckoutReviewPage({
         })
       : "—";
 
+  const returnSlot =
+    booking.returnSlot != null
+      ? booking.returnSlot.toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "—";
+
   const planDays = dayDiff(
     fromIsoDate(isoDate(booking.startDate)),
     fromIsoDate(isoDate(booking.endDate))
@@ -47,8 +55,12 @@ export default async function RentCheckoutReviewPage({
         endDate={isoDate(booking.endDate)}
         planDays={planDays}
         rentalCents={booking.rentalCents}
+        depositCents={booking.depositCents}
+        totalCents={booking.totalCents}
         pickupSlot={pickupSlot}
+        returnSlot={returnSlot}
         customerName={booking.customerName}
+        customerPhone={booking.customerPhone ?? ""}
         email={booking.email}
       />
     </div>

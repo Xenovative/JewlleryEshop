@@ -57,11 +57,12 @@ async function handleRental(session: Stripe.Checkout.Session) {
     if (email) {
       const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
-        select: { customerName: true },
+        select: { customerName: true, customerPhone: true },
       });
       customerId = await upsertCustomerByEmail({
         email,
         name: booking?.customerName ?? null,
+        phone: booking?.customerPhone ?? null,
       });
     }
     await prisma.booking.update({

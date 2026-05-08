@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { LOCALE_COOKIE } from "@/lib/i18n";
 
-const Body = z.object({ locale: z.enum(["en", "zh-Hant"]) });
+const Body = z.object({ locale: z.enum(["en", "zh-Hant", "zh-Hans"]) });
 
 export async function POST(req: Request) {
   const json = await req.json().catch(() => null);

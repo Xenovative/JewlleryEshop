@@ -13,8 +13,12 @@ type Props = {
   endDate: string;
   planDays: number;
   rentalCents: number;
+  depositCents: number;
+  totalCents: number;
   pickupSlot: string;
+  returnSlot: string;
   customerName: string;
+  customerPhone: string;
   email: string;
 };
 
@@ -54,8 +58,12 @@ export function CheckoutReviewClient(props: Props) {
           </dd>
           <dt className="text-gray-500">{t("book.pickupSlot")}</dt>
           <dd>{props.pickupSlot}</dd>
+          <dt className="text-gray-500">{t("review.returnSlot")}</dt>
+          <dd>{props.returnSlot}</dd>
           <dt className="text-gray-500">{t("book.yourName")}</dt>
           <dd>{props.customerName}</dd>
+          <dt className="text-gray-500">{t("review.phone")}</dt>
+          <dd>{props.customerPhone || "—"}</dd>
           <dt className="text-gray-500">{t("book.email")}</dt>
           <dd>{props.email}</dd>
         </dl>
@@ -69,10 +77,27 @@ export function CheckoutReviewClient(props: Props) {
             <span className="block text-xs text-gray-500">{t("book.fobTerms")}</span>
           </span>
         </div>
+        {props.depositCents > 0 && (
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-700">{t("book.deposit")}</span>
+            <span className="text-right">
+              {fmt(props.depositCents)}
+              <span className="block text-xs text-gray-500">{t("book.depositRefundHint")}</span>
+            </span>
+          </div>
+        )}
         <div className="flex justify-between font-medium">
           <span>{t("book.total")}</span>
-          <span>{fmt(props.rentalCents)}</span>
+          <span>{fmt(props.totalCents)}</span>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-brand-100 bg-brand-50/40 p-3 text-sm space-y-1">
+        <p>
+          {t("review.reserveCta")}
+          <sup className="ml-0.5 text-[10px] align-super">#1</sup>
+        </p>
+        <p className="text-xs text-gray-600">{t("review.reserveFeeNote")}</p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
