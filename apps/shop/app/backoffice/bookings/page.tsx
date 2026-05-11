@@ -29,6 +29,8 @@ export default async function AdminBookingsPage({
         totalCents: b.totalCents,
         currency: b.currency,
         waiverIncluded: b.waiverIncluded,
+        stripeSessionId: b.stripeSessionId,
+        paymentProvider: b.paymentProvider,
       }))}
       currentStatus={status ?? ""}
     />

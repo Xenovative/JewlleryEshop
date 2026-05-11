@@ -24,7 +24,7 @@ export function CategoryGridSection({ categories, title, catKeyMap, t }: Props) 
             <Link
               key={c.id}
               href={`/category/${c.slug}`}
-              className="group bg-white border border-brand-100 rounded-lg p-6 text-center hover:border-brand-500 hover:shadow-sm transition"
+              className="interactive-card group bg-white border border-brand-100 rounded-lg p-6 text-center hover:border-brand-500 hover:shadow-md motion-safe:hover:-translate-y-0.5"
             >
               <span className="font-serif text-lg block">
                 {key ? t(key) : c.name}

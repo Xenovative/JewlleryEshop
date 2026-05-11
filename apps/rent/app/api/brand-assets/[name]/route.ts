@@ -10,6 +10,7 @@ const MIME_BY_EXT: Record<string, string> = {
 
 const ALLOWED = new Set([
   "shoplogo.png",
+  "headerlogo.png",
   "favicon.ico",
   "favicon-16x16.png",
   "favicon-32x32.png",
@@ -29,9 +30,10 @@ export async function GET(
   }
 
   const root = path.resolve(process.cwd(), "..", "..");
-  const target = name === "shoplogo.png"
-    ? path.join(root, "shoplogo.png")
-    : path.join(root, "favicons", name);
+  const target =
+    name === "shoplogo.png" || name === "headerlogo.png"
+      ? path.join(root, name)
+      : path.join(root, "favicons", name);
 
   try {
     const data = await readFile(target);

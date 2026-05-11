@@ -43,7 +43,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
 
   return (
     <section
-      className={`rounded-2xl overflow-hidden ${wrapperBg} shadow-sm border border-brand-100/60`}
+      className={`rounded-2xl overflow-hidden ${wrapperBg} shadow-sm border border-brand-100/60 motion-safe:animate-fade-in-up transition-shadow duration-500 ease-out`}
     >
       <div className="grid md:grid-cols-2 items-stretch">
         <div className="px-8 py-12 md:px-12 md:py-16 flex flex-col justify-center">
@@ -67,7 +67,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
               {primaryLabel.trim() && (
                 <Link
                   href={primaryHref}
-                  className={`inline-flex items-center px-6 py-3 rounded font-medium transition ${primaryBtn}`}
+                  className={`inline-flex items-center px-6 py-3 rounded font-medium transition-all duration-200 ease-out motion-reduce:transition-colors active:scale-[0.98] motion-reduce:active:scale-100 ${primaryBtn}`}
                 >
                   {primaryLabel}
                 </Link>
@@ -75,7 +75,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
               {secondaryLabel.trim() && (
                 <Link
                   href={secondaryHref}
-                  className={`inline-flex items-center px-6 py-3 rounded font-medium transition ${secondaryBtn}`}
+                  className={`inline-flex items-center px-6 py-3 rounded font-medium transition-all duration-200 ease-out motion-reduce:transition-colors active:scale-[0.98] motion-reduce:active:scale-100 ${secondaryBtn}`}
                 >
                   {secondaryLabel}
                 </Link>
@@ -96,7 +96,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
                 src={imageUrl}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover motion-safe:animate-fade-in duration-700 ease-out"
               />
             </>
           ) : (

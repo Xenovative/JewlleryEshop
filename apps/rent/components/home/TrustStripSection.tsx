@@ -8,7 +8,7 @@ export function TrustStripSection({ items }: Props) {
   return (
     <section
       aria-label="Trust signals"
-      className="bg-white border border-brand-100 rounded-lg px-6 py-4"
+      className="bg-white border border-brand-100 rounded-lg px-6 py-4 motion-safe:animate-fade-in-soft"
     >
       <ul className="flex flex-wrap items-center justify-around gap-x-6 gap-y-2 text-sm text-gray-700">
         {visible.map((label, i) => (

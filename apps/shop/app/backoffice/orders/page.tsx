@@ -3,8 +3,18 @@ import { prisma } from "@lumiere/db";
 import { formatPrice } from "@/lib/format";
 import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
+import { ConfirmAwaitingOrderButton } from "@/components/backoffice/ConfirmAwaitingOrderButton";
 
 export const dynamic = "force-dynamic";
+
+function paymentLabel(
+  t: Awaited<ReturnType<typeof getT>>,
+  provider: string
+): string {
+  if (provider === "bank_fps") return t("checkout.alt.methodBank");
+  if (provider === "kpay_alipay") return t("checkout.alt.methodKpay");
+  return "Stripe";
+}
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
@@ -33,7 +43,9 @@ export default async function AdminOrdersPage() {
                 <th className="px-3 py-2">{t("admin.orders.col.email")}</th>
                 <th className="px-3 py-2">{t("admin.orders.col.status")}</th>
                 <th className="px-3 py-2">{t("admin.orders.col.total")}</th>
+                <th className="px-3 py-2">{t("admin.orders.col.payment")}</th>
                 <th className="px-3 py-2">{t("admin.orders.col.items")}</th>
+                <th className="px-3 py-2 w-28" />
               </tr>
             </thead>
             <tbody>
@@ -54,10 +66,18 @@ export default async function AdminOrdersPage() {
                     <td className="px-3 py-2">
                       {formatPrice(o.amountTotalCents, o.currency)}
                     </td>
+                    <td className="px-3 py-2 text-xs">
+                      {paymentLabel(t, o.paymentProvider)}
+                    </td>
                     <td className="px-3 py-2 text-xs text-gray-600">
                       {items
                         .map((i) => `${i.name} × ${i.qty}`)
                         .join(", ")}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {o.status === "awaiting_payment" ? (
+                        <ConfirmAwaitingOrderButton orderId={o.id} />
+                      ) : null}
                     </td>
                   </tr>
                 );

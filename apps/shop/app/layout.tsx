@@ -12,7 +12,7 @@ import { rentStorefrontHomeUrl } from "@/lib/rentBase";
 import { getSettings } from "@lumiere/db";
 
 export const metadata: Metadata = {
-  title: "Lumière By Dynasty Jewelry",
+  title: "Lumière By Dynasty",
   description: "Handcrafted fine jewellery.",
   icons: {
     icon: [
@@ -53,16 +53,26 @@ export default async function RootLayout({
     <html lang={locale === "en" ? "en" : locale}>
       <body className="min-h-screen flex flex-col">
         <I18nProvider locale={locale}>
-          <header className="border-b border-brand-100 bg-white">
+          <header className="border-b border-brand-100 bg-white motion-safe:animate-fade-in">
             <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <Link
                     href="/"
-                    className="shrink-0 text-brand-700 leading-tight"
+                    className="group shrink-0 text-brand-700 leading-tight flex items-center gap-2.5 min-w-0"
                   >
-                    <span className="block font-serif text-2xl">{t("brand.name")}</span>
-                    <span className="block text-[11px] text-brand-500">{t("brand.byline")}</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/api/brand-assets/headerlogo.png"
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="h-10 w-auto max-h-10 object-contain shrink-0 transition-transform duration-300 ease-out motion-reduce:transition-none group-hover:scale-[1.04]"
+                    />
+                    <div className="min-w-0">
+                      <span className="block font-serif text-2xl">{t("brand.name")}</span>
+                      <span className="block text-[11px] text-brand-500">{t("brand.byline")}</span>
+                    </div>
                   </Link>
                   {(settings.shopEnabled || settings.rentalEnabled) && (
                     <div className="hidden md:flex items-center gap-2 text-xs shrink-0">
@@ -86,7 +96,7 @@ export default async function RootLayout({
                 </div>
               </div>
               <div className="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-                <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm [&_a]:transition-colors [&_a]:duration-200">
                   <Link href="/category/rings" className="hover:text-brand-600">
                     {t("nav.rings")}
                   </Link>
@@ -118,7 +128,9 @@ export default async function RootLayout({
               </div>
             </div>
           </header>
-          <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">{children}</main>
+          <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 motion-safe:animate-fade-in-soft">
+            {children}
+          </main>
           <footer className="border-t border-brand-100 mt-12">
             <div className="max-w-6xl mx-auto px-6 py-6">
               <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">

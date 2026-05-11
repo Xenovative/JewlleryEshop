@@ -7,18 +7,15 @@ import {
   CHECKOUT_CURRENCY,
 } from "@lumiere/db";
 import { fromIsoDate, isoDate } from "@/lib/format";
-import {
-  quoteRetailPlan,
-  MIN_RENTAL_PLAN_DAYS,
-  MAX_RENTAL_PLAN_DAYS,
-  type RentalPlanDays,
-} from "@/lib/rentalPlanPricing";
+import { quoteRetailPlanByTier, type RetailPlanTier } from "@/lib/rentalPlanPricing";
 import { computeRentalDepositCents } from "@/lib/rentalDeposit";
+
+const PlanTier = z.enum(["4", "8", "extended_tbc"]);
 
 const Body = z.object({
   productId: z.string().min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  planDays: z.number().int().min(MIN_RENTAL_PLAN_DAYS).max(MAX_RENTAL_PLAN_DAYS),
+  planTier: PlanTier,
   email: z.string().email(),
   customerName: z.string().trim().min(1),
   customerPhone: z.string().trim().min(5).max(40),
@@ -46,15 +43,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Start cannot be in the past" }, { status: 400 });
   }
 
-  const planDays = data.planDays as RentalPlanDays;
-  const q = quoteRetailPlan(
+  const tier = data.planTier as RetailPlanTier;
+  const q = quoteRetailPlanByTier(
     product.priceCents,
-    planDays,
+    tier,
     settings.rental4DayPercentOfPrice,
     settings.rental7DayPercentOfPrice,
     start
   );
   if (!q.ok) return NextResponse.json({ error: q.error }, { status: 400 });
+
+  const depositCents = computeRentalDepositCents(
+    product.priceCents,
+    settings.rentalDepositPercentOfPrice
+  );
+  if (tier === "extended_tbc" && depositCents < 1) {
+    return NextResponse.json(
+      {
+        error:
+          "Longer rentals with price TBC require a security deposit in settings — enable deposit % or contact the boutique.",
+      },
+      { status: 400 }
+    );
+  }
 
   const finalEnd = q.endDate;
   const returnDatePart = data.returnSlot.trim().split("T")[0] ?? "";
@@ -90,10 +101,6 @@ export async function POST(req: Request) {
     phone: data.customerPhone,
   });
 
-  const depositCents = computeRentalDepositCents(
-    product.priceCents,
-    settings.rentalDepositPercentOfPrice
-  );
   const totalCents = q.rentalCents + depositCents;
 
   const booking = await prisma.booking.create({
@@ -112,6 +119,7 @@ export async function POST(req: Request) {
       returnSlot: returnAt,
       waiverIncluded: false,
       waiverFeeCents: 0,
+      rentalPlanTier: tier,
       rentalCents: q.rentalCents,
       depositCents,
       totalCents,

@@ -38,20 +38,22 @@ export async function POST(req: Request) {
 
   const desc = `${isoDate(booking.startDate)} → ${isoDate(booking.endDate)} · ${FOB_HONG_KONG_OFFICE}`;
   const depositCents = booking.depositCents ?? 0;
+  const rentalCents = booking.rentalCents ?? 0;
 
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    {
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+  if (rentalCents > 0) {
+    lineItems.push({
       quantity: 1,
       price_data: {
         currency: CHECKOUT_CURRENCY,
-        unit_amount: booking.rentalCents,
+        unit_amount: rentalCents,
         product_data: {
           name: `Rental: ${booking.product.name}`,
           description: desc,
         },
       },
-    },
-  ];
+    });
+  }
   if (depositCents > 0) {
     lineItems.push({
       quantity: 1,
@@ -61,10 +63,19 @@ export async function POST(req: Request) {
         product_data: {
           name: `Refundable deposit: ${booking.product.name}`,
           description:
-            "Security deposit — refunded at our Hong Kong office after staff inspection when you return the piece.",
+            rentalCents < 1
+              ? "Security deposit — rental amount to be confirmed; refunded at our Hong Kong office after staff inspection when you return the piece."
+              : "Security deposit — refunded at our Hong Kong office after staff inspection when you return the piece.",
         },
       },
     });
+  }
+
+  if (lineItems.length === 0) {
+    return NextResponse.json(
+      { error: "Nothing to charge — enable a security deposit for this booking type." },
+      { status: 400 }
+    );
   }
 
   try {
@@ -78,7 +89,7 @@ export async function POST(req: Request) {
     });
     await prisma.booking.update({
       where: { id: booking.id },
-      data: { stripeSessionId: session.id },
+      data: { stripeSessionId: session.id, paymentProvider: "stripe" },
     });
     return NextResponse.json({ url: session.url, bookingId: booking.id });
   } catch (e) {

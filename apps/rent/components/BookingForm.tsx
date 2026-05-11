@@ -4,10 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { formatPrice, isoDate, fromIsoDate, addDays } from "@/lib/format";
 import {
-  quoteRetailPlan,
-  type RentalPlanDays,
-  MIN_RENTAL_PLAN_DAYS,
-  MAX_RENTAL_PLAN_DAYS,
+  quoteRetailPlanByTier,
+  type RetailPlanTier,
   planPercentForDays,
 } from "@/lib/rentalPlanPricing";
 import { computeRentalDepositCents } from "@/lib/rentalDeposit";
@@ -24,6 +22,8 @@ type Props = {
   rentalDepositPercentOfPrice: number;
 };
 
+const PLAN_OPTIONS: RetailPlanTier[] = ["4", "8", "extended_tbc"];
+
 export function BookingForm(props: Props) {
   const router = useRouter();
   const t = useT();
@@ -32,7 +32,7 @@ export function BookingForm(props: Props) {
 
   const today = useMemo(() => isoDate(new Date()), []);
   const [start, setStart] = useState(today);
-  const [planDays, setPlanDays] = useState<RentalPlanDays>(4);
+  const [planTier, setPlanTier] = useState<RetailPlanTier>("4");
   const [fullyBooked, setFullyBooked] = useState<Set<string>>(new Set());
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,14 +51,14 @@ export function BookingForm(props: Props) {
 
   const priceQuote = useMemo(() => {
     if (!start) return null;
-    return quoteRetailPlan(
+    return quoteRetailPlanByTier(
       props.sellPriceCents,
-      planDays,
+      planTier,
       props.rental4DayPercentOfPrice,
       props.rental7DayPercentOfPrice,
       fromIsoDate(start)
     );
-  }, [start, planDays, props]);
+  }, [start, planTier, props]);
 
   const depositCents = useMemo(
     () =>
@@ -129,7 +129,7 @@ export function BookingForm(props: Props) {
       body: JSON.stringify({
         productId: props.productId,
         startDate: start,
-        planDays,
+        planTier,
         email: email.trim(),
         customerName: name.trim(),
         customerPhone: phone.trim(),
@@ -149,14 +149,20 @@ export function BookingForm(props: Props) {
     pct4: props.rental4DayPercentOfPrice,
     pct7: props.rental7DayPercentOfPrice,
   });
-  const planOptions = useMemo(
-    () =>
-      Array.from(
-        { length: MAX_RENTAL_PLAN_DAYS - MIN_RENTAL_PLAN_DAYS + 1 },
-        (_, i) => (MIN_RENTAL_PLAN_DAYS + i) as RentalPlanDays
-      ),
-    []
-  );
+
+  const priceForTier = (tier: RetailPlanTier) => {
+    if (tier === "extended_tbc") return null;
+    const days = tier === "4" ? 4 : 8;
+    const pct = planPercentForDays(days, props.rental4DayPercentOfPrice, props.rental7DayPercentOfPrice);
+    const cents = Math.max(1, Math.round((props.sellPriceCents * pct) / 100));
+    return fmt(cents);
+  };
+
+  const optionLabel = (tier: RetailPlanTier) => {
+    if (tier === "4") return `${t("book.plan4")} — ${priceForTier("4")}`;
+    if (tier === "8") return `${t("book.plan8")} — ${priceForTier("8")}`;
+    return t("book.planExtendedTbc");
+  };
 
   return (
     <div className="space-y-4">
@@ -185,23 +191,15 @@ export function BookingForm(props: Props) {
       <fieldset className="text-sm">
         <legend className="text-gray-600 mb-2">{t("book.rentalPlan")}</legend>
         <select
-          value={planDays}
-          onChange={(e) => setPlanDays(Number(e.target.value) as RentalPlanDays)}
+          value={planTier}
+          onChange={(e) => setPlanTier(e.target.value as RetailPlanTier)}
           className="block w-full border border-brand-200 rounded px-3 py-2"
         >
-          {planOptions.map((days) => {
-            const pct = planPercentForDays(
-              days,
-              props.rental4DayPercentOfPrice,
-              props.rental7DayPercentOfPrice
-            );
-            const cents = Math.max(1, Math.round((props.sellPriceCents * pct) / 100));
-            return (
-              <option key={days} value={days}>
-                {days} {t("review.days")} — {fmt(cents)}
-              </option>
-            );
-          })}
+          {PLAN_OPTIONS.map((tier) => (
+            <option key={tier} value={tier}>
+              {optionLabel(tier)}
+            </option>
+          ))}
         </select>
       </fieldset>
 
@@ -216,16 +214,19 @@ export function BookingForm(props: Props) {
         />
       </label>
 
-      {priceQuote && priceQuote.ok && (
+      {priceQuote && priceQuote.ok && priceQuote.tier !== "extended_tbc" && (
         <p className="text-sm">
           {t("book.periodSummary", {
             start,
             end: endIso,
-            days: priceQuote.days,
+            days: priceQuote.calendarDays,
             price: fmt(priceQuote.rentalCents),
             pct: priceQuote.percentUsed,
           })}
         </p>
+      )}
+      {priceQuote && priceQuote.ok && priceQuote.tier === "extended_tbc" && (
+        <p className="text-sm text-gray-700">{t("book.extendedPeriodSummary", { start, end: endIso })}</p>
       )}
       {priceQuote && !priceQuote.ok && (
         <p className="text-sm text-amber-700">{priceQuote.error}</p>
@@ -285,10 +286,16 @@ export function BookingForm(props: Props) {
           <div className="flex justify-between gap-2">
             <span>{t("book.rental")}</span>
             <span className="text-right">
-              {fmt(priceQuote.rentalCents)}
-              <span className="block text-xs text-gray-500 font-normal">
-                {t("book.fobTerms")}
-              </span>
+              {priceQuote.tier === "extended_tbc" ? (
+                <span className="text-amber-800 font-medium">{t("book.rentalPriceTbc")}</span>
+              ) : (
+                <>
+                  {fmt(priceQuote.rentalCents)}
+                  <span className="block text-xs text-gray-500 font-normal">
+                    {t("book.fobTerms")}
+                  </span>
+                </>
+              )}
             </span>
           </div>
           {depositCents > 0 && (

@@ -11,6 +11,7 @@ type Props = {
   productName: string;
   startDate: string;
   endDate: string;
+  rentalPlanTier: string | null;
   planDays: number;
   rentalCents: number;
   depositCents: number;
@@ -22,14 +23,28 @@ type Props = {
   email: string;
 };
 
+type ReviewPayMethod = "stripe" | "bank_fps" | "kpay_alipay";
+
+const PAY_OPTIONS: ReviewPayMethod[] = ["stripe", "bank_fps", "kpay_alipay"];
+
+function optionClass(selected: boolean) {
+  return [
+    "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition",
+    selected
+      ? "border-brand-500 bg-brand-50/80 ring-1 ring-brand-500/25"
+      : "border-brand-100 bg-white hover:border-brand-200",
+  ].join(" ");
+}
+
 export function CheckoutReviewClient(props: Props) {
   const t = useT();
   const intl = intlLocale(useLocale());
   const fmt = (cents: number) => formatPrice(cents, CHECKOUT_CURRENCY, intl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<ReviewPayMethod>("stripe");
 
-  const pay = async () => {
+  const payStripe = async () => {
     setError(null);
     setBusy(true);
     const res = await fetch("/api/book/session", {
@@ -46,6 +61,37 @@ export function CheckoutReviewClient(props: Props) {
     if (data.url) window.location.href = data.url;
   };
 
+  const payAlternate = async (method: "bank_fps" | "kpay_alipay") => {
+    setError(null);
+    setBusy(true);
+    const res = await fetch("/api/book/payment-alternate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ bookingId: props.bookingId, method }),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!res.ok) {
+      setError(data.error ?? t("review.errAlt"));
+      return;
+    }
+    if (data.redirectUrl) window.location.href = data.redirectUrl;
+  };
+
+  const submitPayment = async () => {
+    if (paymentMethod === "stripe") {
+      await payStripe();
+    } else {
+      await payAlternate(paymentMethod);
+    }
+  };
+
+  const optionTitle = (m: ReviewPayMethod) => {
+    if (m === "stripe") return t("review.payCta");
+    if (m === "bank_fps") return t("review.payBank");
+    return t("review.payKpay");
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white border border-brand-100 rounded-lg p-6 space-y-3 text-sm">
@@ -54,7 +100,15 @@ export function CheckoutReviewClient(props: Props) {
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
           <dt className="text-gray-500">{t("review.period")}</dt>
           <dd>
-            {props.startDate} → {props.endDate} ({props.planDays} {t("review.days")})
+            {props.startDate} → {props.endDate}
+            {props.rentalPlanTier === "extended_tbc" ? (
+              <> — {t("review.extendedTbcBadge")}</>
+            ) : (
+              <>
+                {" "}
+                ({props.planDays} {t("review.days")})
+              </>
+            )}
           </dd>
           <dt className="text-gray-500">{t("book.pickupSlot")}</dt>
           <dd>{props.pickupSlot}</dd>
@@ -73,7 +127,11 @@ export function CheckoutReviewClient(props: Props) {
         <div className="flex justify-between gap-2">
           <span>{t("book.rental")}</span>
           <span className="text-right">
-            {fmt(props.rentalCents)}
+            {props.rentalPlanTier === "extended_tbc" && props.rentalCents < 1 ? (
+              t("book.rentalPriceTbc")
+            ) : (
+              fmt(props.rentalCents)
+            )}
             <span className="block text-xs text-gray-500">{t("book.fobTerms")}</span>
           </span>
         </div>
@@ -92,6 +150,40 @@ export function CheckoutReviewClient(props: Props) {
         </div>
       </div>
 
+      <fieldset className="border-0 p-0 m-0 space-y-2">
+        <legend className="text-sm font-medium text-gray-800">
+          {t("review.paymentMethodLabel")}
+        </legend>
+        <div
+          className="space-y-2"
+          role="radiogroup"
+          aria-label={t("review.paymentMethodLabel")}
+        >
+          {PAY_OPTIONS.map((m) => (
+            <label key={m} className={optionClass(paymentMethod === m)}>
+              <input
+                type="radio"
+                name="rent-checkout-payment"
+                value={m}
+                checked={paymentMethod === m}
+                onChange={() => {
+                  setError(null);
+                  setPaymentMethod(m);
+                }}
+                className="mt-1 h-4 w-4 shrink-0 accent-brand-600"
+              />
+              <span className="min-w-0 flex-1 text-sm font-medium text-brand-900">
+                {optionTitle(m)}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {paymentMethod === "stripe" ? (
+        <p className="text-xs text-gray-500 -mt-2">{t("review.stripeNote")}</p>
+      ) : null}
+
       <div className="rounded-lg border border-brand-100 bg-brand-50/40 p-3 text-sm space-y-1">
         <p>
           {t("review.reserveCta")}
@@ -104,12 +196,15 @@ export function CheckoutReviewClient(props: Props) {
 
       <button
         type="button"
-        onClick={pay}
+        onClick={() => void submitPayment()}
         disabled={busy}
         className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-medium py-3 rounded transition"
       >
-        {busy ? t("review.paying") : t("review.payCta")}
+        {busy ? t("review.processing") : optionTitle(paymentMethod)}
       </button>
+      {paymentMethod !== "stripe" ? (
+        <p className="text-xs text-gray-500 text-center">{t("review.alternateConfirmNote")}</p>
+      ) : null}
     </div>
   );
 }

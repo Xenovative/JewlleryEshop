@@ -9,7 +9,7 @@ export const LOCALE_COOKIE = "locale";
 export const dict = {
   en: {
     "brand.name": "Lumière",
-    "brand.byline": "By Dynasty Jewelry",
+    "brand.byline": "By Dynasty",
     "brand.tagline": "Rentals",
     "nav.browse": "Browse",
     "nav.howItWorks": "How it works",
@@ -17,11 +17,11 @@ export const dict = {
     "nav.necklaces": "Necklaces",
     "nav.earrings": "Earrings",
     "nav.bracelets": "Bracelets",
-    "nav.other": "Other",
+    "nav.other": "Others",
     "nav.buyAt": "Buy at Lumière →",
     "nav.admin": "Admin",
     "nav.terms": "Terms & Conditions",
-    "footer.copyright": "Lumière By Dynasty Jewelry Rentals",
+    "footer.copyright": "Lumière By Dynasty Rentals",
     "footer.contact.addressLabel": "Address",
     "footer.contact.address": "Suite 726, 7/F, Ocean Centre, Harbour City, 5 Canton Rd, Tsim Sha Tsui",
     "footer.contact.phoneLabel": "Phone",
@@ -40,11 +40,14 @@ export const dict = {
     "price.dash": "—",
 
     "how.title": "How rentals work",
+    "how.subtitle":
+      "From choosing a piece to returning it at our Hong Kong office — four clear steps, no guesswork.",
+    "how.browseCta": "Browse rentable pieces",
     "how.s1": "Browse",
     "how.s1.body": "pick a piece and select your dates.",
     "how.s2": "Book & pay",
     "how.s2.body":
-      "checkout securely with Stripe for the rental plus a refundable security deposit.",
+      "Confirm your booking, then pay the rental and refundable deposit. We accept cards (via Stripe), bank transfer / FPS, and Alipay (KPay).",
     "how.s3": "Receive",
     "how.s3.body": "pick up at our Hong Kong office ahead of your start date.",
     "how.s4": "Enjoy & return in person",
@@ -59,7 +62,7 @@ export const dict = {
     "book.endDateAuto": "End date (auto)",
     "book.daysSummary": "{days} day(s) · {price} rental",
     "book.planHint":
-      "4–8 day plans. 4 days use {pct4}% of retail; day-7 anchor is {pct7}% (HKD), and day 8 scales from that rate.",
+      "Choose 4 days, 8 days, or 8+ days (rental price TBC). Published prices use {pct4}% of retail for 4 days and scale to an 8-day rate anchored at {pct7}% of the reference price (HKD).",
     "book.pickupOnly":
       "Rentals are collected and returned in person at our Hong Kong office only — we do not ship rental items or accept mail-in returns.",
     "book.deposit": "Refundable deposit",
@@ -68,7 +71,11 @@ export const dict = {
       "A {pct}% security deposit of the piece’s reference price is charged at checkout and refunded on site after return inspection.",
     "book.rentalPlan": "Rental length",
     "book.plan4": "4 days",
-    "book.plan7": "7 days",
+    "book.plan8": "8 days",
+    "book.planExtendedTbc": "8 days or more — rental price TBC",
+    "book.extendedPeriodSummary":
+      "{start} to {end} — provisional calendar for 8+ day rentals (rental price confirmed by our team).",
+    "book.rentalPriceTbc": "Price TBC",
     "book.periodSummary":
       "{start} to {end} ({days} days) · {pct}% of retail reference price · {price}",
     "book.fobTerms": "FOB - Hong Kong Office",
@@ -114,9 +121,16 @@ export const dict = {
 
     "review.title": "Review your booking",
     "review.subtitle":
-      "Confirm the details below, then pay the rental and refundable deposit securely with Stripe.",
+      "Confirm the details below, then complete payment using the method you prefer.",
+    "review.paymentMethodsNote":
+      "We accept several payment options — cards (via Stripe), bank transfer / FPS, and Alipay (KPay). Choose below.",
+    "review.paymentMethodLabel": "Payment method",
+    "review.stripeNote": "Card payments complete on Stripe’s secure checkout page.",
+    "review.alternateConfirmNote":
+      "We’ll confirm your booking after our team verifies bank or KPay payment in the office.",
     "review.item": "Rental item",
     "review.period": "Rental period",
+    "review.extendedTbcBadge": "8+ days · rental price TBC",
     "review.returnSlot": "Office return",
     "review.phone": "Phone",
     "review.days": "days",
@@ -126,7 +140,27 @@ export const dict = {
       "#1 Different payment methods may involve different handling fees.",
     "review.payCta": "Pay with Stripe",
     "review.paying": "Redirecting to Stripe…",
+    "review.processing": "Please wait…",
     "review.errPay": "Could not start payment",
+    "review.payBank": "Bank transfer / FPS",
+    "review.payKpay": "Alipay via KPay",
+    "review.errAlt": "Could not switch payment method",
+    "alt.title": "Complete your payment",
+    "alt.intro":
+      "Use the booking reference and total below. Your rental is confirmed only after our team marks payment received.",
+    "alt.ref": "Payment reference",
+    "alt.amount": "Amount due",
+    "alt.method": "Method",
+    "alt.methodBank": "Bank transfer / FPS",
+    "alt.methodKpay": "Alipay (KPay)",
+    "alt.bankNotConfigured":
+      "Bank / FPS instructions are not set yet. Please contact the boutique.",
+    "alt.openKpay": "Open KPay / Alipay",
+    "alt.kpayNotConfigured":
+      "KPay URL is not configured in admin settings. Please contact the boutique.",
+    "alt.footerNote":
+      "If you already paid, you may close this page. We will confirm manually.",
+    "alt.backBrowse": "Back to browse",
 
     "cancel.title": "Checkout canceled",
     "cancel.body": "No charge was made. The dates you picked are released.",
@@ -153,7 +187,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière Rental",
     "rental.hero.title": "Wear the heirloom. Skip the vault.",
     "rental.hero.subtitle":
-      "Expertly cleaned fine jewellery for your night, your wedding, or your shoot — flexible 4 to 8 day rentals, collected at our Hong Kong office.",
+      "Expertly cleaned fine jewellery for your night, your wedding, or your shoot — 4-day, 8-day, or longer (price TBC) rentals, collected at our Hong Kong office.",
     "rental.hero.primaryCta": "Browse rentable pieces",
     "rental.hero.secondaryCta": "How rental works",
     "rental.howItWorks.title": "How rental works",
@@ -164,13 +198,13 @@ export const dict = {
       "Pick the piece and rental window. We confirm availability the same day.",
     "rental.steps.2.title": "2. Confirm & pay",
     "rental.steps.2.body":
-      "Review your booking, then pay rental plus a refundable security deposit with Stripe.",
+      "Review your booking, then pay the rental and refundable deposit. We accept cards (Stripe), bank transfer / FPS, and Alipay (KPay).",
     "rental.steps.3.title": "3. Pick up & return",
     "rental.steps.3.body":
       "Collect at our Hong Kong office, enjoy your dates, then return in person by the end date — a specialist inspects the piece and refunds your deposit on site.",
     "rental.featured.title": "Featured rentable pieces",
     "rental.featured.subtitle":
-      "A short list this season. Each piece offers 4 to 8 day rentals as a percentage of its retail value, with pickup at our Hong Kong office.",
+      "A short list this season. Each piece can be rented for 4 or 8 days at published rates, or longer windows with price TBC, pickup at our Hong Kong office.",
     "rental.featured.empty":
       "Our rental atelier is taking new pieces in. Check back shortly.",
     "rental.policies.title": "Why our clients trust us",
@@ -184,7 +218,7 @@ export const dict = {
       "Each piece is ultrasonic-cleaned and inspected by our atelier between renters.",
     "rental.policy.flexibility.title": "Flexible windows",
     "rental.policy.flexibility.body":
-      "Flexible 4 to 8 day rentals. Need more time? Ask us about extending before your return date.",
+      "4-day, 8-day, or 8+ day (price TBC) plans. Need different dates? Ask us before you return.",
     "rental.cta.title": "Have a black-tie event coming up?",
     "rental.cta.body":
       "Reserve now and we'll set the piece aside. Most reservations confirm within an hour during business days.",
@@ -200,22 +234,23 @@ export const dict = {
     "rental.snapshot.copies": "Total rental copies",
     "rental.snapshot.tiers": "Tiered rental options",
     "rental.snapshot.plans": "Rental plans",
-    "rental.snapshot.planLengths": "4–8 days",
+    "rental.snapshot.planLengths": "4 / 8 / 8+ days",
     "rental.card.from": "From {price}",
     "rental.card.daily": "{price} / day",
     "rental.card.fixed": "{price} for {days} days",
-    "rental.card.plans": "4 days: {price4} · 8 days: {price8}",
+    "rental.card.plans": "4 days: {price4} · 8 days: {price8} · {tbc}",
+    "rental.card.planTbcShort": "8+ days: price TBC",
     "rental.card.priceOnRequest": "Price on request",
     "rental.card.view": "View details",
     "rental.badge.copies": "{n} copies",
     "rental.badge.tiers": "{n} tiers",
-    "rental.badge.plans": "4–8 days",
+    "rental.badge.plans": "4 / 8 / 8+ days",
 
     "lang.switchLabel": "Language",
   },
   "zh-Hant": {
     "brand.name": "Lumière",
-    "brand.byline": "By Dynasty Jewelry",
+    "brand.byline": "By Dynasty",
     "brand.tagline": "租賃",
     "nav.browse": "瀏覽",
     "nav.howItWorks": "租借流程",
@@ -246,10 +281,13 @@ export const dict = {
     "price.dash": "—",
 
     "how.title": "租賃流程",
+    "how.subtitle": "從挑選珠寶到香港辦公室親自歸還——四個清晰步驟,一目了然。",
+    "how.browseCta": "瀏覽可租借款式",
     "how.s1": "瀏覽",
     "how.s1.body": "挑選您喜愛的珠寶,並選擇租借日期。",
     "how.s2": "預訂並付款",
-    "how.s2.body": "透過 Stripe 安全支付租金與可退還之保證金。",
+    "how.s2.body":
+      "確認預訂後支付租金與可退還保證金。我們接受信用卡（經 Stripe）、銀行轉賬／FPS,以及支付寶（KPay）。",
     "how.s3": "收件",
     "how.s3.body": "請於開始日前至香港辦公室取件。",
     "how.s4": "享用並親自歸還",
@@ -264,7 +302,7 @@ export const dict = {
     "book.endDateAuto": "結束日期(自動)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
     "book.planHint":
-      "提供 4 至 8 天方案。4 天按定價 {pct4}% 計算；第 7 天錨點為 {pct7}%（港幣），第 8 天依同斜率延伸。",
+      "可選 4 天、8 天或 8 天以上（租金另議）。已公佈價格：4 天為參考定價之 {pct4}%,8 天則依錨點 {pct7}% 斜率計算（港幣）。",
     "book.pickupOnly":
       "租賃僅限於香港辦公室現場取件與歸還,不提供寄送,亦不接受郵寄退件。",
     "book.deposit": "可退還保證金",
@@ -273,7 +311,10 @@ export const dict = {
       "結帳時另收參考定價之 {pct}% 作為保證金,於現場驗收歸還後退還。",
     "book.rentalPlan": "租賃天數",
     "book.plan4": "4 天",
-    "book.plan7": "7 天",
+    "book.plan8": "8 天",
+    "book.planExtendedTbc": "8 天或以上 — 租金另議",
+    "book.extendedPeriodSummary": "{start} 至 {end} — 8 天以上預留檔期（租金由專櫃確認）。",
+    "book.rentalPriceTbc": "租金另議",
     "book.periodSummary":
       "{start} 至 {end}（共 {days} 天）· 定價之 {pct}% · {price}",
     "book.fobTerms": "FOB - Hong Kong Office",
@@ -318,9 +359,15 @@ export const dict = {
     "success.cta": "繼續瀏覽",
 
     "review.title": "確認預訂內容",
-    "review.subtitle": "請確認以下資料,然後以 Stripe 支付租金與可退還保證金。",
+    "review.subtitle": "請確認以下資料,然後以您偏好的方式完成付款。",
+    "review.paymentMethodsNote":
+      "我們提供多種付款方式——信用卡（經 Stripe）、銀行轉賬／FPS,以及支付寶（KPay）。請於下方選擇。",
+    "review.paymentMethodLabel": "付款方式",
+    "review.stripeNote": "選擇信用卡時,將於 Stripe 安全結帳頁完成付款。",
+    "review.alternateConfirmNote": "選擇銀行轉賬或 KPay 後,我們會在辦公室核對入數後才確認預訂。",
     "review.item": "租賃商品",
     "review.period": "租賃期間",
+    "review.extendedTbcBadge": "8 天以上 · 租金另議",
     "review.returnSlot": "辦公室歸還",
     "review.phone": "電話",
     "review.days": "天",
@@ -329,7 +376,23 @@ export const dict = {
     "review.reserveFeeNote": "#1 不同付款方式可能產生不同手續費。",
     "review.payCta": "使用 Stripe 付款",
     "review.paying": "前往 Stripe…",
+    "review.processing": "請稍候…",
     "review.errPay": "無法開始付款",
+    "review.payBank": "銀行轉賬 / FPS",
+    "review.payKpay": "支付寶（KPay）",
+    "review.errAlt": "無法切換付款方式",
+    "alt.title": "請完成付款",
+    "alt.intro": "請依下列預訂編號與金額付款。我們在辦公室確認入數後才會確認租賃。",
+    "alt.ref": "付款參考",
+    "alt.amount": "應付金額",
+    "alt.method": "方式",
+    "alt.methodBank": "銀行轉賬 / FPS",
+    "alt.methodKpay": "支付寶（KPay）",
+    "alt.bankNotConfigured": "尚未設定銀行／FPS 指示,請聯絡專櫃。",
+    "alt.openKpay": "前往 KPay／支付寶",
+    "alt.kpayNotConfigured": "後台尚未設定 KPay 連結,請聯絡專櫃。",
+    "alt.footerNote": "若您已完成付款,可安心關閉此頁,我們會人手核對。",
+    "alt.backBrowse": "返回瀏覽",
 
     "cancel.title": "結帳已取消",
     "cancel.body": "尚未產生任何費用,您所選的日期已釋出。",
@@ -356,7 +419,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière 租賃服務",
     "rental.hero.title": "戴出傳家寶,不必鎖在保險箱。",
     "rental.hero.subtitle":
-      "專業清潔、品質保證的高級珠寶租賃 — 彈性 4 至 8 天方案,於香港辦公室取件。",
+      "專業清潔、品質保證的高級珠寶租賃 — 可選 4 天、8 天或 8 天以上（租金另議）,於香港辦公室取件。",
     "rental.hero.primaryCta": "瀏覽可租賃商品",
     "rental.hero.secondaryCta": "了解租賃流程",
     "rental.howItWorks.title": "租賃流程",
@@ -364,13 +427,14 @@ export const dict = {
     "rental.steps.1.title": "1. 預約",
     "rental.steps.1.body": "選擇商品與租賃日期,我們當日完成可用性確認。",
     "rental.steps.2.title": "2. 確認並付款",
-    "rental.steps.2.body": "確認預訂後,以 Stripe 支付租金與可退還保證金。",
+    "rental.steps.2.body":
+      "確認預訂後支付租金與可退還保證金。接受信用卡（Stripe）、銀行轉賬／FPS,以及支付寶（KPay）。",
     "rental.steps.3.title": "3. 取件與歸還",
     "rental.steps.3.body":
       "至香港辦公室取件,於租期內配戴,結束日前親自歸還；專人驗收後於現場退還保證金。",
     "rental.featured.title": "本季精選租賃",
     "rental.featured.subtitle":
-      "本季精選租賃單品,提供 4 至 8 天方案（按定價百分比計算）,於香港辦公室取件。",
+      "本季精選租賃單品；可依已公佈價格租用 4 天或 8 天,亦可選 8 天以上（租金另議）,於香港辦公室取件。",
     "rental.featured.empty": "目前正在引進新作品,請稍後再回來看看。",
     "rental.policies.title": "顧客為何放心選擇我們",
     "rental.policies.subtitle":
@@ -382,7 +446,7 @@ export const dict = {
     "rental.policy.cleaning.body": "每件作品於每次出借前後皆經超音波清潔與工坊檢查。",
     "rental.policy.flexibility.title": "彈性方案",
     "rental.policy.flexibility.body":
-      "可選 4 至 8 天租賃。需要更長時間請於歸還日前與我們聯絡。",
+      "可選 4 天、8 天或 8 天以上（租金另議）。需要調整檔期請於歸還前與我們聯絡。",
     "rental.cta.title": "近期有重要的正式場合?",
     "rental.cta.body":
       "立即預約,我們會為您保留商品,大多數預約於工作日一小時內完成確認。",
@@ -398,22 +462,23 @@ export const dict = {
     "rental.snapshot.copies": "可租賃實體總數",
     "rental.snapshot.tiers": "分級租賃方案",
     "rental.snapshot.plans": "租賃方案",
-    "rental.snapshot.planLengths": "4 至 8 天",
+    "rental.snapshot.planLengths": "4／8／8+ 天",
     "rental.card.from": "{price} 起",
     "rental.card.daily": "{price} / 天",
     "rental.card.fixed": "{days} 天 {price}",
-    "rental.card.plans": "4 天：{price4} · 8 天：{price8}",
+    "rental.card.plans": "4 天：{price4} · 8 天：{price8} · {tbc}",
+    "rental.card.planTbcShort": "8+ 天：租金另議",
     "rental.card.priceOnRequest": "價格另洽",
     "rental.card.view": "查看詳情",
     "rental.badge.copies": "{n} 件實體",
     "rental.badge.tiers": "{n} 種方案",
-    "rental.badge.plans": "4 至 8 天",
+    "rental.badge.plans": "4／8／8+ 天",
 
     "lang.switchLabel": "語言",
   },
   "zh-Hans": {
     "brand.name": "Lumière",
-    "brand.byline": "By Dynasty Jewelry",
+    "brand.byline": "By Dynasty",
     "brand.tagline": "租赁",
     "nav.browse": "浏览",
     "nav.howItWorks": "租借流程",
@@ -444,10 +509,13 @@ export const dict = {
     "price.dash": "—",
 
     "how.title": "租赁流程",
+    "how.subtitle": "从挑选珠宝到香港办公室亲自归还——四个清晰步骤,简单明了。",
+    "how.browseCta": "浏览可租款式",
     "how.s1": "浏览",
     "how.s1.body": "挑选您喜爱的珠宝,并选择租借日期。",
     "how.s2": "预订并付款",
-    "how.s2.body": "通过 Stripe 安全支付租金与可退还保证金。",
+    "how.s2.body":
+      "确认预约后支付租金与可退还保证金。我们接受信用卡（经 Stripe）、银行转账／FPS,以及支付宝（KPay）。",
     "how.s3": "收件",
     "how.s3.body": "请于开始日前至香港办公室取件。",
     "how.s4": "享用并亲自归还",
@@ -462,7 +530,7 @@ export const dict = {
     "book.endDateAuto": "结束日期(自动)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
     "book.planHint":
-      "提供 4 至 8 天方案。4 天按定价 {pct4}% 计算；第 7 天锚点为 {pct7}%（港币），第 8 天按同斜率延伸。",
+      "可选 4 天、8 天或 8 天以上（租金待定）。已公布价格：4 天为参考定价之 {pct4}%,8 天则按锚点 {pct7}% 斜率计算（港币）。",
     "book.pickupOnly":
       "租赁仅限在香港办公室现场取件与归还,不提供寄送,亦不接受邮寄退件。",
     "book.deposit": "可退还保证金",
@@ -471,7 +539,10 @@ export const dict = {
       "结账时另收参考定价的 {pct}% 作为保证金,在现场验收归还后退还。",
     "book.rentalPlan": "租赁天数",
     "book.plan4": "4 天",
-    "book.plan7": "7 天",
+    "book.plan8": "8 天",
+    "book.planExtendedTbc": "8 天或以上 — 租金待定",
+    "book.extendedPeriodSummary": "{start} 至 {end} — 8 天以上预留档期（租金由专柜确认）。",
+    "book.rentalPriceTbc": "租金待定",
     "book.periodSummary":
       "{start} 至 {end}（共 {days} 天）· 定价之 {pct}% · {price}",
     "book.fobTerms": "FOB - Hong Kong Office",
@@ -516,9 +587,15 @@ export const dict = {
     "success.cta": "继续浏览",
 
     "review.title": "确认预约内容",
-    "review.subtitle": "请确认以下资料,然后通过 Stripe 支付租金与可退还保证金。",
+    "review.subtitle": "请确认以下资料,然后以您偏好的方式完成付款。",
+    "review.paymentMethodsNote":
+      "我们提供多种付款方式——信用卡（经 Stripe）、银行转账／FPS,以及支付宝（KPay）。请在下方选择。",
+    "review.paymentMethodLabel": "付款方式",
+    "review.stripeNote": "选择信用卡时,将在 Stripe 安全结账页完成付款。",
+    "review.alternateConfirmNote": "选择银行转账或 KPay 后,我们会在办公室核对收款后才确认预订。",
     "review.item": "租赁商品",
     "review.period": "租赁期间",
+    "review.extendedTbcBadge": "8 天以上 · 租金待定",
     "review.returnSlot": "办公室归还",
     "review.phone": "电话",
     "review.days": "天",
@@ -527,7 +604,23 @@ export const dict = {
     "review.reserveFeeNote": "#1 不同付款方式可能会产生不同手续费。",
     "review.payCta": "使用 Stripe 付款",
     "review.paying": "前往 Stripe…",
+    "review.processing": "请稍候…",
     "review.errPay": "无法开始付款",
+    "review.payBank": "银行转账 / FPS",
+    "review.payKpay": "支付宝（KPay）",
+    "review.errAlt": "无法切换付款方式",
+    "alt.title": "请完成付款",
+    "alt.intro": "请按下列预订编号与金额付款。我们在办公室确认收款后才会确认租赁。",
+    "alt.ref": "付款参考",
+    "alt.amount": "应付金额",
+    "alt.method": "方式",
+    "alt.methodBank": "银行转账 / FPS",
+    "alt.methodKpay": "支付宝（KPay）",
+    "alt.bankNotConfigured": "尚未设置银行／FPS 说明,请联系专柜。",
+    "alt.openKpay": "前往 KPay／支付宝",
+    "alt.kpayNotConfigured": "后台尚未配置 KPay 链接,请联系专柜。",
+    "alt.footerNote": "若您已完成付款,可安心关闭此页,我们会人工核对。",
+    "alt.backBrowse": "返回浏览",
 
     "cancel.title": "结账已取消",
     "cancel.body": "尚未产生任何费用,您所选的日期已释放。",
@@ -554,7 +647,7 @@ export const dict = {
     "rental.hero.eyebrow": "Lumière 租赁服务",
     "rental.hero.title": "戴出传家宝,不必锁在保险箱。",
     "rental.hero.subtitle":
-      "专业清洁、品质有保证的高级珠宝租赁 — 弹性 4 至 8 天方案,在香港办公室取件。",
+      "专业清洁、品质有保证的高级珠宝租赁 — 可选 4 天、8 天或 8 天以上（租金待定）,在香港办公室取件。",
     "rental.hero.primaryCta": "浏览可租赁商品",
     "rental.hero.secondaryCta": "了解租赁流程",
     "rental.howItWorks.title": "租赁流程",
@@ -562,13 +655,14 @@ export const dict = {
     "rental.steps.1.title": "1. 预约",
     "rental.steps.1.body": "选择商品与租赁日期,我们当日完成可用性确认。",
     "rental.steps.2.title": "2. 确认并付款",
-    "rental.steps.2.body": "确认预约后,通过 Stripe 支付租金与可退还保证金。",
+    "rental.steps.2.body":
+      "确认预约后支付租金与可退还保证金。接受信用卡（Stripe）、银行转账／FPS,以及支付宝（KPay）。",
     "rental.steps.3.title": "3. 取件与归还",
     "rental.steps.3.body":
       "至香港办公室取件,在租期内佩戴,结束日前亲自归还；专人验收后于现场退还保证金。",
     "rental.featured.title": "本季精选租赁",
     "rental.featured.subtitle":
-      "本季精选租赁单品,提供 4 至 8 天方案（按定价百分比计算）,在香港办公室取件。",
+      "本季精选租赁单品；可按已公布价格租用 4 天或 8 天,亦可选 8 天以上（租金待定）,在香港办公室取件。",
     "rental.featured.empty": "目前正在引进新作品,请稍后再回来看看。",
     "rental.policies.title": "顾客为何放心选择我们",
     "rental.policies.subtitle":
@@ -580,7 +674,7 @@ export const dict = {
     "rental.policy.cleaning.body": "每件作品在每次出借前后均经超声波清洁与工坊检查。",
     "rental.policy.flexibility.title": "弹性方案",
     "rental.policy.flexibility.body":
-      "可选 4 至 8 天租赁。需要更长时间请在归还日前与我们联系。",
+      "可选 4 天、8 天或 8 天以上（租金待定）。需要调整档期请在归还前与我们联系。",
     "rental.cta.title": "近期有重要的正式场合?",
     "rental.cta.body":
       "立即预约,我们会为您保留商品,大多数预约在工作日一小时内完成确认。",
@@ -596,16 +690,17 @@ export const dict = {
     "rental.snapshot.copies": "可租赁实体总数",
     "rental.snapshot.tiers": "分级租赁方案",
     "rental.snapshot.plans": "租赁方案",
-    "rental.snapshot.planLengths": "4 至 8 天",
+    "rental.snapshot.planLengths": "4／8／8+ 天",
     "rental.card.from": "{price} 起",
     "rental.card.daily": "{price} / 天",
     "rental.card.fixed": "{days} 天 {price}",
-    "rental.card.plans": "4 天：{price4} · 8 天：{price8}",
+    "rental.card.plans": "4 天：{price4} · 8 天：{price8} · {tbc}",
+    "rental.card.planTbcShort": "8+ 天：租金待定",
     "rental.card.priceOnRequest": "价格另洽",
     "rental.card.view": "查看详情",
     "rental.badge.copies": "{n} 件实体",
     "rental.badge.tiers": "{n} 种方案",
-    "rental.badge.plans": "4 至 8 天",
+    "rental.badge.plans": "4／8／8+ 天",
 
     "lang.switchLabel": "语言",
   }

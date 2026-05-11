@@ -21,6 +21,15 @@ export async function updateSettings(
     rental4DayPercentOfPrice: number;
     rental7DayPercentOfPrice: number;
     rentalDepositPercentOfPrice: number;
+    bankFpsInstructions: string | null;
+    kpayAlipayBaseUrl: string | null;
+    adminPhone: string | null;
+    twilioAccountSid: string | null;
+    twilioAuthToken: string | null;
+    twilioFromNumber: string | null;
+    genericGatewayBaseUrl: string | null;
+    genericGatewayWebhookSecret: string | null;
+    genericGatewayLabel: string | null;
   }>
 ) {
   await getSettings();

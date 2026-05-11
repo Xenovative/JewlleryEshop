@@ -1,7 +1,7 @@
 import { formatPrice } from "@/lib/format";
 import type { DictKey } from "@/lib/i18n";
 import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
-import { planPercentForDays, type RentalPlanDays } from "@/lib/rentalPlanPricing";
+import { planPercentForDays } from "@/lib/rentalPlanPricing";
 
 export function rentalPriceTeaser(
   product: { priceCents: number },
@@ -12,16 +12,12 @@ export function rentalPriceTeaser(
   if (product.priceCents <= 0) {
     return t("rental.card.priceOnRequest");
   }
-  const toPrice = (days: RentalPlanDays) =>
+  const toPrice = (days: 4 | 8) =>
     Math.max(
       1,
       Math.round(
         (product.priceCents *
-          planPercentForDays(
-            days,
-            settings.rental4DayPercentOfPrice,
-            settings.rental7DayPercentOfPrice
-          )) /
+          planPercentForDays(days, settings.rental4DayPercentOfPrice, settings.rental7DayPercentOfPrice)) /
           100
       )
     );
@@ -30,5 +26,6 @@ export function rentalPriceTeaser(
   return t("rental.card.plans", {
     price4: formatPrice(p4, CHECKOUT_CURRENCY, locale),
     price8: formatPrice(p8, CHECKOUT_CURRENCY, locale),
+    tbc: t("rental.card.planTbcShort"),
   });
 }

@@ -32,7 +32,7 @@ export function ProductGridSection({
   locale,
 }: Props) {
   return (
-    <section id={id} className="scroll-mt-20">
+    <section id={id} className="scroll-mt-20 motion-safe:animate-fade-in-soft">
       <div className="flex items-end justify-between flex-wrap gap-2 mb-5">
         <div>
           <h2 className="font-serif text-2xl md:text-3xl">{title}</h2>

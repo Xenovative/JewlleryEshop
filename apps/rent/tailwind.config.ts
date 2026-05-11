@@ -19,6 +19,25 @@ export default {
         },
       },
       fontFamily: { serif: ["Georgia", "ui-serif", "serif"] },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(0.5rem)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in-soft": {
+          from: { opacity: "0", transform: "translateY(0.25rem)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.45s ease-out both",
+        "fade-in-up": "fade-in-up 0.55s ease-out both",
+        "fade-in-soft": "fade-in-soft 0.5s ease-out both",
+      },
     },
   },
   plugins: [],

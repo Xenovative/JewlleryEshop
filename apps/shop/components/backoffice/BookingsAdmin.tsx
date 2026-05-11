@@ -18,6 +18,8 @@ type Row = {
   totalCents: number;
   currency: string;
   waiverIncluded: boolean;
+  stripeSessionId: string | null;
+  paymentProvider: string | null;
 };
 
 const STATUSES = ["", "pending", "confirmed", "active", "returned", "canceled"];
@@ -43,6 +45,29 @@ export function BookingsAdmin({
     });
     if (res.ok) router.refresh();
   };
+
+  const confirmAlternate = async (id: string) => {
+    const res = await fetch(`/api/backoffice/bookings/${id}/confirm-alternate-payment`, {
+      method: "POST",
+    });
+    if (res.ok) router.refresh();
+    else {
+      const data = await res.json().catch(() => ({}));
+      window.alert((data as { error?: string }).error ?? "Failed");
+    }
+  };
+
+  const payMethodLabel = (b: Row) => {
+    if (b.stripeSessionId) return "Stripe";
+    if (b.paymentProvider === "bank_fps") return t("checkout.alt.methodBank");
+    if (b.paymentProvider === "kpay_alipay") return t("checkout.alt.methodKpay");
+    return "—";
+  };
+
+  const showConfirmAlternate = (b: Row) =>
+    b.status === "pending" &&
+    !b.stripeSessionId &&
+    (b.paymentProvider === "bank_fps" || b.paymentProvider === "kpay_alipay");
 
   const filter = (s: string) => {
     const url = new URL(window.location.href);
@@ -80,7 +105,9 @@ export function BookingsAdmin({
                 <th className="px-3 py-2">{t("admin.bookings.col.customer")}</th>
                 <th className="px-3 py-2">{t("admin.bookings.col.fulfillment")}</th>
                 <th className="px-3 py-2">{t("admin.bookings.col.total")}</th>
+                <th className="px-3 py-2">{t("admin.bookings.col.payment")}</th>
                 <th className="px-3 py-2">{t("admin.bookings.col.status")}</th>
+                <th className="px-3 py-2 w-32" />
               </tr>
             </thead>
             <tbody>
@@ -108,6 +135,7 @@ export function BookingsAdmin({
                   <td className="px-3 py-2">
                     {formatPrice(b.totalCents, b.currency)}
                   </td>
+                  <td className="px-3 py-2 text-xs">{payMethodLabel(b)}</td>
                   <td className="px-3 py-2">
                     <select
                       value={b.status}
@@ -120,6 +148,17 @@ export function BookingsAdmin({
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    {showConfirmAlternate(b) ? (
+                      <button
+                        type="button"
+                        onClick={() => confirmAlternate(b.id)}
+                        className="text-xs bg-brand-600 hover:bg-brand-700 text-white px-2 py-1 rounded"
+                      >
+                        {t("admin.bookings.confirmAlternate")}
+                      </button>
+                    ) : null}
                   </td>
                 </tr>
               ))}

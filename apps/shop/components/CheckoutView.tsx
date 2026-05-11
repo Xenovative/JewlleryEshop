@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { readCart, updateQty, removeFromCart, type CartItem } from "@/lib/cart";
+import { readCart, updateQty, removeFromCart, clearCart, type CartItem } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
@@ -21,12 +21,28 @@ type ResolvedItem = {
   stock: number;
 };
 
+type CheckoutPayMethod = "stripe" | "bank_fps" | "kpay_alipay" | "generic_gateway";
+
+function optionClass(selected: boolean) {
+  return [
+    "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition",
+    selected
+      ? "border-brand-500 bg-brand-50/80 ring-1 ring-brand-500/25"
+      : "border-brand-100 bg-white hover:border-brand-200",
+  ].join(" ");
+}
+
 export function CheckoutView() {
   const t = useT();
   const localeCode = intlLocale(useLocale());
   const [items, setItems] = useState<ResolvedItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPayMethod>("stripe");
+  const [genericGatewayLabel, setGenericGatewayLabel] = useState<string | null>(null);
 
   const refresh = async () => {
     const local = readCart();
@@ -50,7 +66,49 @@ export function CheckoutView() {
     return () => window.removeEventListener("cart:changed", handler);
   }, []);
 
-  const pay = async () => {
+  useEffect(() => {
+    fetch("/api/backoffice/generic-gateway/label")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (d?.label !== undefined) setGenericGatewayLabel(d.label as string | null);
+      })
+      .catch(() => {});
+  }, []);
+
+  const payAlternate = async (method: "bank_fps" | "kpay_alipay" | "generic_gateway") => {
+    setError(null);
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError(t("checkout.emailMissing"));
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/checkout/alternate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          items: readCart(),
+          email: trimmed,
+          name: name.trim() || undefined,
+          phone: phone.trim() || undefined,
+          method,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Checkout failed");
+      if (data.redirectUrl) {
+        clearCart();
+        window.dispatchEvent(new Event("cart:changed"));
+        window.location.href = data.redirectUrl;
+      }
+    } catch (e) {
+      setError((e as Error).message);
+      setLoading(false);
+    }
+  };
+
+  const payStripe = async () => {
     setError(null);
     setLoading(true);
     try {
@@ -66,6 +124,28 @@ export function CheckoutView() {
       setError((e as Error).message);
       setLoading(false);
     }
+  };
+
+  const submitPayment = async () => {
+    if (paymentMethod === "stripe") {
+      await payStripe();
+    } else {
+      await payAlternate(paymentMethod);
+    }
+  };
+
+  const payOptions: CheckoutPayMethod[] = [
+    "stripe",
+    "bank_fps",
+    "kpay_alipay",
+    ...(genericGatewayLabel !== null ? ["generic_gateway" as CheckoutPayMethod] : []),
+  ];
+
+  const optionTitle = (m: CheckoutPayMethod) => {
+    if (m === "stripe") return t("checkout.payStripe");
+    if (m === "bank_fps") return t("checkout.payBank");
+    if (m === "kpay_alipay") return t("checkout.payKpay");
+    return genericGatewayLabel ?? t("checkout.payGenericGateway");
   };
 
   if (items === null) return <p>{t("cart.loading")}</p>;
@@ -146,7 +226,74 @@ export function CheckoutView() {
             </span>
           </span>
         </div>
-        <p className="text-xs text-gray-500 mt-3">{t("checkout.stripeNote")}</p>
+        <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50/50 p-3 text-sm text-gray-700 leading-relaxed">
+          {t("checkout.paymentMethodsBlurb")}
+        </div>
+
+        <fieldset className="mt-5 border-0 p-0 m-0">
+          <legend className="text-sm font-medium text-gray-800">
+            {t("checkout.paymentMethodLabel")}
+          </legend>
+          <div
+            className="mt-2 space-y-2"
+            role="radiogroup"
+            aria-label={t("checkout.paymentMethodLabel")}
+          >
+            {payOptions.map((m) => (
+              <label key={m} className={optionClass(paymentMethod === m)}>
+                <input
+                  type="radio"
+                  name="shop-checkout-payment"
+                  value={m}
+                  checked={paymentMethod === m}
+                  onChange={() => {
+                    setError(null);
+                    setPaymentMethod(m);
+                  }}
+                  className="mt-1 h-4 w-4 shrink-0 accent-brand-600"
+                />
+                <span className="min-w-0 flex-1 text-sm font-medium text-brand-900">
+                  {optionTitle(m)}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        {paymentMethod === "stripe" ? (
+          <p className="text-xs text-gray-500 mt-2">{t("checkout.stripeNote")}</p>
+        ) : null}
+
+        <div className="mt-4 space-y-2 text-sm">
+          <label className="block">
+            <span className="text-gray-600 text-xs">{t("checkout.emailLabel")}</span>
+            <input
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full border border-brand-200 rounded px-2 py-1.5"
+            />
+          </label>
+          <label className="block">
+            <span className="text-gray-600 text-xs">{t("checkout.nameLabel")}</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 w-full border border-brand-200 rounded px-2 py-1.5"
+            />
+          </label>
+          <label className="block">
+            <span className="text-gray-600 text-xs">{t("checkout.phoneLabel")}</span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="mt-1 w-full border border-brand-200 rounded px-2 py-1.5"
+            />
+          </label>
+        </div>
         <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50/40 p-3 text-sm space-y-1">
           <p>
             {t("checkout.reserveCta")}
@@ -156,12 +303,16 @@ export function CheckoutView() {
         </div>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <button
-          onClick={pay}
+          type="button"
+          onClick={() => void submitPayment()}
           disabled={loading}
           className="mt-6 w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white font-medium py-3 rounded transition"
         >
-          {loading ? t("cart.redirecting") : t("checkout.payStripe")}
+          {loading ? t("cart.redirecting") : optionTitle(paymentMethod)}
         </button>
+        {paymentMethod !== "stripe" ? (
+          <p className="mt-2 text-xs text-gray-500">{t("checkout.altPendingNote")}</p>
+        ) : null}
         <Link
           href="/cart"
           className="mt-3 block text-center text-sm text-brand-600 hover:underline"

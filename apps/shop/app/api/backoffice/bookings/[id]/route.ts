@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@lumiere/db";
 import { requireApiRole } from "@/lib/rbac";
 import { audit } from "@/lib/audit";
+import { sendAdminSms } from "@/lib/sms";
 
 const Body = z.object({
   status: z.enum(["pending", "confirmed", "active", "returned", "canceled"]),
@@ -23,7 +24,7 @@ export async function PUT(
   }
   const before = await prisma.booking.findUnique({
     where: { id },
-    select: { status: true },
+    select: { status: true, email: true, customerName: true },
   });
   try {
     const booking = await prisma.booking.update({
@@ -38,6 +39,21 @@ export async function PUT(
       before,
       { status: parsed.data.status }
     );
+
+    // guarded: notify on meaningful status changes only
+    if (before && before.status !== parsed.data.status) {
+      setImmediate(() => {
+        sendAdminSms({
+          type: "booking_status_changed",
+          bookingId: id,
+          oldStatus: before.status,
+          newStatus: parsed.data.status,
+          email: before.email ?? "",
+          customerName: before.customerName ?? "",
+        }).catch((smsErr) => console.error("Admin SMS failed for booking status change:", smsErr));
+      });
+    }
+
     return NextResponse.json(booking);
   } catch (e) {
     console.error(e);

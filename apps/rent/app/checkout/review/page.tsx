@@ -41,12 +41,16 @@ export default async function RentCheckoutReviewPage({
   return (
     <div className="max-w-lg mx-auto py-8">
       <h1 className="font-serif text-2xl mb-2">{t("review.title")}</h1>
-      <p className="text-sm text-gray-600 mb-6">{t("review.subtitle")}</p>
+      <p className="text-sm text-gray-600 mb-3">{t("review.subtitle")}</p>
+      <div className="mb-6 rounded-lg border border-brand-100 bg-brand-50/50 p-3 text-sm text-gray-700 leading-relaxed">
+        {t("review.paymentMethodsNote")}
+      </div>
       <CheckoutReviewClient
         bookingId={booking.id}
         productName={booking.product.name}
         startDate={isoDate(booking.startDate)}
         endDate={isoDate(booking.endDate)}
+        rentalPlanTier={booking.rentalPlanTier}
         planDays={planDays}
         rentalCents={booking.rentalCents}
         depositCents={booking.depositCents}

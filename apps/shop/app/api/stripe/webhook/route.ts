@@ -4,7 +4,9 @@ import {
   getStripe,
   getStripeWebhookSecret,
   upsertCustomerByEmail,
+  decrementStockForCartLines,
 } from "@lumiere/db";
+import { sendAdminSms } from "@/lib/sms";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -70,9 +72,29 @@ async function handleRental(session: Stripe.Checkout.Session) {
       data: {
         status: "confirmed",
         stripeSessionId: session.id,
+        paymentProvider: "stripe",
         email,
         ...(customerId ? { customerId } : {}),
       },
+    });
+
+    const bookingForSms = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { totalCents: true, currency: true, customerName: true },
+    });
+
+    // guarded: fire-and-forget SMS; non-blocking
+    setImmediate(() => {
+      if (bookingForSms) {
+        sendAdminSms({
+          type: "booking_confirmed",
+          bookingId: bookingId,
+          amountCents: bookingForSms.totalCents,
+          currency: bookingForSms.currency,
+          email: email ?? "",
+          customerName: bookingForSms.customerName ?? "",
+        }).catch((smsErr) => console.error("Admin SMS failed for booking:", smsErr));
+      }
     });
   } catch (e) {
     console.error("Booking confirm failed", e);
@@ -107,6 +129,7 @@ async function handleOrder(session: Stripe.Checkout.Session) {
       await tx.order.create({
         data: {
           stripeSessionId: session.id,
+          paymentProvider: "stripe",
           status: "paid",
           amountTotalCents: session.amount_total ?? 0,
           currency: session.currency ?? "usd",
@@ -116,19 +139,25 @@ async function handleOrder(session: Stripe.Checkout.Session) {
         },
       });
 
-      for (const item of cart) {
-        if (item.variantId) {
-          await tx.variant.update({
-            where: { id: item.variantId },
-            data: { stock: { decrement: item.qty } },
-          });
-        } else {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.qty } },
-          });
-        }
-      }
+      await decrementStockForCartLines(
+        tx,
+        cart.map((c) => ({
+          productId: c.productId,
+          variantId: c.variantId,
+          qty: c.qty,
+        }))
+      );
+    });
+
+    // guarded: fire-and-forget SMS; wrapped in setImmediate to avoid blocking webhook response
+    setImmediate(() => {
+      sendAdminSms({
+        type: "order_paid",
+        orderId: session.id,
+        amountCents: session.amount_total ?? 0,
+        currency: session.currency ?? "usd",
+        email: session.customer_details?.email ?? null,
+      }).catch((smsErr) => console.error("Admin SMS failed for order:", smsErr));
     });
   } catch (e) {
     console.error("Order persistence failed", e);

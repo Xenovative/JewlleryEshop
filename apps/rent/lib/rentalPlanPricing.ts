@@ -1,30 +1,60 @@
 import { addDays } from "./format";
 
-export const MIN_RENTAL_PLAN_DAYS = 4;
-export const MAX_RENTAL_PLAN_DAYS = 8;
-export type RentalPlanDays = 4 | 5 | 6 | 7 | 8;
+/** Inclusive calendar days blocked for “8+ days, price TBC” until staff confirms dates. */
+export const EXTENDED_TBC_CALENDAR_DAYS = 14;
+
+export type RetailPlanTier = "4" | "8" | "extended_tbc";
 
 export type RetailPlanQuote =
   | {
       ok: true;
       rentalCents: number;
-      days: number;
+      /** Inclusive rental length in days (used for copy and calendar). */
+      calendarDays: number;
       endDate: Date;
       percentUsed: number;
+      tier: RetailPlanTier;
     }
   | { ok: false; error: string };
 
-export function quoteRetailPlan(
+/** Interpolate retail % for 4- or 8-day plans only (day-7 anchor drives the slope to day 8). */
+export function planPercentForDays(
+  days: 4 | 8,
+  percent4: number,
+  percent7: number
+): number {
+  const step = (percent7 - percent4) / 3;
+  return percent4 + (days - 4) * step;
+}
+
+export function quoteRetailPlanByTier(
   sellPriceCents: number,
-  planDays: RentalPlanDays,
+  tier: RetailPlanTier,
   percent4: number,
   percent7: number,
   startDate: Date
 ): RetailPlanQuote {
+  if (tier === "extended_tbc") {
+    if (sellPriceCents <= 0) {
+      return { ok: false, error: "Retail reference price is not set for this item." };
+    }
+    const calendarDays = EXTENDED_TBC_CALENDAR_DAYS;
+    const endDate = addDays(startDate, calendarDays - 1);
+    return {
+      ok: true,
+      rentalCents: 0,
+      calendarDays,
+      endDate,
+      percentUsed: 0,
+      tier,
+    };
+  }
+
   if (sellPriceCents <= 0) {
     return { ok: false, error: "Retail reference price is not set for this item." };
   }
-  const pct = planPercentForDays(planDays, percent4, percent7);
+  const days = tier === "4" ? 4 : 8;
+  const pct = planPercentForDays(days, percent4, percent7);
   if (pct <= 0 || pct > 100) {
     return { ok: false, error: "Rental percentages are not configured correctly." };
   }
@@ -32,17 +62,13 @@ export function quoteRetailPlan(
   if (rentalCents < 1) {
     return { ok: false, error: "Computed rental amount is too small." };
   }
-  const endDate = addDays(startDate, planDays - 1);
-  return { ok: true, rentalCents, days: planDays, endDate, percentUsed: pct };
-}
-
-export function planPercentForDays(
-  days: RentalPlanDays,
-  percent4: number,
-  percent7: number
-): number {
-  // Interpolate day 5-6 between configured 4/7 anchors, and extend to day 8.
-  // step = (p7 - p4) / 3 so day 8 is one step above day 7.
-  const step = (percent7 - percent4) / 3;
-  return percent4 + (days - MIN_RENTAL_PLAN_DAYS) * step;
+  const endDate = addDays(startDate, days - 1);
+  return {
+    ok: true,
+    rentalCents,
+    calendarDays: days,
+    endDate,
+    percentUsed: pct,
+    tier,
+  };
 }

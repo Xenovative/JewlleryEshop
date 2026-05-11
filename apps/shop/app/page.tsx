@@ -1,4 +1,4 @@
-import { prisma, getSettings } from "@lumiere/db";
+import { prisma, getSettings, sortCategoriesForDisplay } from "@lumiere/db";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { parseShopHomeConfig, SHOP_HOME_DEFAULT } from "@/lib/homepageConfig";
@@ -36,7 +36,7 @@ export default async function HomePage() {
           { createdAt: "desc" as const },
         ];
 
-  const [categories, featured] = await Promise.all([
+  const [categoriesRaw, featured] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: { buyable: true },
@@ -44,6 +44,7 @@ export default async function HomePage() {
       take: 8,
     }),
   ]);
+  const categories = sortCategoriesForDisplay(categoriesRaw);
 
   const trustItems = config.trustStrip
     .map((it) => it.label.trim())

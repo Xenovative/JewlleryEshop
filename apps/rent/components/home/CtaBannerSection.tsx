@@ -32,7 +32,7 @@ export function CtaBannerSection({
   const bodyClass = isRental ? "text-brand-50/85" : "text-gray-700";
   return (
     <section
-      className={`rounded-2xl px-8 py-10 md:px-12 md:py-12 border border-brand-100 ${wrap}`}
+      className={`rounded-2xl px-8 py-10 md:px-12 md:py-12 border border-brand-100 motion-safe:animate-fade-in-soft transition-shadow duration-500 ease-out hover:shadow-md motion-reduce:hover:shadow-none ${wrap}`}
     >
       <div className="grid md:grid-cols-[1fr_auto] items-center gap-6">
         <div>
@@ -48,7 +48,7 @@ export function CtaBannerSection({
         {cleanCtaLabel && (
           <Link
             href={safeHref(ctaHref, defaultHref)}
-            className={`inline-flex justify-center items-center px-6 py-3 rounded font-medium transition whitespace-nowrap ${btn}`}
+            className={`inline-flex justify-center items-center px-6 py-3 rounded font-medium transition-all duration-200 ease-out motion-reduce:transition-colors active:scale-[0.98] motion-reduce:active:scale-100 whitespace-nowrap ${btn}`}
           >
             {cleanCtaLabel}
           </Link>

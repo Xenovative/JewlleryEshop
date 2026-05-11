@@ -24,6 +24,18 @@ export default async function AdminSettingsPage() {
       rental4DayPercentOfPrice={s.rental4DayPercentOfPrice}
       rental7DayPercentOfPrice={s.rental7DayPercentOfPrice}
       rentalDepositPercentOfPrice={s.rentalDepositPercentOfPrice}
+      bankFpsInstructions={s.bankFpsInstructions}
+      kpayAlipayBaseUrl={s.kpayAlipayBaseUrl}
+      adminPhone={s.adminPhone}
+      twilioAccountSidMasked={maskKey(s.twilioAccountSid)}
+      twilioAuthTokenMasked={maskKey(s.twilioAuthToken)}
+      twilioFromNumber={s.twilioFromNumber}
+      twilioAccountSidEnvFallback={!s.twilioAccountSid && !!process.env.TWILIO_ACCOUNT_SID}
+      twilioAuthTokenEnvFallback={!s.twilioAuthToken && !!process.env.TWILIO_AUTH_TOKEN}
+      twilioFromNumberEnvFallback={!s.twilioFromNumber && !!process.env.TWILIO_FROM_NUMBER}
+      genericGatewayBaseUrl={s.genericGatewayBaseUrl}
+      genericGatewayWebhookSecretMasked={maskKey(s.genericGatewayWebhookSecret)}
+      genericGatewayLabel={s.genericGatewayLabel}
       totpEnabled={!!me?.totpEnabled}
     />
   );

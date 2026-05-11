@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { prisma, getSettings } from "@lumiere/db";
+import { prisma, getSettings, sortCategoriesForDisplay } from "@lumiere/db";
 import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
 import {
@@ -52,7 +52,7 @@ export default async function RentHomePage() {
           { createdAt: "desc" as const },
         ];
 
-  const [categories, featured] = await Promise.all([
+  const [categoriesRaw, featured] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: { rentable: true },
@@ -60,6 +60,7 @@ export default async function RentHomePage() {
       take: 8,
     }),
   ]);
+  const categories = sortCategoriesForDisplay(categoriesRaw);
 
   const trustItems = config.trustStrip
     .map((it) => it.label.trim())
@@ -164,7 +165,7 @@ export default async function RentHomePage() {
                     {featured.map((p) => (
                       <article
                         key={p.id}
-                        className="bg-white border border-brand-100 rounded-xl p-4 hover:border-brand-300 transition"
+                        className="interactive-card group bg-white border border-brand-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-md motion-safe:hover:-translate-y-0.5"
                       >
                         <div className="flex gap-4">
                           <div className="w-24 h-24 rounded-lg overflow-hidden bg-brand-50 flex-shrink-0">
@@ -172,7 +173,7 @@ export default async function RentHomePage() {
                             <img
                               src={p.imageUrl}
                               alt={p.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition duration-300 ease-out motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

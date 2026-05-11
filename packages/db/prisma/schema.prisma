@@ -104,12 +104,16 @@ model Booking {
   returnSlot          DateTime?
   waiverIncluded      Boolean  @default(false)
   waiverFeeCents      Int      @default(0)
+  /// "4" | "8" | "extended_tbc" — retail ladder vs open-ended TBC rental
+  rentalPlanTier      String?
   rentalCents         Int
   /// Refundable security deposit (same currency); released at office after return inspection
   depositCents        Int      @default(0)
   totalCents          Int
   currency            String   @default("hkd")
   stripeSessionId     String?  @unique
+  /// "stripe" | "bank_fps" | "kpay_alipay" — set when customer chooses a non-Stripe path
+  paymentProvider     String?
   createdAt           DateTime @default(now())
   customerId          String?
   customer            Customer? @relation(fields: [customerId], references: [id])
@@ -141,16 +145,36 @@ model Settings {
   rentalHomeJson      String?
   /// Whole-number percent of product selling price (priceCents) for 4-day rental
   rental4DayPercentOfPrice Int @default(10)
-  /// Whole-number percent of product selling price for 7-day rental
+  /// Whole-number percent: curve anchor (day 7) with 4-day % to derive published 8-day rental on rent frontend
   rental7DayPercentOfPrice Int @default(18)
   /// Security deposit as % of selling price (0 disables deposit at checkout)
   rentalDepositPercentOfPrice Int @default(25)
+  /// Shown on bank transfer / FPS checkout; plain text or light HTML from admin
+  bankFpsInstructions String?
+  /// KPay Alipay entry URL (query params ref / amount may be appended by the app)
+  kpayAlipayBaseUrl   String?
+  /// Admin mobile number for SMS alerts (E.164 format, e.g. +85212345678)
+  adminPhone          String?
+  /// Twilio Account SID for SMS alerts
+  twilioAccountSid    String?
+  /// Twilio Auth Token for SMS alerts
+  twilioAuthToken     String?
+  /// Twilio sender number for SMS alerts (E.164 format)
+  twilioFromNumber    String?
+  /// Generic redirect payment gateway entry URL (ref/amountCents/currency appended as query params)
+  genericGatewayBaseUrl      String?
+  /// Bearer token the gateway sends in Authorization header on its inbound webhook
+  genericGatewayWebhookSecret String?
+  /// Human-readable label shown to shoppers at checkout (e.g. "Pay via WooCommerce")
+  genericGatewayLabel        String?
   updatedAt           DateTime @updatedAt
 }
 
 model Order {
-  id               String   @id @default(cuid())
-  stripeSessionId  String   @unique
+  id              String   @id @default(cuid())
+  stripeSessionId String?  @unique
+  /// "stripe" | "bank_fps" | "kpay_alipay"
+  paymentProvider  String   @default("stripe")
   status           String
   amountTotalCents Int
   currency         String   @default("hkd")

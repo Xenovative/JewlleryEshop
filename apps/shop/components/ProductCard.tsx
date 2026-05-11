@@ -22,14 +22,14 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${slug}`}
-      className="group block bg-white rounded-lg overflow-hidden border border-brand-100 hover:border-brand-500 transition"
+      className="interactive-card group block bg-white rounded-lg overflow-hidden border border-brand-100 hover:border-brand-500 hover:shadow-md motion-safe:hover:-translate-y-0.5"
     >
       <div className="aspect-square bg-brand-50 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageUrl}
           alt={name}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition duration-300 ease-out motion-reduce:group-hover:scale-100"
         />
       </div>
       <div className="p-4">
