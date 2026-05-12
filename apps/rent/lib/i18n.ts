@@ -123,11 +123,11 @@ export const dict = {
     "review.subtitle":
       "Confirm the details below, then complete payment using the method you prefer.",
     "review.paymentMethodsNote":
-      "We accept several payment options — cards (via Stripe), bank transfer / FPS, and Alipay (KPay). Choose below.",
+      "We accept several payment options — cards (via Stripe), bank transfer / FPS, Alipay (KPay), and WhatsApp (prefilled booking message) when configured. Choose below.",
     "review.paymentMethodLabel": "Payment method",
     "review.stripeNote": "Card payments complete on Stripe’s secure checkout page.",
     "review.alternateConfirmNote":
-      "We’ll confirm your booking after our team verifies bank or KPay payment in the office.",
+      "We’ll confirm your booking after our team verifies bank, KPay, or WhatsApp-arranged payment in the office.",
     "review.item": "Rental item",
     "review.period": "Rental period",
     "review.extendedTbcBadge": "8+ days · rental price TBC",
@@ -144,6 +144,9 @@ export const dict = {
     "review.errPay": "Could not start payment",
     "review.payBank": "Bank transfer / FPS",
     "review.payKpay": "Alipay via KPay",
+    "review.payWhatsapp": "WhatsApp order message",
+    "review.whatsappNotConfigured":
+      "WhatsApp checkout is not set up yet. Please choose another method or contact the boutique.",
     "review.errAlt": "Could not switch payment method",
     "alt.title": "Complete your payment",
     "alt.intro":
@@ -153,11 +156,15 @@ export const dict = {
     "alt.method": "Method",
     "alt.methodBank": "Bank transfer / FPS",
     "alt.methodKpay": "Alipay (KPay)",
+    "alt.methodWhatsapp": "WhatsApp",
     "alt.bankNotConfigured":
       "Bank / FPS instructions are not set yet. Please contact the boutique.",
     "alt.openKpay": "Open KPay / Alipay",
     "alt.kpayNotConfigured":
       "KPay URL is not configured in admin settings. Please contact the boutique.",
+    "alt.openWhatsapp": "Open WhatsApp with booking details",
+    "alt.whatsappNotConfigured":
+      "WhatsApp number is not configured in admin settings. Your booking is saved — please contact the boutique with your booking ID.",
     "alt.footerNote":
       "If you already paid, you may close this page. We will confirm manually.",
     "alt.backBrowse": "Back to browse",
@@ -361,10 +368,11 @@ export const dict = {
     "review.title": "確認預訂內容",
     "review.subtitle": "請確認以下資料,然後以您偏好的方式完成付款。",
     "review.paymentMethodsNote":
-      "我們提供多種付款方式——信用卡（經 Stripe）、銀行轉賬／FPS,以及支付寶（KPay）。請於下方選擇。",
+      "我們提供多種付款方式——信用卡（經 Stripe）、銀行轉賬／FPS、支付寶（KPay）,以及後台設定後的 WhatsApp（預填訊息）。請於下方選擇。",
     "review.paymentMethodLabel": "付款方式",
     "review.stripeNote": "選擇信用卡時,將於 Stripe 安全結帳頁完成付款。",
-    "review.alternateConfirmNote": "選擇銀行轉賬或 KPay 後,我們會在辦公室核對入數後才確認預訂。",
+    "review.alternateConfirmNote":
+      "選擇銀行轉賬、KPay 或 WhatsApp 後,我們會在辦公室核對後才確認預訂。",
     "review.item": "租賃商品",
     "review.period": "租賃期間",
     "review.extendedTbcBadge": "8 天以上 · 租金另議",
@@ -380,6 +388,9 @@ export const dict = {
     "review.errPay": "無法開始付款",
     "review.payBank": "銀行轉賬 / FPS",
     "review.payKpay": "支付寶（KPay）",
+    "review.payWhatsapp": "WhatsApp 訂單訊息",
+    "review.whatsappNotConfigured":
+      "WhatsApp 結帳尚未設定,請改用其他方式或聯絡專櫃。",
     "review.errAlt": "無法切換付款方式",
     "alt.title": "請完成付款",
     "alt.intro": "請依下列預訂編號與金額付款。我們在辦公室確認入數後才會確認租賃。",
@@ -388,9 +399,13 @@ export const dict = {
     "alt.method": "方式",
     "alt.methodBank": "銀行轉賬 / FPS",
     "alt.methodKpay": "支付寶（KPay）",
+    "alt.methodWhatsapp": "WhatsApp",
     "alt.bankNotConfigured": "尚未設定銀行／FPS 指示,請聯絡專櫃。",
     "alt.openKpay": "前往 KPay／支付寶",
     "alt.kpayNotConfigured": "後台尚未設定 KPay 連結,請聯絡專櫃。",
+    "alt.openWhatsapp": "以 WhatsApp 開啟（已帶預訂內容）",
+    "alt.whatsappNotConfigured":
+      "後台尚未設定 WhatsApp 號碼。預訂已儲存,請聯絡專櫃並提供預訂編號。",
     "alt.footerNote": "若您已完成付款,可安心關閉此頁,我們會人手核對。",
     "alt.backBrowse": "返回瀏覽",
 
@@ -589,10 +604,11 @@ export const dict = {
     "review.title": "确认预约内容",
     "review.subtitle": "请确认以下资料,然后以您偏好的方式完成付款。",
     "review.paymentMethodsNote":
-      "我们提供多种付款方式——信用卡（经 Stripe）、银行转账／FPS,以及支付宝（KPay）。请在下方选择。",
+      "我们提供多种付款方式——信用卡（经 Stripe）、银行转账／FPS、支付宝（KPay）,以及后台配置后的 WhatsApp（预填消息）。请在下方选择。",
     "review.paymentMethodLabel": "付款方式",
     "review.stripeNote": "选择信用卡时,将在 Stripe 安全结账页完成付款。",
-    "review.alternateConfirmNote": "选择银行转账或 KPay 后,我们会在办公室核对收款后才确认预订。",
+    "review.alternateConfirmNote":
+      "选择银行转账、KPay 或 WhatsApp 后,我们会在办公室核对后才确认预订。",
     "review.item": "租赁商品",
     "review.period": "租赁期间",
     "review.extendedTbcBadge": "8 天以上 · 租金待定",
@@ -608,6 +624,9 @@ export const dict = {
     "review.errPay": "无法开始付款",
     "review.payBank": "银行转账 / FPS",
     "review.payKpay": "支付宝（KPay）",
+    "review.payWhatsapp": "WhatsApp 订单消息",
+    "review.whatsappNotConfigured":
+      "WhatsApp 结账尚未配置,请改用其他方式或联系专柜。",
     "review.errAlt": "无法切换付款方式",
     "alt.title": "请完成付款",
     "alt.intro": "请按下列预订编号与金额付款。我们在办公室确认收款后才会确认租赁。",
@@ -616,9 +635,13 @@ export const dict = {
     "alt.method": "方式",
     "alt.methodBank": "银行转账 / FPS",
     "alt.methodKpay": "支付宝（KPay）",
+    "alt.methodWhatsapp": "WhatsApp",
     "alt.bankNotConfigured": "尚未设置银行／FPS 说明,请联系专柜。",
     "alt.openKpay": "前往 KPay／支付宝",
     "alt.kpayNotConfigured": "后台尚未配置 KPay 链接,请联系专柜。",
+    "alt.openWhatsapp": "打开 WhatsApp（已带预订内容）",
+    "alt.whatsappNotConfigured":
+      "后台尚未配置 WhatsApp 号码。预订已保存,请联系专柜并提供预订编号。",
     "alt.footerNote": "若您已完成付款,可安心关闭此页,我们会人工核对。",
     "alt.backBrowse": "返回浏览",
 

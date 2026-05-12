@@ -655,7 +655,7 @@ export const dict = {
     "admin.settings.kpayAlipayBaseUrl": "KPay / Alipay entry URL",
     "admin.settings.saveAltPayments": "Save alternate payment settings",
     "admin.settings.whatsappCheckoutBlurb":
-      "When set, shoppers can choose “WhatsApp order message” at checkout. The order is saved first; then WhatsApp opens with a prefilled message to this number. Use digits with country code (e.g. 85291234567). Staff mark the order paid in Back Office after confirming payment.",
+      "When set, shoppers can choose “WhatsApp order message” at shop and rental checkout. The order or booking is saved first; then WhatsApp opens with a prefilled message to this number. Use digits with country code (e.g. 85291234567). Staff mark payment received in Back Office after confirming.",
     "admin.settings.whatsappCheckoutNumber": "WhatsApp number (country code + number, digits only)",
     "admin.settings.saveWhatsappCheckout": "Save WhatsApp checkout",
     "admin.settings.genericGateway": "Online payment gateway",
@@ -1306,7 +1306,7 @@ export const dict = {
     "admin.settings.kpayAlipayBaseUrl": "KPay／支付寶入口網址",
     "admin.settings.saveAltPayments": "儲存其他付款設定",
     "admin.settings.whatsappCheckoutBlurb":
-      "設定後,顧客可於結帳選「WhatsApp 訂單訊息」。系統會先建立訂單,再開啟 WhatsApp 並帶入預填訊息至此號碼。請填國家碼+號碼（僅數字,例如 85291234567）。同事於後台確認收款後標記已付款。",
+      "設定後,顧客於網店與租賃結帳均可選「WhatsApp 訂單訊息」。系統會先建立訂單或預訂,再開啟 WhatsApp 並帶入預填訊息至此號碼。請填國家碼+號碼（僅數字,例如 85291234567）。同事於後台確認收款後標記已付款。",
     "admin.settings.whatsappCheckoutNumber": "WhatsApp 號碼（國家碼+號碼,僅數字）",
     "admin.settings.saveWhatsappCheckout": "儲存 WhatsApp 結帳",
     "admin.settings.genericGateway": "網上付款閘道",
@@ -1957,7 +1957,7 @@ export const dict = {
     "admin.settings.kpayAlipayBaseUrl": "KPay／支付宝入口网址",
     "admin.settings.saveAltPayments": "保存其他付款设置",
     "admin.settings.whatsappCheckoutBlurb":
-      "设置后,顾客可在结账选择「WhatsApp 订单消息」。系统会先创建订单,再打开 WhatsApp 并带入预填消息至此号码。请填国家码+号码（仅数字,例如 85291234567）。同事在后台确认收款后标记已付款。",
+      "设置后,顾客在网店与租赁结账均可选「WhatsApp 订单消息」。系统会先创建订单或预订,再打开 WhatsApp 并带入预填消息至此号码。请填国家码+号码（仅数字,例如 85291234567）。同事在后台确认收款后标记已付款。",
     "admin.settings.whatsappCheckoutNumber": "WhatsApp 号码（国家码+号码,仅数字）",
     "admin.settings.saveWhatsappCheckout": "保存 WhatsApp 结账",
     "admin.settings.genericGateway": "网上支付网关",

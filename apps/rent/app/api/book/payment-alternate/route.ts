@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@lumiere/db";
+import { prisma, getSettings } from "@lumiere/db";
+import { normalizeWhatsAppDigits } from "@/lib/whatsappBookingMessage";
 
 const Body = z.object({
   bookingId: z.string().min(1),
-  method: z.enum(["bank_fps", "kpay_alipay"]),
+  method: z.enum(["bank_fps", "kpay_alipay", "whatsapp"]),
 });
 
 export async function POST(req: Request) {
@@ -13,6 +14,13 @@ export async function POST(req: Request) {
   const parsed = Body.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  if (parsed.data.method === "whatsapp") {
+    const settings = await getSettings();
+    if (!normalizeWhatsAppDigits(settings.whatsappCheckoutNumber)) {
+      return NextResponse.json({ error: "whatsapp_not_configured" }, { status: 400 });
+    }
   }
 
   const booking = await prisma.booking.findUnique({

@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma, getSettings, buildKpayCheckoutUrl } from "@lumiere/db";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isoDate } from "@/lib/format";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { intlLocale } from "@/lib/i18n";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
+import {
+  buildRentalBookingWhatsAppMessage,
+  buildWhatsAppMeUrl,
+  normalizeWhatsAppDigits,
+} from "@/lib/whatsappBookingMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +30,8 @@ export default async function RentAlternateCheckoutPage({
     !booking ||
     booking.status !== "pending" ||
     (booking.paymentProvider !== "bank_fps" &&
-      booking.paymentProvider !== "kpay_alipay")
+      booking.paymentProvider !== "kpay_alipay" &&
+      booking.paymentProvider !== "whatsapp")
   ) {
     notFound();
   }
@@ -33,6 +39,31 @@ export default async function RentAlternateCheckoutPage({
   const settings = await getSettings();
   const t = await getT();
   const intl = intlLocale(await getLocale());
+  const whatsappDigits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+  const periodLabel = `${isoDate(booking.startDate)} → ${isoDate(booking.endDate)}`;
+  const pickupStr = booking.pickupSlot ? new Date(booking.pickupSlot).toISOString() : "—";
+  const returnStr = booking.returnSlot ? new Date(booking.returnSlot).toISOString() : "—";
+  const whatsappUrl =
+    booking.paymentProvider === "whatsapp" && whatsappDigits
+      ? buildWhatsAppMeUrl(
+          whatsappDigits,
+          buildRentalBookingWhatsAppMessage({
+            bookingId: booking.id,
+            productName: booking.product.name,
+            periodLabel,
+            rentalCents: booking.rentalCents,
+            depositCents: booking.depositCents,
+            totalCents: booking.totalCents,
+            currency: booking.currency,
+            email: booking.email,
+            customerName: booking.customerName,
+            customerPhone: booking.customerPhone ?? "",
+            pickupSlot: pickupStr,
+            returnSlot: returnStr,
+            rentalPlanTier: booking.rentalPlanTier,
+          })
+        )
+      : null;
   const kpayUrl =
     booking.paymentProvider === "kpay_alipay"
       ? buildKpayCheckoutUrl(
@@ -62,7 +93,9 @@ export default async function RentAlternateCheckoutPage({
           <span>
             {booking.paymentProvider === "bank_fps"
               ? t("alt.methodBank")
-              : t("alt.methodKpay")}
+              : booking.paymentProvider === "kpay_alipay"
+                ? t("alt.methodKpay")
+                : t("alt.methodWhatsapp")}
           </span>
         </div>
         <div className="text-xs text-gray-500 pt-1">{booking.product.name}</div>
@@ -90,6 +123,21 @@ export default async function RentAlternateCheckoutPage({
       ) : booking.paymentProvider === "kpay_alipay" ? (
         <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded p-3">
           {t("alt.kpayNotConfigured")}
+        </p>
+      ) : null}
+
+      {booking.paymentProvider === "whatsapp" && whatsappUrl ? (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium py-3 rounded transition"
+        >
+          {t("alt.openWhatsapp")}
+        </a>
+      ) : booking.paymentProvider === "whatsapp" ? (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded p-3">
+          {t("alt.whatsappNotConfigured")}
         </p>
       ) : null}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
@@ -23,9 +23,7 @@ type Props = {
   email: string;
 };
 
-type ReviewPayMethod = "stripe" | "bank_fps" | "kpay_alipay";
-
-const PAY_OPTIONS: ReviewPayMethod[] = ["stripe", "bank_fps", "kpay_alipay"];
+type ReviewPayMethod = "stripe" | "bank_fps" | "kpay_alipay" | "whatsapp";
 
 function optionClass(selected: boolean) {
   return [
@@ -43,6 +41,16 @@ export function CheckoutReviewClient(props: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<ReviewPayMethod>("stripe");
+  const [whatsappAvailable, setWhatsappAvailable] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/book/checkout-options")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.whatsappCheckout) setWhatsappAvailable(true);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const payStripe = async () => {
     setError(null);
@@ -61,7 +69,7 @@ export function CheckoutReviewClient(props: Props) {
     if (data.url) window.location.href = data.url;
   };
 
-  const payAlternate = async (method: "bank_fps" | "kpay_alipay") => {
+  const payAlternate = async (method: "bank_fps" | "kpay_alipay" | "whatsapp") => {
     setError(null);
     setBusy(true);
     const res = await fetch("/api/book/payment-alternate", {
@@ -72,6 +80,10 @@ export function CheckoutReviewClient(props: Props) {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
+      if (data.error === "whatsapp_not_configured") {
+        setError(t("review.whatsappNotConfigured"));
+        return;
+      }
       setError(data.error ?? t("review.errAlt"));
       return;
     }
@@ -89,8 +101,16 @@ export function CheckoutReviewClient(props: Props) {
   const optionTitle = (m: ReviewPayMethod) => {
     if (m === "stripe") return t("review.payCta");
     if (m === "bank_fps") return t("review.payBank");
-    return t("review.payKpay");
+    if (m === "kpay_alipay") return t("review.payKpay");
+    return t("review.payWhatsapp");
   };
+
+  const payOptions: ReviewPayMethod[] = [
+    "stripe",
+    "bank_fps",
+    "kpay_alipay",
+    ...(whatsappAvailable ? (["whatsapp"] as const) : []),
+  ];
 
   return (
     <div className="space-y-6">
@@ -159,7 +179,7 @@ export function CheckoutReviewClient(props: Props) {
           role="radiogroup"
           aria-label={t("review.paymentMethodLabel")}
         >
-          {PAY_OPTIONS.map((m) => (
+          {payOptions.map((m) => (
             <label key={m} className={optionClass(paymentMethod === m)}>
               <input
                 type="radio"
