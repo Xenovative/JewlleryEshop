@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getSettings, buildKpayCheckoutUrl } from "@lumiere/db";
+import { prisma, getSettings, buildKpayCheckoutUrl, getWhatsappCheckoutDigits } from "@lumiere/db";
 import { formatPrice } from "@/lib/format";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { intlLocale } from "@/lib/i18n";
 import {
   buildShopOrderWhatsAppMessage,
   buildWhatsAppMeUrl,
-  normalizeWhatsAppDigits,
 } from "@/lib/whatsappOrderMessage";
 import type { CartSnapshotItem } from "@/lib/checkoutCart";
 
@@ -78,7 +77,7 @@ export default async function ShopAlternateCheckoutPage({
     cartItems = [];
   }
 
-  const whatsappDigits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+  const whatsappDigits = await getWhatsappCheckoutDigits();
   const whatsappUrl =
     order.paymentProvider === "whatsapp" && whatsappDigits
       ? buildWhatsAppMeUrl(

@@ -43,7 +43,6 @@ export function CheckoutView() {
   const [phone, setPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<CheckoutPayMethod>("stripe");
   const [genericGatewayLabel, setGenericGatewayLabel] = useState<string | null>(null);
-  const [whatsappCheckout, setWhatsappCheckout] = useState(false);
 
   const refresh = async () => {
     const local = readCart();
@@ -75,7 +74,6 @@ export function CheckoutView() {
         if (d.genericGatewayLabel !== undefined) {
           setGenericGatewayLabel(d.genericGatewayLabel as string | null);
         }
-        if (d.whatsappCheckout === true) setWhatsappCheckout(true);
       })
       .catch(() => {});
   }, []);
@@ -148,7 +146,7 @@ export function CheckoutView() {
     "stripe",
     "bank_fps",
     "kpay_alipay",
-    ...(whatsappCheckout ? (["whatsapp"] as const) : []),
+    "whatsapp",
     ...(genericGatewayLabel !== null ? ["generic_gateway" as CheckoutPayMethod] : []),
   ];
 

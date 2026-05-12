@@ -1,3 +1,4 @@
+export * from "./whatsappDigits";
 export * from "./prisma";
 export * from "./categoryDisplayOrder";
 export * from "./settings";

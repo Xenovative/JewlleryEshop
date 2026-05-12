@@ -1,10 +1,6 @@
 import type { CartSnapshotItem } from "./checkoutCart";
 
-export function normalizeWhatsAppDigits(raw: string | null | undefined): string | null {
-  if (!raw?.trim()) return null;
-  const d = raw.replace(/\D/g, "");
-  return d.length >= 8 ? d : null;
-}
+export { normalizeWhatsAppDigits } from "@lumiere/db";
 
 function formatMoney(cents: number, currency: string): string {
   return `${currency.toUpperCase()} ${(cents / 100).toFixed(2)}`;

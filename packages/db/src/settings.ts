@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { normalizeWhatsAppDigits } from "./whatsappDigits";
 
 const SINGLETON_ID = "singleton";
 
@@ -6,6 +7,28 @@ export async function getSettings() {
   const existing = await prisma.settings.findUnique({ where: { id: SINGLETON_ID } });
   if (existing) return existing;
   return prisma.settings.create({ data: { id: SINGLETON_ID } });
+}
+
+/** When DB and storefront processes disagree on DATABASE_URL, set this on the rent/shop host. */
+export function getWhatsappCheckoutDigitsFromEnv(): string | null {
+  const raw =
+    process.env.LUMIERE_WHATSAPP_CHECKOUT_NUMBER?.trim() ||
+    process.env.WHATSAPP_CHECKOUT_NUMBER?.trim() ||
+    null;
+  return normalizeWhatsAppDigits(raw);
+}
+
+/** Merge DB value with env without a second DB round-trip. */
+export function getWhatsappCheckoutDigitsFromSettings(
+  s: Pick<{ whatsappCheckoutNumber: string | null }, "whatsappCheckoutNumber">
+): string | null {
+  return normalizeWhatsAppDigits(s.whatsappCheckoutNumber) ?? getWhatsappCheckoutDigitsFromEnv();
+}
+
+/** Settings row first, then env fallback (same validation as payment routes). */
+export async function getWhatsappCheckoutDigits(): Promise<string | null> {
+  const s = await getSettings();
+  return getWhatsappCheckoutDigitsFromSettings(s);
 }
 
 export async function updateSettings(

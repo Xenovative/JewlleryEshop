@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import { getSettings } from "@lumiere/db";
-import { normalizeWhatsAppDigits } from "@/lib/whatsappBookingMessage";
+import { getWhatsappCheckoutDigits } from "@lumiere/db";
 
 export const dynamic = "force-dynamic";
 
 /** Public: whether WhatsApp checkout is configured (same Settings as shop). */
 export async function GET() {
-  const s = await getSettings().catch(() => null);
+  const digits = await getWhatsappCheckoutDigits().catch(() => null);
   return NextResponse.json({
-    whatsappCheckout: !!normalizeWhatsAppDigits(s?.whatsappCheckoutNumber),
+    whatsappCheckout: !!digits,
   });
 }

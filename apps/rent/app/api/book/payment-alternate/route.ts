@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma, getSettings } from "@lumiere/db";
-import { normalizeWhatsAppDigits } from "@/lib/whatsappBookingMessage";
+import { prisma, getWhatsappCheckoutDigits } from "@lumiere/db";
 
 const Body = z.object({
   bookingId: z.string().min(1),
@@ -17,8 +16,8 @@ export async function POST(req: Request) {
   }
 
   if (parsed.data.method === "whatsapp") {
-    const settings = await getSettings();
-    if (!normalizeWhatsAppDigits(settings.whatsappCheckoutNumber)) {
+    const digits = await getWhatsappCheckoutDigits();
+    if (!digits) {
       return NextResponse.json({ error: "whatsapp_not_configured" }, { status: 400 });
     }
   }

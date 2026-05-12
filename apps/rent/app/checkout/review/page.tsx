@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { prisma, getSettings } from "@lumiere/db";
-import { normalizeWhatsAppDigits } from "@/lib/whatsappBookingMessage";
+import { prisma } from "@lumiere/db";
 import { dayDiff, fromIsoDate, isoDate } from "@/lib/format";
 import { getT } from "@/lib/i18n.server";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
@@ -39,9 +38,6 @@ export default async function RentCheckoutReviewPage({
     fromIsoDate(isoDate(booking.endDate))
   );
 
-  const settings = await getSettings();
-  const whatsappCheckoutEnabled = !!normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
-
   return (
     <div className="max-w-lg mx-auto py-8">
       <h1 className="font-serif text-2xl mb-2">{t("review.title")}</h1>
@@ -51,7 +47,6 @@ export default async function RentCheckoutReviewPage({
       </div>
       <CheckoutReviewClient
         bookingId={booking.id}
-        whatsappCheckoutEnabled={whatsappCheckoutEnabled}
         productName={booking.product.name}
         startDate={isoDate(booking.startDate)}
         endDate={isoDate(booking.endDate)}

@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma, upsertCustomerByEmail, getSettings } from "@lumiere/db";
+import { prisma, upsertCustomerByEmail, getWhatsappCheckoutDigits } from "@lumiere/db";
 import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 import { CheckoutItemsSchema, resolveCheckoutItems } from "@/lib/checkoutCart";
 import { sendAdminSms } from "@/lib/sms";
-import { normalizeWhatsAppDigits } from "@/lib/whatsappOrderMessage";
 
 const Body = CheckoutItemsSchema.extend({
   email: z.string().email(),
@@ -24,8 +23,7 @@ export async function POST(req: Request) {
   const { email, name, phone, method, items } = parsed.data;
 
   if (method === "whatsapp") {
-    const settings = await getSettings();
-    const digits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+    const digits = await getWhatsappCheckoutDigits();
     if (!digits) {
       return NextResponse.json(
         { error: "whatsapp_not_configured" },

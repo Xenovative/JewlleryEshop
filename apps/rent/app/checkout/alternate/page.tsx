@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma, getSettings, buildKpayCheckoutUrl } from "@lumiere/db";
+import { prisma, getSettings, buildKpayCheckoutUrl, getWhatsappCheckoutDigits } from "@lumiere/db";
 import { formatPrice, isoDate } from "@/lib/format";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { intlLocale } from "@/lib/i18n";
@@ -8,7 +8,6 @@ import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
 import {
   buildRentalBookingWhatsAppMessage,
   buildWhatsAppMeUrl,
-  normalizeWhatsAppDigits,
 } from "@/lib/whatsappBookingMessage";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +38,7 @@ export default async function RentAlternateCheckoutPage({
   const settings = await getSettings();
   const t = await getT();
   const intl = intlLocale(await getLocale());
-  const whatsappDigits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+  const whatsappDigits = await getWhatsappCheckoutDigits();
   const periodLabel = `${isoDate(booking.startDate)} → ${isoDate(booking.endDate)}`;
   const pickupStr = booking.pickupSlot ? new Date(booking.pickupSlot).toISOString() : "—";
   const returnStr = booking.returnSlot ? new Date(booking.returnSlot).toISOString() : "—";

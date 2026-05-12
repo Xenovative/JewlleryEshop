@@ -8,8 +8,6 @@ import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 
 type Props = {
   bookingId: string;
-  /** From server: same DB as booking; avoids relying on a separate client fetch. */
-  whatsappCheckoutEnabled: boolean;
   productName: string;
   startDate: string;
   endDate: string;
@@ -101,7 +99,7 @@ export function CheckoutReviewClient(props: Props) {
     "stripe",
     "bank_fps",
     "kpay_alipay",
-    ...(props.whatsappCheckoutEnabled ? (["whatsapp"] as const) : []),
+    "whatsapp",
   ];
 
   return (

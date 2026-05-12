@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSettings } from "@lumiere/db";
-import { normalizeWhatsAppDigits } from "@/lib/whatsappOrderMessage";
+import { getSettings, getWhatsappCheckoutDigitsFromSettings, getWhatsappCheckoutDigitsFromEnv } from "@lumiere/db";
 
 export const dynamic = "force-dynamic";
 
@@ -8,8 +7,11 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const s = await getSettings().catch(() => null);
   const hasGateway = !!s?.genericGatewayBaseUrl?.trim();
+  const waDigits = s
+    ? getWhatsappCheckoutDigitsFromSettings(s)
+    : getWhatsappCheckoutDigitsFromEnv();
   return NextResponse.json({
     genericGatewayLabel: hasGateway ? (s?.genericGatewayLabel?.trim() || null) : null,
-    whatsappCheckout: !!normalizeWhatsAppDigits(s?.whatsappCheckoutNumber),
+    whatsappCheckout: !!waDigits,
   });
 }
