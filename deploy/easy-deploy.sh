@@ -5,7 +5,7 @@ set -euo pipefail
 # - Suggests APP_DIR as repo root, or /var/www/<basename> if the repo is under /root
 # - When under /root, defaults SOURCE_DIR to that path so vps-deploy rsyncs into APP_DIR
 #   (override with SOURCE_DIR=… or EASY_DEPLOY_SKIP_RSYNC=1 to skip the copy)
-# - Asks only essential questions
+# - If APP_DIR already looks like a deployment, offers to delete it before vps-deploy
 # - Re-runs itself with sudo if needed
 # - Calls main script in NONINTERACTIVE mode
 
@@ -40,6 +40,29 @@ prompt() {
   printf -v "${var_name}" "%s" "${value}"
 }
 
+# Non-empty APP_DIR that already has project artifacts (prior clone / deploy).
+looks_like_existing_deployment() {
+  local d="$1"
+  [[ -d "${d}" ]] || return 1
+  [[ -f "${d}/package.json" || -d "${d}/node_modules" || -d "${d}/.next" || -d "${d}/apps" ]] && return 0
+  return 1
+}
+
+# Refuse obviously dangerous rm -rf targets.
+safe_to_remove_deploy_dir() {
+  local d="${1%/}"
+  [[ -n "${d}" ]] || return 1
+  case "${d}" in
+    / | /root | /var | /usr | /etc | /home | /bin | /boot | /lib | /lib64 | /sbin | /opt)
+      return 1
+      ;;
+  esac
+  case "${d}" in
+    /*/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 if [[ "${EUID}" -ne 0 ]]; then
   log "This script needs root privileges for nginx/systemd/certbot."
   log "Re-running with sudo..."
@@ -68,6 +91,25 @@ LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 SOURCE_DIR="${SOURCE_DIR:-}"
 
 prompt APP_DIR "App directory on VPS" "${APP_DIR}"
+
+if looks_like_existing_deployment "${APP_DIR}"; then
+  echo
+  log "Existing content detected at ${APP_DIR} (e.g. package.json, node_modules, .next, or apps/)."
+  read -r -p "Delete this directory entirely before deploying? [y/N]: " wipe
+  if [[ "${wipe}" =~ ^[Yy]$ ]]; then
+    if ! safe_to_remove_deploy_dir "${APP_DIR}"; then
+      echo "[easy-deploy][error] Refusing to remove '${APP_DIR}' (path safety check). Delete manually or pick another APP_DIR." >&2
+      exit 1
+    fi
+    log "Removing ${APP_DIR} ..."
+    rm -rf "${APP_DIR}"
+    log "Removed."
+  else
+    log "Keeping existing directory; vps-deploy will update / rsync over it where applicable."
+  fi
+  echo
+fi
+
 prompt APP_USER "System user for services" "${APP_USER}"
 if [[ "${IS_ROOT_CLONE}" -eq 1 ]]; then
   if [[ "${EASY_DEPLOY_SKIP_RSYNC:-0}" == "1" ]]; then
