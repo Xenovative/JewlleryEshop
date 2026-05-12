@@ -62,7 +62,7 @@ export const dict = {
     "book.endDateAuto": "End date (auto)",
     "book.daysSummary": "{days} day(s) · {price} rental",
     "book.planHint":
-      "Choose 4 days, 8 days, or 8+ days (rental price TBC). Published prices use {pct4}% of retail for 4 days and scale to an 8-day rate anchored at {pct7}% of the reference price (HKD).",
+      "Choose 4 days, 8 days, or 8+ days (rental price TBC). Published rates are {pct4}% of the reference price for 4 days and {pct7}% for 8 days (HKD).",
     "book.pickupOnly":
       "Rentals are collected and returned in person at our Hong Kong office only — we do not ship rental items or accept mail-in returns.",
     "book.deposit": "Refundable deposit",
@@ -302,7 +302,7 @@ export const dict = {
     "book.endDateAuto": "結束日期(自動)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
     "book.planHint":
-      "可選 4 天、8 天或 8 天以上（租金另議）。已公佈價格：4 天為參考定價之 {pct4}%,8 天則依錨點 {pct7}% 斜率計算（港幣）。",
+      "可選 4 天、8 天或 8 天以上（租金另議）。已公佈價格：4 天為參考定價之 {pct4}%，8 天為 {pct7}%（港幣）。",
     "book.pickupOnly":
       "租賃僅限於香港辦公室現場取件與歸還,不提供寄送,亦不接受郵寄退件。",
     "book.deposit": "可退還保證金",
@@ -530,7 +530,7 @@ export const dict = {
     "book.endDateAuto": "结束日期(自动)",
     "book.daysSummary": "共 {days} 天 · 租金 {price}",
     "book.planHint":
-      "可选 4 天、8 天或 8 天以上（租金待定）。已公布价格：4 天为参考定价之 {pct4}%,8 天则按锚点 {pct7}% 斜率计算（港币）。",
+      "可选 4 天、8 天或 8 天以上（租金待定）。已公布价格：4 天为参考定价之 {pct4}%，8 天为 {pct7}%（港币）。",
     "book.pickupOnly":
       "租赁仅限在香港办公室现场取件与归还,不提供寄送,亦不接受邮寄退件。",
     "book.deposit": "可退还保证金",

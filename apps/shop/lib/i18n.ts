@@ -633,9 +633,9 @@ export const dict = {
     "admin.settings.rentalFrontend": "Rental frontend",
     "admin.settings.rentalPricing": "Rental plan pricing",
     "admin.settings.rentalPricingBlurb":
-      "The 4-day field is the percent of each product’s selling price (admin price) for a 4-day rental. The second field is the curve anchor at reference day 7; together with the 4-day value it determines the published 8-day rate on the rental storefront. Longer rentals with price TBC are quoted separately. Whole numbers 1–100.",
+      "The 4-day field is the percent of each product’s selling price (admin price) for a 4-day rental. The second field is the percent of selling price for the published 8-day rental. Longer rentals with price TBC are quoted separately. Whole numbers 1–100.",
     "admin.settings.rentalPct4": "4-day plan (% of selling price)",
-    "admin.settings.rentalPct8Anchor": "8-day curve anchor — day 7 reference (% of selling price)",
+    "admin.settings.rentalPct8Anchor": "8-day plan (% of selling price)",
     "admin.settings.rentalDepositPct": "Security deposit (% of selling price)",
     "admin.settings.rentalDepositPctHint":
       "Charged as a second Stripe line item at checkout. Use 0 to disable. Refunds are handled in person at your office after return inspection.",
@@ -1271,9 +1271,9 @@ export const dict = {
     "admin.settings.rentalFrontend": "租賃前台",
     "admin.settings.rentalPricing": "租賃方案定價",
     "admin.settings.rentalPricingBlurb":
-      "「4 天」為各商品售價（後台標價）之百分比,用於 4 天租金。第二個數值為曲線錨點（參考第 7 天）之售價百分比,與 4 天數值一併推算租賃前台顯示的 8 天已公佈租金。更長租期且租金另議者另計。請填 1–100 的整數。",
+      "「4 天」為各商品售價（後台標價）之百分比,用於 4 天租金。第二個數值為已公佈 8 天租金之售價百分比。更長租期且租金另議者另計。請填 1–100 的整數。",
     "admin.settings.rentalPct4": "4 天方案（售價之 %）",
-    "admin.settings.rentalPct8Anchor": "8 天曲線錨點 — 第 7 天參考點（售價之 %）",
+    "admin.settings.rentalPct8Anchor": "8 天方案（售價之 %）",
     "admin.settings.rentalDepositPct": "保證金（售價之 %）",
     "admin.settings.rentalDepositPctHint":
       "結帳時另列 Stripe 項目收取。填 0 則不收取。退還於顧客親自歸還並驗收後在辦公室處理。",
@@ -1909,9 +1909,9 @@ export const dict = {
     "admin.settings.rentalFrontend": "租赁前台",
     "admin.settings.rentalPricing": "租赁方案定价",
     "admin.settings.rentalPricingBlurb":
-      "「4 天」为各商品售价（后台标价）之百分比,用于 4 天租金。第二个数值为曲线锚点（参考第 7 天）之售价百分比,与 4 天数值一并推算租赁前台显示的 8 天已公布租金。更长租期且租金待定者另计。请填 1–100 的整数。",
+      "「4 天」为各商品售价（后台标价）之百分比,用于 4 天租金。第二个数值为已公布 8 天租金之售价百分比。更长租期且租金待定者另计。请填 1–100 的整数。",
     "admin.settings.rentalPct4": "4 天方案（售价之 %）",
-    "admin.settings.rentalPct8Anchor": "8 天曲线锚点 — 第 7 天参考点（售价之 %）",
+    "admin.settings.rentalPct8Anchor": "8 天方案（售价之 %）",
     "admin.settings.rentalDepositPct": "保證金（售价之 %）",
     "admin.settings.rentalDepositPctHint":
       "結帳時另列 Stripe 項目收取。填 0 則不收取。退还於顾客親自归还並验收后在办公室处理。",

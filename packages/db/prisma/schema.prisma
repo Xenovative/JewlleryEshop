@@ -145,7 +145,7 @@ model Settings {
   rentalHomeJson      String?
   /// Whole-number percent of product selling price (priceCents) for 4-day rental
   rental4DayPercentOfPrice Int @default(10)
-  /// Whole-number percent: curve anchor (day 7) with 4-day % to derive published 8-day rental on rent frontend
+  /// Whole-number percent of selling price for the published 8-day rental plan (rent frontend)
   rental7DayPercentOfPrice Int @default(18)
   /// Security deposit as % of selling price (0 disables deposit at checkout)
   rentalDepositPercentOfPrice Int @default(25)

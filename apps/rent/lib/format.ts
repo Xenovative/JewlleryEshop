@@ -1,6 +1,6 @@
 export function formatPrice(
   cents: number,
-  currency = "usd",
+  currency = "hkd",
   locale = "en-US"
 ): string {
   return new Intl.NumberFormat(locale, {

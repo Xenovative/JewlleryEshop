@@ -13,6 +13,10 @@ export function shopPublicDir(): string {
   if (fromEnv) {
     const abs = path.resolve(fromEnv);
     if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) return abs;
+    console.warn(
+      `[shopPublicDir] SHOP_PUBLIC_DIR is set but not a directory: "${fromEnv}" → "${abs}". ` +
+        "Falling back to cwd heuristic; uploads may not match what Next serves."
+    );
   }
 
   let dir = path.resolve(process.cwd());

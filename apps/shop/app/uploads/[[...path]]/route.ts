@@ -22,9 +22,12 @@ export async function GET(
     return new NextResponse(null, { status: 404 });
   }
 
-  const base = path.resolve(shopPublicDir());
-  const abs = path.resolve(base, ...segments);
-  const rel = path.relative(base, abs);
+  // `[[...path]]` is everything after `/uploads/` (e.g. `products/uuid.jpg`).
+  // Files on disk live under `public/uploads/...`, not `public/products/...`.
+  const publicRoot = path.resolve(shopPublicDir());
+  const uploadsRoot = path.join(publicRoot, "uploads");
+  const abs = path.resolve(uploadsRoot, ...segments);
+  const rel = path.relative(uploadsRoot, abs);
   if (rel.startsWith("..") || path.isAbsolute(rel)) {
     return new NextResponse(null, { status: 400 });
   }

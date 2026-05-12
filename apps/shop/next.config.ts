@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
+  // Backoffice product images are up to 5 MB; Next defaults are much smaller for parsed bodies.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
+  },
 };
 
 export default nextConfig;

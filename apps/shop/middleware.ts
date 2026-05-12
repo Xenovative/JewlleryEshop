@@ -2,7 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/session";
 
 export const config = {
-  matcher: ["/backoffice/:path*", "/api/backoffice/:path*"],
+  matcher: [
+    "/backoffice/:path*",
+    // Exclude multipart upload routes so middleware does not buffer/truncate large bodies;
+    // `requireApiRole` in each route still enforces staff auth.
+    "/api/backoffice/((?!uploads).*)",
+  ],
 };
 
 const BO_PATH_HEADER = "x-lumiere-bo-path";

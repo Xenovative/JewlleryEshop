@@ -17,14 +17,16 @@ export type RetailPlanQuote =
     }
   | { ok: false; error: string };
 
-/** Interpolate retail % for 4- or 8-day plans only (day-7 anchor drives the slope to day 8). */
+/**
+ * Retail % of reference price for published 4- and 8-day plans.
+ * `percent8Anchor` is the configured 8-day rate (stored as `rental7DayPercentOfPrice` for history).
+ */
 export function planPercentForDays(
   days: 4 | 8,
   percent4: number,
-  percent7: number
+  percent8Anchor: number
 ): number {
-  const step = (percent7 - percent4) / 3;
-  return percent4 + (days - 4) * step;
+  return days === 4 ? percent4 : percent8Anchor;
 }
 
 export function quoteRetailPlanByTier(

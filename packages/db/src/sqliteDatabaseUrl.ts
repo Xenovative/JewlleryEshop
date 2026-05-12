@@ -1,7 +1,6 @@
 import { createRequire } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 /**
  * Walk up from cwd to find this package's prisma directory (monorepo root
@@ -39,8 +38,34 @@ function findPrismaDirFromPackage(): string | null {
   return null;
 }
 
+/** Optional: absolute path to `packages/db/prisma` when auto-detect fails. */
+function prismaDirFromEnv(): string | null {
+  const raw = process.env.LUMIERE_PRISMA_DIR?.trim();
+  if (!raw) return null;
+  const abs = path.resolve(raw);
+  if (fs.existsSync(path.join(abs, "schema.prisma"))) return abs;
+  return null;
+}
+
 function prismaDirForSqlite(): string | null {
-  return findPrismaDirFromCwd() ?? findPrismaDirFromPackage();
+  return prismaDirFromEnv() ?? findPrismaDirFromCwd() ?? findPrismaDirFromPackage();
+}
+
+/**
+ * Prisma + SQLite on Windows are picky about `file:` URLs. Prefer `file:C:/path`
+ * (see Prisma SQLite docs); on Unix use `file:` + absolute path (`file:///var/...`).
+ */
+function toPrismaSqliteFileUrl(absOsPath: string): string {
+  const abs = path.resolve(absOsPath);
+  fs.mkdirSync(path.dirname(abs), { recursive: true });
+  const p = abs.split(path.sep).join("/");
+  if (/^[A-Za-z]:\//.test(p)) {
+    return `file:${p}`;
+  }
+  if (p.startsWith("/")) {
+    return `file://${p}`;
+  }
+  return `file:${p}`;
 }
 
 /** If DATABASE_URL is a relative `file:` SQLite path, return the relative file segment. */
@@ -75,7 +100,7 @@ export function normalizeSqliteDatabaseUrl(): void {
     return;
   }
   const abs = path.resolve(prismaDir, rel);
-  process.env.DATABASE_URL = pathToFileURL(abs).href;
+  process.env.DATABASE_URL = toPrismaSqliteFileUrl(abs);
 }
 
 normalizeSqliteDatabaseUrl();

@@ -48,7 +48,7 @@ const empty = (categoryId: string): Product => ({
   name: "",
   description: "",
   priceCents: 0,
-  currency: "usd",
+  currency: "hkd",
   imageUrl: "",
   stock: 0,
   material: "",
@@ -86,6 +86,13 @@ function slugifyProductName(name: string): string {
     .replace(/-{2,}/g, "-")
     .replace(/^-+|-+$/g, "");
   return slug.slice(0, 200);
+}
+
+/** Admin money fields are edited in major units (e.g. HKD); DB stays integer cents. */
+function dollarsFieldToCents(raw: string): number {
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.round(n * 100);
 }
 
 export function ProductsAdmin({
@@ -203,7 +210,7 @@ export function ProductsAdmin({
       name: editing.name,
       description: editing.description,
       priceCents: Number(editing.priceCents),
-      currency: editing.currency || "usd",
+      currency: editing.currency?.trim() || "hkd",
       imageUrl:
         editing.imageUrl.trim() ||
         (editing.images.find((img) => img.url.trim() !== "")?.url ?? ""),
@@ -489,10 +496,15 @@ export function ProductsAdmin({
               <Field label={t("admin.products.field.salePrice")}>
                 <input
                   type="number"
+                  min={0}
+                  step="0.01"
                   className="input"
-                  value={editing.priceCents}
+                  value={editing.priceCents / 100}
                   onChange={(e) =>
-                    setEditing({ ...editing, priceCents: Number(e.target.value) })
+                    setEditing({
+                      ...editing,
+                      priceCents: dollarsFieldToCents(e.target.value),
+                    })
                   }
                 />
               </Field>
@@ -870,12 +882,14 @@ export function ProductsAdmin({
                     <Field label={t("admin.products.field.dailyPrice")}>
                       <input
                         type="number"
+                        min={0}
+                        step="0.01"
                         className="input"
-                        value={editing.rentDailyCents ?? 0}
+                        value={(editing.rentDailyCents ?? 0) / 100}
                         onChange={(e) =>
                           setEditing({
                             ...editing,
-                            rentDailyCents: Number(e.target.value),
+                            rentDailyCents: dollarsFieldToCents(e.target.value),
                           })
                         }
                       />
@@ -886,12 +900,14 @@ export function ProductsAdmin({
                       <Field label={t("admin.products.field.fixedPrice")}>
                         <input
                           type="number"
+                          min={0}
+                          step="0.01"
                           className="input"
-                          value={editing.rentFixedCents ?? 0}
+                          value={(editing.rentFixedCents ?? 0) / 100}
                           onChange={(e) =>
                             setEditing({
                               ...editing,
-                              rentFixedCents: Number(e.target.value),
+                              rentFixedCents: dollarsFieldToCents(e.target.value),
                             })
                           }
                         />
@@ -915,13 +931,21 @@ export function ProductsAdmin({
                   <Field label={t("admin.products.field.waiverFee")}>
                     <input
                       type="number"
+                      min={0}
+                      step="0.01"
                       className="input"
-                      value={editing.waiverFeeCents ?? ""}
+                      value={
+                        editing.waiverFeeCents == null || editing.waiverFeeCents === 0
+                          ? ""
+                          : editing.waiverFeeCents / 100
+                      }
                       onChange={(e) =>
                         setEditing({
                           ...editing,
                           waiverFeeCents:
-                            e.target.value === "" ? null : Number(e.target.value),
+                            e.target.value === ""
+                              ? null
+                              : dollarsFieldToCents(e.target.value) || null,
                         })
                       }
                     />
@@ -959,11 +983,16 @@ export function ProductsAdmin({
                         <input
                           className="input w-32"
                           type="number"
+                          min={0}
+                          step="0.01"
                           placeholder={t("admin.products.tier.price")}
-                          value={tier.priceCents}
+                          value={tier.priceCents / 100}
                           onChange={(e) => {
                             const next = [...editing.rentalTiers];
-                            next[idx] = { ...tier, priceCents: Number(e.target.value) };
+                            next[idx] = {
+                              ...tier,
+                              priceCents: dollarsFieldToCents(e.target.value),
+                            };
                             setEditing({ ...editing, rentalTiers: next });
                           }}
                         />
