@@ -14,6 +14,7 @@ import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PolicyHighlightsSection } from "@/components/home/PolicyHighlightsSection";
 import { CtaBannerSection } from "@/components/home/CtaBannerSection";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
+import { resolveShopHostedMediaUrl } from "@/lib/shopMediaUrl";
 import { rentalPriceTeaser } from "@/lib/rentalPriceTeaser";
 import type { DictKey } from "@/lib/i18n";
 
@@ -171,7 +172,7 @@ export default async function RentHomePage() {
                           <div className="w-24 h-24 rounded-lg overflow-hidden bg-brand-50 flex-shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={p.imageUrl}
+                              src={resolveShopHostedMediaUrl(p.imageUrl)}
                               alt={p.name}
                               className="w-full h-full object-cover transition duration-300 ease-out motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100"
                             />

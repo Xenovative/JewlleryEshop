@@ -74,6 +74,20 @@ const empty = (categoryId: string): Product => ({
   images: [],
 });
 
+/** URL-safe slug from display name (supports letters/numbers across scripts). */
+function slugifyProductName(name: string): string {
+  const base = name
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .trim();
+  const slug = base
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.slice(0, 200);
+}
+
 export function ProductsAdmin({
   initialProducts,
   categories,
@@ -85,14 +99,22 @@ export function ProductsAdmin({
   const t = useT();
   const fileRef = useRef<HTMLInputElement>(null);
   const pendingReplaceIndex = useRef<number | null>(null);
+  /** After user edits slug, do not overwrite it from name changes (new products only). */
+  const slugEditedManually = useRef(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const startNew = () => setEditing(empty(categories[0]?.id ?? ""));
-  const startEdit = (p: Product) => setEditing(JSON.parse(JSON.stringify(p)));
+  const startNew = () => {
+    slugEditedManually.current = false;
+    setEditing(empty(categories[0]?.id ?? ""));
+  };
+  const startEdit = (p: Product) => {
+    slugEditedManually.current = true;
+    setEditing(JSON.parse(JSON.stringify(p)));
+  };
   const cancel = () => {
     setEditing(null);
     setError(null);
@@ -418,14 +440,25 @@ export function ProductsAdmin({
                 <input
                   className="input"
                   value={editing.name}
-                  onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    const isNew = !editing.id;
+                    const nextSlug =
+                      isNew && !slugEditedManually.current
+                        ? slugifyProductName(name)
+                        : editing.slug;
+                    setEditing({ ...editing, name, slug: nextSlug });
+                  }}
                 />
               </Field>
               <Field label={t("admin.products.field.slug")}>
                 <input
                   className="input"
                   value={editing.slug}
-                  onChange={(e) => setEditing({ ...editing, slug: e.target.value })}
+                  onChange={(e) => {
+                    slugEditedManually.current = true;
+                    setEditing({ ...editing, slug: e.target.value });
+                  }}
                 />
               </Field>
               <Field label={t("admin.products.field.sku")}>

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import path from "node:path";
-import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { requireApiRole } from "@/lib/rbac";
 import { audit } from "@/lib/audit";
+import { shopPublicDir } from "@/lib/shopPublicDir";
 
 export const runtime = "nodejs";
 
@@ -15,12 +15,6 @@ const MIME_EXT: Record<string, string> = {
   "image/webp": ".webp",
   "image/gif": ".gif",
 };
-
-function shopPublicDir(): string {
-  const monorepo = path.join(process.cwd(), "apps", "shop", "public");
-  if (fs.existsSync(monorepo)) return monorepo;
-  return path.join(process.cwd(), "public");
-}
 
 function publicBaseUrl(req: Request): string {
   const fromEnv = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "");

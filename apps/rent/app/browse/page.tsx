@@ -5,6 +5,7 @@ import { intlLocale } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
 import type { DictKey } from "@/lib/i18n";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
+import { resolveShopHostedMediaUrl } from "@/lib/shopMediaUrl";
 import { rentalPriceTeaser } from "@/lib/rentalPriceTeaser";
 
 export const dynamic = "force-dynamic";
@@ -123,7 +124,7 @@ export default async function BrowsePage({
               <div className="aspect-square bg-brand-50 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={p.imageUrl}
+                  src={resolveShopHostedMediaUrl(p.imageUrl)}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-300 ease-out motion-reduce:group-hover:scale-100"
                 />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { safeHref, type HeroConfig } from "@/lib/homepageConfig";
+import { resolveShopHostedMediaUrl } from "@/lib/shopMediaUrl";
 
 type Props = {
   hero: HeroConfig;
@@ -24,7 +25,7 @@ export function HeroSection({ hero, defaults, variant = "shop" }: Props) {
     hero.secondaryCtaLabel.trim() || defaults.secondaryCtaLabel;
   const primaryHref = safeHref(hero.primaryCtaHref, defaults.primaryCtaHref);
   const secondaryHref = safeHref(hero.secondaryCtaHref, defaults.secondaryCtaHref);
-  const imageUrl = hero.imageUrl?.trim();
+  const imageUrl = resolveShopHostedMediaUrl(hero.imageUrl?.trim());
 
   const isRental = variant === "rental";
   const wrapperBg = isRental

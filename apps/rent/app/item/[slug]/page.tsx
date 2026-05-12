@@ -7,6 +7,7 @@ import { ItemGallery } from "@/components/ItemGallery";
 import type { DictKey } from "@/lib/i18n";
 import { getT } from "@/lib/i18n.server";
 import { enforceRentalFrontendEnabled } from "@/lib/frontendMode";
+import { resolveShopHostedMediaUrl } from "@/lib/shopMediaUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +36,14 @@ export async function generateMetadata({
     },
   });
   if (!p) return {};
+  const og = resolveShopHostedMediaUrl(p.imageUrl);
   return {
     title: p.seoTitle || p.name,
     description: p.seoDescription || p.description.slice(0, 160),
     openGraph: {
       title: p.seoTitle || p.name,
       description: p.seoDescription || p.description.slice(0, 160),
-      images: p.imageUrl ? [p.imageUrl] : undefined,
+      images: og ? [og] : undefined,
     },
   };
 }
@@ -66,11 +68,16 @@ export default async function ItemPage({
   const t = await getT();
   const catKey = CAT_KEYS[product.category.slug];
   const catLabel = catKey ? t(catKey) : product.category.name;
+  const heroUrl = resolveShopHostedMediaUrl(product.imageUrl);
+  const galleryImages = product.images.map((img) => ({
+    ...img,
+    url: resolveShopHostedMediaUrl(img.url),
+  }));
   return (
     <div className="grid md:grid-cols-2 gap-10">
       <ItemGallery
-        hero={{ url: product.imageUrl, alt: product.name }}
-        images={product.images}
+        hero={{ url: heroUrl, alt: product.name }}
+        images={galleryImages}
       />
 
       <div>
