@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { useT, useLocale } from "./I18nProvider";
 import { intlLocale } from "@/lib/i18n";
@@ -8,6 +8,8 @@ import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 
 type Props = {
   bookingId: string;
+  /** From server: same DB as booking; avoids relying on a separate client fetch. */
+  whatsappCheckoutEnabled: boolean;
   productName: string;
   startDate: string;
   endDate: string;
@@ -41,16 +43,6 @@ export function CheckoutReviewClient(props: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<ReviewPayMethod>("stripe");
-  const [whatsappAvailable, setWhatsappAvailable] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/book/checkout-options")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d?.whatsappCheckout) setWhatsappAvailable(true);
-      })
-      .catch(() => undefined);
-  }, []);
 
   const payStripe = async () => {
     setError(null);
@@ -109,7 +101,7 @@ export function CheckoutReviewClient(props: Props) {
     "stripe",
     "bank_fps",
     "kpay_alipay",
-    ...(whatsappAvailable ? (["whatsapp"] as const) : []),
+    ...(props.whatsappCheckoutEnabled ? (["whatsapp"] as const) : []),
   ];
 
   return (

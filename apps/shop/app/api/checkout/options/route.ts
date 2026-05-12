@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSettings } from "@lumiere/db";
+import { normalizeWhatsAppDigits } from "@/lib/whatsappOrderMessage";
+
+export const dynamic = "force-dynamic";
 
 /** Public: which non-Stripe checkout affordances are configured (no secrets). */
 export async function GET() {
@@ -7,6 +10,6 @@ export async function GET() {
   const hasGateway = !!s?.genericGatewayBaseUrl?.trim();
   return NextResponse.json({
     genericGatewayLabel: hasGateway ? (s?.genericGatewayLabel?.trim() || null) : null,
-    whatsappCheckout: !!s?.whatsappCheckoutNumber?.trim(),
+    whatsappCheckout: !!normalizeWhatsAppDigits(s?.whatsappCheckoutNumber),
   });
 }
