@@ -168,6 +168,7 @@ export function CheckoutReviewClient(props: Props) {
           className="space-y-2"
           role="radiogroup"
           aria-label={t("review.paymentMethodLabel")}
+          data-lumiere-rent-pay-options="stripe,bank_fps,kpay_alipay,whatsapp"
         >
           {payOptions.map((m) => (
             <label key={m} className={optionClass(paymentMethod === m)}>

@@ -248,6 +248,7 @@ export function CheckoutView() {
             className="mt-2 space-y-2"
             role="radiogroup"
             aria-label={t("checkout.paymentMethodLabel")}
+            data-lumiere-shop-checkout="whatsapp-listed"
           >
             {payOptions.map((m) => (
               <label key={m} className={optionClass(paymentMethod === m)}>
