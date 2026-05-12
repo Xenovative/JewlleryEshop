@@ -3,6 +3,8 @@ set -euo pipefail
 
 # Painless wrapper around deploy/vps-deploy.sh
 # - Suggests APP_DIR as repo root, or /var/www/<basename> if the repo is under /root
+# - When under /root, defaults SOURCE_DIR to that path so vps-deploy rsyncs into APP_DIR
+#   (override with SOURCE_DIR=… or EASY_DEPLOY_SKIP_RSYNC=1 to skip the copy)
 # - Asks only essential questions
 # - Re-runs itself with sudo if needed
 # - Calls main script in NONINTERACTIVE mode
@@ -10,8 +12,10 @@ set -euo pipefail
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR_DEFAULT="$(cd "${SELF_DIR}/.." && pwd)"
 # Never default APP_DIR to a path under /root (permissions + upload/static mismatch).
+IS_ROOT_CLONE=0
 if [[ "${APP_DIR_DEFAULT}" == /root || "${APP_DIR_DEFAULT}" == /root/* ]]; then
   APP_DIR_SUGGEST="/var/www/$(basename "${APP_DIR_DEFAULT}")"
+  IS_ROOT_CLONE=1
 else
   APP_DIR_SUGGEST="${APP_DIR_DEFAULT}"
 fi
@@ -51,8 +55,8 @@ echo
 echo "Lumiere VPS Easy Deploy"
 echo "-----------------------"
 echo "Project root detected: ${APP_DIR_DEFAULT}"
-if [[ "${APP_DIR_DEFAULT}" != "${APP_DIR_SUGGEST}" ]]; then
-  echo "(Repo is under /root — default APP_DIR on VPS is ${APP_DIR_SUGGEST}; set SOURCE_DIR to ${APP_DIR_DEFAULT} if you want rsync to copy this tree there first.)"
+if [[ "${IS_ROOT_CLONE}" -eq 1 ]]; then
+  echo "(Repo is under /root — default APP_DIR is ${APP_DIR_SUGGEST}; files will be rsync'd there unless EASY_DEPLOY_SKIP_RSYNC=1.)"
 fi
 echo
 
@@ -65,7 +69,19 @@ SOURCE_DIR="${SOURCE_DIR:-}"
 
 prompt APP_DIR "App directory on VPS" "${APP_DIR}"
 prompt APP_USER "System user for services" "${APP_USER}"
-prompt SOURCE_DIR "Optional source dir to sync into APP_DIR (blank to skip)" "${SOURCE_DIR}"
+if [[ "${IS_ROOT_CLONE}" -eq 1 ]]; then
+  if [[ "${EASY_DEPLOY_SKIP_RSYNC:-0}" == "1" ]]; then
+    SOURCE_DIR=""
+    log "EASY_DEPLOY_SKIP_RSYNC=1: not copying from /root (SOURCE_DIR left empty)."
+  elif [[ -z "${SOURCE_DIR}" ]]; then
+    SOURCE_DIR="${APP_DIR_DEFAULT}"
+    log "Will rsync from ${SOURCE_DIR} → ${APP_DIR} (under-/root bootstrap)."
+  else
+    log "Using SOURCE_DIR=${SOURCE_DIR} (set in environment)."
+  fi
+else
+  prompt SOURCE_DIR "Optional source dir to sync into APP_DIR (blank to skip)" "${SOURCE_DIR}"
+fi
 prompt SHOP_DOMAIN "Shop domain (required)" "${SHOP_DOMAIN}"
 prompt RENT_DOMAIN "Rent domain (optional)" "${RENT_DOMAIN}"
 prompt LETSENCRYPT_EMAIL "Let's Encrypt email (required)" "${LETSENCRYPT_EMAIL}"
