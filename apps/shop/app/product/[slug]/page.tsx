@@ -9,6 +9,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { intlLocale, type DictKey } from "@/lib/i18n";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { enforceShopFrontendEnabled } from "@/lib/frontendMode";
+import { absolutizePublicUrl } from "@/lib/publicAssetUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +24,14 @@ export async function generateMetadata({
     select: { name: true, description: true, seoTitle: true, seoDescription: true, imageUrl: true },
   });
   if (!p) return {};
+  const ogImg = absolutizePublicUrl(p.imageUrl);
   return {
     title: p.seoTitle || p.name,
     description: p.seoDescription || p.description.slice(0, 160),
     openGraph: {
       title: p.seoTitle || p.name,
       description: p.seoDescription || p.description.slice(0, 160),
-      images: p.imageUrl ? [p.imageUrl] : undefined,
+      images: ogImg ? [ogImg] : undefined,
     },
   };
 }

@@ -4,7 +4,7 @@ set -euo pipefail
 # Easy sync wrapper:
 # - Mirrors easy-deploy.sh prompt/confirm style
 # - Syncs project files to VPS with rsync
-# - Preserves destination .env and common database files
+# - Preserves destination .env, SQLite DB files, and apps/shop/public/uploads (rsync excludes)
 # - Rebuilds and restarts app service
 # - Does NOT touch SSL/certbot/domain/nginx config
 
@@ -105,6 +105,7 @@ RSYNC_FLAGS=(
   --exclude "*.db"
   --exclude "*.db-shm"
   --exclude "*.db-wal"
+  --exclude "apps/shop/public/uploads/"
 )
 
 if [[ "${DRY_RUN}" == "1" ]]; then

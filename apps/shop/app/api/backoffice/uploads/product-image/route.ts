@@ -16,12 +16,6 @@ const MIME_EXT: Record<string, string> = {
   "image/gif": ".gif",
 };
 
-function publicBaseUrl(req: Request): string {
-  const fromEnv = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "");
-  if (fromEnv) return fromEnv;
-  return new URL(req.url).origin;
-}
-
 export async function POST(req: Request) {
   const guard = await requireApiRole("staff");
   if (guard instanceof NextResponse) return guard;
@@ -56,12 +50,12 @@ export async function POST(req: Request) {
   const abs = path.join(uploadRoot, name);
   await fsPromises.writeFile(abs, buf);
 
-  const url = `${publicBaseUrl(req)}${rel}`;
+  // Same-origin path survives deploys and avoids NEXT_PUBLIC_BASE_URL / host drift.
   await audit(user, "upload", "ProductImage", null, undefined, {
     pathrel: rel,
     bytes: buf.length,
     mime,
   });
 
-  return NextResponse.json({ url, pathrel: rel });
+  return NextResponse.json({ url: rel, pathrel: rel });
 }

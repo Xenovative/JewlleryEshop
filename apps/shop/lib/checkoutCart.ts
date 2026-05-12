@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { prisma, CHECKOUT_CURRENCY, FOB_HONG_KONG_OFFICE } from "@lumiere/db";
+import { absolutizePublicUrl } from "@/lib/publicAssetUrl";
 
 export const CheckoutItemsSchema = z.object({
   items: z
@@ -80,6 +81,7 @@ export async function resolveCheckoutItems(
     }
 
     const baseName = variantLabel ? `${p.name} (${variantLabel})` : p.name;
+    const stripeImage = absolutizePublicUrl(p.imageUrl);
     lineItems.push({
       quantity: item.qty,
       price_data: {
@@ -88,7 +90,7 @@ export async function resolveCheckoutItems(
         product_data: {
           name: baseName,
           description: FOB_HONG_KONG_OFFICE,
-          images: [p.imageUrl],
+          ...(stripeImage ? { images: [stripeImage] } : {}),
         },
       },
     });

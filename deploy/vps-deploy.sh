@@ -167,7 +167,7 @@ setup_repo() {
   }
 
   # If SOURCE_DIR is provided, always sync first so APP_DIR has latest code.
-  # Keep server-local env/db files intact during sync.
+  # Keep server-local env/db files and product uploads intact during sync.
   if [[ -n "${SOURCE_DIR}" && -f "${SOURCE_DIR}/package.json" ]]; then
     log "Syncing source from ${SOURCE_DIR} -> ${APP_DIR}"
     mkdir -p "${APP_DIR}"
@@ -179,6 +179,7 @@ setup_repo() {
       --exclude "*.db" \
       --exclude "*.db-shm" \
       --exclude "*.db-wal" \
+      --exclude "apps/shop/public/uploads/" \
       "${SOURCE_DIR}/" "${APP_DIR}/"
     chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
   fi
