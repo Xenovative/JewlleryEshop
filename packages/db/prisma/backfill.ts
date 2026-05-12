@@ -6,6 +6,7 @@
 //
 // Idempotent: safe to run repeatedly.
 
+import "../src/sqliteDatabaseUrl";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
