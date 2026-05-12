@@ -2,13 +2,19 @@
 set -euo pipefail
 
 # Painless wrapper around deploy/vps-deploy.sh
-# - Auto-detects APP_DIR as repo root (script parent/..)
+# - Suggests APP_DIR as repo root, or /var/www/<basename> if the repo is under /root
 # - Asks only essential questions
 # - Re-runs itself with sudo if needed
 # - Calls main script in NONINTERACTIVE mode
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR_DEFAULT="$(cd "${SELF_DIR}/.." && pwd)"
+# Never default APP_DIR to a path under /root (permissions + upload/static mismatch).
+if [[ "${APP_DIR_DEFAULT}" == /root || "${APP_DIR_DEFAULT}" == /root/* ]]; then
+  APP_DIR_SUGGEST="/var/www/$(basename "${APP_DIR_DEFAULT}")"
+else
+  APP_DIR_SUGGEST="${APP_DIR_DEFAULT}"
+fi
 MAIN_SCRIPT="${SELF_DIR}/vps-deploy.sh"
 
 if [[ ! -x "${MAIN_SCRIPT}" ]]; then
@@ -45,9 +51,12 @@ echo
 echo "Lumiere VPS Easy Deploy"
 echo "-----------------------"
 echo "Project root detected: ${APP_DIR_DEFAULT}"
+if [[ "${APP_DIR_DEFAULT}" != "${APP_DIR_SUGGEST}" ]]; then
+  echo "(Repo is under /root — default APP_DIR on VPS is ${APP_DIR_SUGGEST}; set SOURCE_DIR to ${APP_DIR_DEFAULT} if you want rsync to copy this tree there first.)"
+fi
 echo
 
-APP_DIR="${APP_DIR:-${APP_DIR_DEFAULT}}"
+APP_DIR="${APP_DIR:-${APP_DIR_SUGGEST}}"
 APP_USER="${APP_USER:-${SUDO_USER:-deploy}}"
 SHOP_DOMAIN="${SHOP_DOMAIN:-}"
 RENT_DOMAIN="${RENT_DOMAIN:-}"

@@ -19,6 +19,7 @@ set -euo pipefail
 #
 # Notes:
 # - APP_DIR should point to an existing local project directory on the VPS.
+# - Do not set APP_DIR under /root (mode 700 breaks /uploads for other users; uploads vs systemd cwd can diverge).
 # - If APP_DIR is missing, set SOURCE_DIR to copy files from a local path.
 # - RENT_DOMAIN is optional. If omitted, only the shop app is exposed.
 # - Ensure DNS for domains points to this VPS before running certbot.
@@ -246,6 +247,26 @@ configure_env_file() {
   fi
   sed -i -E "s#^NEXT_PUBLIC_BASE_URL=.*#NEXT_PUBLIC_BASE_URL=\"https://${SHOP_DOMAIN}\"#g" "${APP_DIR}/.env" || true
   sed -i -E "s#^RENT_BASE_URL=.*#RENT_BASE_URL=\"${rent_url}\"#g" "${APP_DIR}/.env" || true
+
+  # Pin uploads to this checkout so backoffice uploads and `next start` read the same
+  # directory (avoids writes under /root/... while systemd uses /var/www/... → URL 404).
+  if ! grep -qE '^[[:space:]]*SHOP_PUBLIC_DIR=' "${APP_DIR}/.env" 2>/dev/null; then
+    {
+      echo ""
+      echo "# Canonical shop public/ root (product uploads). Set explicitly on servers."
+      printf 'SHOP_PUBLIC_DIR="%s/apps/shop/public"\n' "${APP_DIR}"
+    } >>"${APP_DIR}/.env"
+    chown "${APP_USER}:${APP_USER}" "${APP_DIR}/.env"
+    log "Appended SHOP_PUBLIC_DIR to .env (uploads + static serving aligned to APP_DIR)"
+  fi
+}
+
+reject_app_dir_under_root() {
+  case "${APP_DIR}" in
+    /root | /root/*)
+      err "APP_DIR='${APP_DIR}' must not live under /root: home is usually drwx------ so other users (e.g. nginx, deploy) cannot read /uploads; uploads can also land in a different tree than systemd WorkingDirectory. Move the repo to e.g. /var/www/lumiere and point APP_DIR there."
+      ;;
+  esac
 }
 
 check_app_user_access() {
@@ -253,6 +274,23 @@ check_app_user_access() {
   if ! sudo -u "${APP_USER}" -H bash -lc "test -x '${APP_DIR}' && test -r '${APP_DIR}'"; then
     err "APP_USER='${APP_USER}' cannot access APP_DIR='${APP_DIR}'. If APP_DIR is under /root, move it to a shared path (e.g. /srv/lumiere or /var/www/lumiere) or set APP_USER=root."
   fi
+}
+
+# SQLite needs write access to the DB file and the directory (WAL / -shm / -journal).
+# If prisma/ was ever owned by root or built without deploy ownership, Prisma returns
+# "attempt to write a readonly database" (extended code 1032).
+ensure_runtime_data_permissions() {
+  log "Ensuring SQLite and product-upload dirs are owned by ${APP_USER} and writable"
+  local prisma_dir="${APP_DIR}/packages/db/prisma"
+  local uploads_dir="${APP_DIR}/apps/shop/public/uploads"
+  if [[ -d "${prisma_dir}" ]]; then
+    chown -R "${APP_USER}:${APP_USER}" "${prisma_dir}"
+    chmod u+rwX "${prisma_dir}"
+    find "${prisma_dir}" -maxdepth 1 -type f \( -name "*.db" -o -name "*.db-wal" -o -name "*.db-shm" -o -name "*.db-journal" \) -exec chmod u+rw {} \; 2>/dev/null || true
+  fi
+  mkdir -p "${uploads_dir}/products"
+  chown -R "${APP_USER}:${APP_USER}" "${uploads_dir}"
+  chmod -R u+rwX "${uploads_dir}" 2>/dev/null || true
 }
 
 build_apps() {
@@ -459,6 +497,10 @@ print_summary() {
   fi
   echo "  nginx -t"
   echo "  journalctl -u lumiere-shop -f"
+  echo "  Broken /uploads/products/…: ensure the file exists under THIS APP_DIR (see SHOP_PUBLIC_DIR in .env);"
+  echo "    do not keep the live app under /root only — move to e.g. ${APP_DIR} and copy apps/shop/public/uploads."
+  echo "  SQLite 'readonly database': ensure ${APP_USER} owns ${APP_DIR}/packages/db/prisma (and WAL files);"
+  echo "    sudo chown -R ${APP_USER}:${APP_USER} \"${APP_DIR}/packages/db/prisma\" \"${APP_DIR}/apps/shop/public/uploads\" && sudo systemctl restart lumiere-shop lumiere-rent"
 }
 
 require_root
@@ -483,11 +525,14 @@ require_cmd npm
 log "Step 4/8: Ensure deploy user and project files"
 ensure_user
 setup_repo
+reject_app_dir_under_root
 check_app_user_access
 log "Step 5/8: Configure environment file"
 configure_env_file
+ensure_runtime_data_permissions
 log "Step 6/8: Install dependencies and build apps"
 build_apps
+ensure_runtime_data_permissions
 log "Step 7/8: Configure systemd and nginx"
 write_systemd_services
 write_nginx_config
