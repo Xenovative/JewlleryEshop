@@ -4,6 +4,12 @@ import { prisma, getSettings, buildKpayCheckoutUrl } from "@lumiere/db";
 import { formatPrice } from "@/lib/format";
 import { getT, getLocale } from "@/lib/i18n.server";
 import { intlLocale } from "@/lib/i18n";
+import {
+  buildShopOrderWhatsAppMessage,
+  buildWhatsAppMeUrl,
+  normalizeWhatsAppDigits,
+} from "@/lib/whatsappOrderMessage";
+import type { CartSnapshotItem } from "@/lib/checkoutCart";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +39,10 @@ export default async function ShopAlternateCheckoutPage({
   const { orderId } = await searchParams;
   if (!orderId) notFound();
 
-  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { customer: true },
+  });
   if (!order || order.status !== "awaiting_payment") notFound();
 
   const settings = await getSettings();
@@ -62,6 +71,30 @@ export default async function ShopAlternateCheckoutPage({
 
   const genericLabel = settings.genericGatewayLabel?.trim() || t("checkout.alt.methodGeneric");
 
+  let cartItems: CartSnapshotItem[] = [];
+  try {
+    cartItems = JSON.parse(order.itemsJson) as CartSnapshotItem[];
+  } catch {
+    cartItems = [];
+  }
+
+  const whatsappDigits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+  const whatsappUrl =
+    order.paymentProvider === "whatsapp" && whatsappDigits
+      ? buildWhatsAppMeUrl(
+          whatsappDigits,
+          buildShopOrderWhatsAppMessage({
+            orderId: order.id,
+            amountTotalCents: order.amountTotalCents,
+            currency: order.currency,
+            email: order.email,
+            name: order.customer?.name ?? null,
+            phone: order.customer?.phone ?? null,
+            items: cartItems,
+          })
+        )
+      : null;
+
   return (
     <div className="max-w-xl mx-auto space-y-6 py-8 px-4">
       <h1 className="font-serif text-2xl">{t("checkout.alt.title")}</h1>
@@ -83,8 +116,12 @@ export default async function ShopAlternateCheckoutPage({
             {order.paymentProvider === "bank_fps"
               ? t("checkout.alt.methodBank")
               : order.paymentProvider === "kpay_alipay"
-              ? t("checkout.alt.methodKpay")
-              : genericLabel}
+                ? t("checkout.alt.methodKpay")
+                : order.paymentProvider === "whatsapp"
+                  ? t("checkout.alt.methodWhatsapp")
+                  : order.paymentProvider === "generic_gateway"
+                    ? genericLabel
+                    : t("checkout.alt.methodStripe")}
           </span>
         </div>
       </div>
@@ -125,6 +162,21 @@ export default async function ShopAlternateCheckoutPage({
       ) : order.paymentProvider === "generic_gateway" ? (
         <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded p-3">
           {t("checkout.alt.genericGatewayNotConfigured")}
+        </p>
+      ) : null}
+
+      {order.paymentProvider === "whatsapp" && whatsappUrl ? (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium py-3 rounded transition"
+        >
+          {t("checkout.alt.openWhatsapp")}
+        </a>
+      ) : order.paymentProvider === "whatsapp" ? (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded p-3">
+          {t("checkout.alt.whatsappNotConfigured")}
         </p>
       ) : null}
 

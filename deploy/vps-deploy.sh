@@ -179,6 +179,11 @@ setup_repo() {
       --exclude "*.db" \
       --exclude "*.db-shm" \
       --exclude "*.db-wal" \
+      --exclude "*.db-journal" \
+      --exclude "packages/db/prisma/*.db" \
+      --exclude "packages/db/prisma/*.db-shm" \
+      --exclude "packages/db/prisma/*.db-wal" \
+      --exclude "packages/db/prisma/*.db-journal" \
       --exclude "apps/shop/public/uploads/" \
       "${SOURCE_DIR}/" "${APP_DIR}/"
     chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
@@ -260,6 +265,19 @@ configure_env_file() {
     chown "${APP_USER}:${APP_USER}" "${APP_DIR}/.env"
     log "Appended SHOP_PUBLIC_DIR to .env (uploads + static serving aligned to APP_DIR)"
   fi
+
+  # One-time hint: absolute DATABASE_URL avoids losing data if the app directory is ever replaced.
+  if ! grep -qE '^[[:space:]]*# Lumiere: SQLite persistence hint' "${APP_DIR}/.env" 2>/dev/null; then
+    {
+      echo ""
+      echo "# Lumiere: SQLite persistence hint — default file:./dev.db lives under packages/db/prisma/."
+      echo "# To survive deleting or re-cloning this folder, use a path outside the repo, e.g.:"
+      echo "# DATABASE_URL=\"file:/var/lib/lumiere/lumiere.db\""
+      printf '# LUMIERE_PRISMA_DIR="%s/packages/db/prisma"\n' "${APP_DIR}"
+    } >>"${APP_DIR}/.env"
+    chown "${APP_USER}:${APP_USER}" "${APP_DIR}/.env"
+    log "Appended SQLite persistence hint to .env (comment only; edit if you use an external DB file)"
+  fi
 }
 
 reject_app_dir_under_root() {
@@ -298,8 +316,12 @@ build_apps() {
   log "Installing npm dependencies"
   sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm ci"
 
-  log "Pushing database schema"
-  sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm run db:push"
+  if [[ "${SKIP_DB_PUSH:-0}" == "1" ]]; then
+    log "Skipping npm run db:push (SKIP_DB_PUSH=1). Apply schema changes manually if needed."
+  else
+    log "Pushing database schema (npm run db:push — updates schema; existing rows stay on disk)"
+    sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm run db:push"
+  fi
 
   log "Building shop + rent"
   sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm run build"
@@ -502,6 +524,10 @@ print_summary() {
   echo "    do not keep the live app under /root only — move to e.g. ${APP_DIR} and copy apps/shop/public/uploads."
   echo "  SQLite 'readonly database': ensure ${APP_USER} owns ${APP_DIR}/packages/db/prisma (and WAL files);"
   echo "    sudo chown -R ${APP_USER}:${APP_USER} \"${APP_DIR}/packages/db/prisma\" \"${APP_DIR}/apps/shop/public/uploads\" && sudo systemctl restart lumiere-shop lumiere-rent"
+  echo "  SQLite missing after an 'update': rsync/deploy excludes *.db from the source tree — do not copy"
+  echo "    packages/db/prisma/dev.db from your laptop unless you intend to replace production."
+  echo "    Prefer DATABASE_URL=file:/var/lib/... outside the repo (see comments in .env)."
+  echo "  Skip schema push on this run only: SKIP_DB_PUSH=1 bash deploy/vps-deploy.sh (with your env vars)."
 }
 
 require_root

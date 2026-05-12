@@ -13,6 +13,8 @@ function paymentLabel(
 ): string {
   if (provider === "bank_fps") return t("checkout.alt.methodBank");
   if (provider === "kpay_alipay") return t("checkout.alt.methodKpay");
+  if (provider === "whatsapp") return t("checkout.alt.methodWhatsapp");
+  if (provider === "generic_gateway") return t("checkout.alt.methodGeneric");
   return "Stripe";
 }
 

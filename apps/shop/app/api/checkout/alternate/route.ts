@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma, upsertCustomerByEmail } from "@lumiere/db";
+import { prisma, upsertCustomerByEmail, getSettings } from "@lumiere/db";
 import { CHECKOUT_CURRENCY } from "@lumiere/db/commerce";
 import { CheckoutItemsSchema, resolveCheckoutItems } from "@/lib/checkoutCart";
 import { sendAdminSms } from "@/lib/sms";
+import { normalizeWhatsAppDigits } from "@/lib/whatsappOrderMessage";
 
 const Body = CheckoutItemsSchema.extend({
   email: z.string().email(),
   name: z.string().max(200).optional(),
   phone: z.string().max(80).optional(),
-  method: z.enum(["bank_fps", "kpay_alipay", "generic_gateway"]),
+  method: z.enum(["bank_fps", "kpay_alipay", "generic_gateway", "whatsapp"]),
 });
 
 export async function POST(req: Request) {
@@ -21,6 +22,18 @@ export async function POST(req: Request) {
   }
 
   const { email, name, phone, method, items } = parsed.data;
+
+  if (method === "whatsapp") {
+    const settings = await getSettings();
+    const digits = normalizeWhatsAppDigits(settings.whatsappCheckoutNumber);
+    if (!digits) {
+      return NextResponse.json(
+        { error: "whatsapp_not_configured" },
+        { status: 400 }
+      );
+    }
+  }
+
   const resolved = await resolveCheckoutItems(items);
   if (!resolved.ok) {
     return NextResponse.json(
@@ -62,7 +75,9 @@ export async function POST(req: Request) {
       amountCents: amountTotalCents,
       currency: CHECKOUT_CURRENCY,
       email: email ?? null,
-    }).catch((smsErr) => console.error("Admin SMS failed for alternate order:", smsErr));
+    }).catch((smsErr: unknown) =>
+      console.error("Admin SMS failed for alternate order:", smsErr)
+    );
   });
 
   return NextResponse.json({

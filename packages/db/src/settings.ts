@@ -30,6 +30,7 @@ export async function updateSettings(
     genericGatewayBaseUrl: string | null;
     genericGatewayWebhookSecret: string | null;
     genericGatewayLabel: string | null;
+    whatsappCheckoutNumber: string | null;
   }>
 ) {
   await getSettings();

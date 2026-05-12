@@ -8,6 +8,12 @@ out
 deploy/.sync-host
 *.log
 .DS_Store
+# SQLite — canonical path in this monorepo
+packages/db/prisma/*.db
+packages/db/prisma/*.db-shm
+packages/db/prisma/*.db-wal
+packages/db/prisma/*.db-journal
+# Legacy paths (older layouts)
 prisma/dev.db
 prisma/dev.db-journal
 

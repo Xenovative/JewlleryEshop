@@ -37,6 +37,7 @@ export default async function AdminSettingsPage() {
       genericGatewayWebhookSecretMasked={maskKey(s.genericGatewayWebhookSecret)}
       genericGatewayLabel={s.genericGatewayLabel}
       totpEnabled={!!me?.totpEnabled}
+      whatsappCheckoutNumber={s.whatsappCheckoutNumber}
     />
   );
 }

@@ -27,6 +27,7 @@ type Props = {
   genericGatewayWebhookSecretMasked: string | null;
   genericGatewayLabel: string | null;
   totpEnabled: boolean;
+  whatsappCheckoutNumber: string | null;
 };
 
 export function SettingsAdmin(props: Props) {
@@ -67,7 +68,10 @@ export function SettingsAdmin(props: Props) {
   const [genericGatewayWebhookSecretInput, setGenericGatewayWebhookSecretInput] = useState("");
   const [savingGenericGateway, setSavingGenericGateway] = useState(false);
   const [genericGatewayMsg, setGenericGatewayMsg] = useState<string | null>(null);
-  const [payTab, setPayTab] = useState<"stripe" | "bank_fps" | "kpay" | "gateway">("stripe");
+  const [payTab, setPayTab] = useState<"stripe" | "bank_fps" | "kpay" | "whatsapp" | "gateway">("stripe");
+  const [whatsappNumberInput, setWhatsappNumberInput] = useState(props.whatsappCheckoutNumber ?? "");
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [whatsappMsg, setWhatsappMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setRentalPct4(String(props.rental4DayPercentOfPrice));
@@ -101,6 +105,10 @@ export function SettingsAdmin(props: Props) {
     setGenericGatewayBaseUrlInput(props.genericGatewayBaseUrl ?? "");
     setGenericGatewayLabelInput(props.genericGatewayLabel ?? "");
   }, [props.genericGatewayBaseUrl, props.genericGatewayLabel]);
+
+  useEffect(() => {
+    setWhatsappNumberInput(props.whatsappCheckoutNumber ?? "");
+  }, [props.whatsappCheckoutNumber]);
 
   const pct4n = Number(rentalPct4);
   const pct8AnchorN = Number(rentalPct8Anchor);
@@ -191,6 +199,26 @@ export function SettingsAdmin(props: Props) {
       return;
     }
     setAltMsg(t("admin.settings.savedDot"));
+    router.refresh();
+  };
+
+  const saveWhatsappCheckout = async () => {
+    setSavingWhatsapp(true);
+    setWhatsappMsg(null);
+    const res = await fetch("/api/backoffice/settings", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        whatsappCheckoutNumber: whatsappNumberInput.trim() || "",
+      }),
+    });
+    setSavingWhatsapp(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setWhatsappMsg(data.error ?? t("admin.settings.saveFailed"));
+      return;
+    }
+    setWhatsappMsg(t("admin.settings.savedDot"));
     router.refresh();
   };
 
@@ -338,6 +366,7 @@ export function SettingsAdmin(props: Props) {
               ["stripe",  t("admin.settings.tabStripe")],
               ["bank_fps", t("admin.settings.tabBank")],
               ["kpay",    t("admin.settings.tabKpay")],
+              ["whatsapp", t("admin.settings.tabWhatsapp")],
               ["gateway", t("admin.settings.tabGateway")],
             ] as [typeof payTab, string][]
           ).map(([id, label]) => (
@@ -464,6 +493,43 @@ export function SettingsAdmin(props: Props) {
                 className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm"
               >
                 {savingAlt ? t("admin.settings.saving") : t("admin.settings.saveAltPayments")}
+              </button>
+            </div>
+          )}
+
+          {payTab === "whatsapp" && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">{t("admin.settings.whatsappCheckoutBlurb")}</p>
+              <label className="block text-sm">
+                <span className="text-gray-600">{t("admin.settings.whatsappCheckoutNumber")}</span>
+                <input
+                  value={whatsappNumberInput}
+                  onChange={(e) => {
+                    setWhatsappMsg(null);
+                    setWhatsappNumberInput(e.target.value);
+                  }}
+                  placeholder="85291234567"
+                  className="mt-1 block w-full border border-brand-200 rounded px-3 py-2 font-mono text-sm"
+                />
+              </label>
+              {whatsappMsg && (
+                <p
+                  className={`text-sm ${
+                    whatsappMsg === t("admin.settings.savedDot")
+                      ? "text-green-700"
+                      : "text-red-600"
+                  }`}
+                >
+                  {whatsappMsg}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => void saveWhatsappCheckout()}
+                disabled={savingWhatsapp}
+                className="bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm"
+              >
+                {savingWhatsapp ? t("admin.settings.saving") : t("admin.settings.saveWhatsappCheckout")}
               </button>
             </div>
           )}

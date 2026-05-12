@@ -146,7 +146,7 @@ export const dict = {
     "checkout.allPricesNote":
       "All amounts in HKD. Each item is priced FOB - Hong Kong Office.",
     "checkout.paymentMethodsBlurb":
-      "We accept several payment options — major cards (via Stripe), bank transfer / FPS, and Alipay (KPay). Choose how you’d like to pay below.",
+      "We accept several payment options — major cards (via Stripe), bank transfer / FPS, Alipay (KPay), WhatsApp (prefilled order message), and optional third-party gateways. Choose below.",
     "checkout.paymentMethodLabel": "Payment method",
     "checkout.stripeNote":
       "If you pay by card, you’ll complete checkout on Stripe’s secure hosted page.",
@@ -156,13 +156,16 @@ export const dict = {
       "#1 Different payment methods may involve different handling fees.",
     "checkout.payStripe": "Pay with Stripe",
     "checkout.backToCart": "Back to cart",
-    "checkout.emailLabel": "Email (required for bank transfer / KPay)",
-    "checkout.emailMissing": "Please enter your email to use bank transfer or KPay.",
+    "checkout.emailLabel": "Email (required for non-card checkout)",
+    "checkout.emailMissing": "Please enter your email for bank transfer, KPay, or WhatsApp checkout.",
     "checkout.nameLabel": "Name (optional)",
     "checkout.phoneLabel": "Phone (optional)",
     "checkout.payBank": "Bank transfer / FPS",
     "checkout.payKpay": "Alipay via KPay",
+    "checkout.payWhatsapp": "WhatsApp order message",
     "checkout.payGenericGateway": "Online payment gateway",
+    "checkout.whatsappNotConfigured":
+      "WhatsApp checkout is not set up yet. Please choose another method or contact the boutique.",
     "checkout.altPendingNote":
       "We will ship or arrange pickup after our team confirms your payment in the office.",
     "checkout.alt.title": "Complete your payment",
@@ -173,6 +176,8 @@ export const dict = {
     "checkout.alt.method": "Method",
     "checkout.alt.methodBank": "Bank transfer / FPS",
     "checkout.alt.methodKpay": "Alipay (KPay)",
+    "checkout.alt.methodWhatsapp": "WhatsApp",
+    "checkout.alt.methodStripe": "Stripe",
     "checkout.alt.bankNotConfigured":
       "Bank / FPS instructions are not set yet. Please contact the boutique or try another method.",
     "checkout.alt.openKpay": "Open KPay / Alipay",
@@ -182,6 +187,9 @@ export const dict = {
     "checkout.alt.openGenericGateway": "Proceed to payment",
     "checkout.alt.genericGatewayNotConfigured":
       "Payment gateway is not configured in admin settings. Please contact the boutique.",
+    "checkout.alt.openWhatsapp": "Open WhatsApp with order details",
+    "checkout.alt.whatsappNotConfigured":
+      "WhatsApp number is not configured in admin settings. Your order is saved — please contact the boutique with your order ID.",
     "checkout.alt.footerNote":
       "If you already paid, you may safely close this page. We will confirm manually.",
     "checkout.alt.backHome": "Back to home",
@@ -587,6 +595,7 @@ export const dict = {
     "admin.settings.tabBank": "Bank / FPS",
     "admin.settings.tabKpay": "KPay / Alipay",
     "admin.settings.tabGateway": "Online gateway",
+    "admin.settings.tabWhatsapp": "WhatsApp checkout",
     "admin.settings.stripe": "Stripe",
     "admin.settings.stripeBlurb":
       "Stored in the database. Leaves the corresponding env var as a fallback if you clear the value.",
@@ -645,6 +654,10 @@ export const dict = {
     "admin.settings.bankFpsInstructions": "Bank / FPS instructions (HTML allowed)",
     "admin.settings.kpayAlipayBaseUrl": "KPay / Alipay entry URL",
     "admin.settings.saveAltPayments": "Save alternate payment settings",
+    "admin.settings.whatsappCheckoutBlurb":
+      "When set, shoppers can choose “WhatsApp order message” at checkout. The order is saved first; then WhatsApp opens with a prefilled message to this number. Use digits with country code (e.g. 85291234567). Staff mark the order paid in Back Office after confirming payment.",
+    "admin.settings.whatsappCheckoutNumber": "WhatsApp number (country code + number, digits only)",
+    "admin.settings.saveWhatsappCheckout": "Save WhatsApp checkout",
     "admin.settings.genericGateway": "Online payment gateway",
     "admin.settings.genericGatewayBlurb":
       "Redirect shoppers to a third-party payment gateway (e.g. WooCommerce Payments, PayMe, PayPal). The gateway URL receives query params: ref, amountCents, currency. Your gateway should POST back to the webhook URL below to auto-confirm orders.",
@@ -797,7 +810,7 @@ export const dict = {
     "checkout.summary": "訂單摘要",
     "checkout.allPricesNote": "金額均以港幣計。各品項條款：FOB - Hong Kong Office。",
     "checkout.paymentMethodsBlurb":
-      "我們接受多種付款方式——信用卡（經 Stripe）、銀行轉賬／FPS,以及支付寶（KPay）。請於下方選擇付款方式。",
+      "我們接受多種付款方式——信用卡（經 Stripe）、銀行轉賬／FPS、支付寶（KPay）、WhatsApp（預填訂單訊息）及選用之網上閘道。請於下方選擇。",
     "checkout.paymentMethodLabel": "付款方式",
     "checkout.stripeNote": "若選擇信用卡,將於 Stripe 安全結帳頁完成付款。",
     "checkout.reserveCta":
@@ -805,13 +818,16 @@ export const dict = {
     "checkout.reserveFeeNote": "#1 不同付款方式可能產生不同手續費。",
     "checkout.payStripe": "使用 Stripe 付款",
     "checkout.backToCart": "返回購物車",
-    "checkout.emailLabel": "電郵（銀行轉賬 / KPay 必填）",
-    "checkout.emailMissing": "請輸入電郵以使用銀行轉賬或 KPay。",
+    "checkout.emailLabel": "電郵（非信用卡結帳必填）",
+    "checkout.emailMissing": "請輸入電郵以使用銀行轉賬、KPay 或 WhatsApp 結帳。",
     "checkout.nameLabel": "姓名（選填）",
     "checkout.phoneLabel": "電話（選填）",
     "checkout.payBank": "銀行轉賬 / FPS",
     "checkout.payKpay": "支付寶（KPay）",
+    "checkout.payWhatsapp": "WhatsApp 訂單訊息",
     "checkout.payGenericGateway": "網上付款閘道",
+    "checkout.whatsappNotConfigured":
+      "WhatsApp 結帳尚未設定,請改用其他方式或聯絡專櫃。",
     "checkout.altPendingNote": "我們在辦公室確認入數後才會安排發貨或取貨。",
     "checkout.alt.title": "請完成付款",
     "checkout.alt.intro": "請依下列參考編號與金額付款。入數確認後我們才會扣減庫存並處理訂單。",
@@ -820,12 +836,17 @@ export const dict = {
     "checkout.alt.method": "方式",
     "checkout.alt.methodBank": "銀行轉賬 / FPS",
     "checkout.alt.methodKpay": "支付寶（KPay）",
+    "checkout.alt.methodWhatsapp": "WhatsApp",
+    "checkout.alt.methodStripe": "Stripe",
     "checkout.alt.bankNotConfigured": "尚未設定銀行／FPS 指示,請聯絡專櫃或改用其他方式。",
     "checkout.alt.openKpay": "前往 KPay／支付寶",
     "checkout.alt.kpayNotConfigured": "後台尚未設定 KPay 連結,請聯絡專櫃。",
     "checkout.alt.methodGeneric": "網上付款閘道",
     "checkout.alt.openGenericGateway": "前往付款",
     "checkout.alt.genericGatewayNotConfigured": "後台尚未設定付款閘道，請聯絡專櫃。",
+    "checkout.alt.openWhatsapp": "以 WhatsApp 開啟（已帶訂單內容）",
+    "checkout.alt.whatsappNotConfigured":
+      "後台尚未設定 WhatsApp 號碼。訂單已儲存,請聯絡專櫃並提供訂單編號。",
     "checkout.alt.footerNote": "若您已完成付款,可安心關閉此頁,我們會人手核對。",
     "checkout.alt.backHome": "返回首頁",
 
@@ -1227,6 +1248,7 @@ export const dict = {
     "admin.settings.tabBank": "銀行 / FPS",
     "admin.settings.tabKpay": "KPay / 支付寶",
     "admin.settings.tabGateway": "網上閘道",
+    "admin.settings.tabWhatsapp": "WhatsApp 結帳",
     "admin.settings.stripe": "Stripe",
     "admin.settings.stripeBlurb":
       "資料儲存於資料庫。若您清除此欄位,系統會回退使用對應的環境變數。",
@@ -1283,6 +1305,10 @@ export const dict = {
     "admin.settings.bankFpsInstructions": "銀行／FPS 指示（可含簡單 HTML）",
     "admin.settings.kpayAlipayBaseUrl": "KPay／支付寶入口網址",
     "admin.settings.saveAltPayments": "儲存其他付款設定",
+    "admin.settings.whatsappCheckoutBlurb":
+      "設定後,顧客可於結帳選「WhatsApp 訂單訊息」。系統會先建立訂單,再開啟 WhatsApp 並帶入預填訊息至此號碼。請填國家碼+號碼（僅數字,例如 85291234567）。同事於後台確認收款後標記已付款。",
+    "admin.settings.whatsappCheckoutNumber": "WhatsApp 號碼（國家碼+號碼,僅數字）",
+    "admin.settings.saveWhatsappCheckout": "儲存 WhatsApp 結帳",
     "admin.settings.genericGateway": "網上付款閘道",
     "admin.settings.genericGatewayBlurb":
       "將顧客轉至第三方付款閘道（如 WooCommerce Payments、PayMe、PayPal）。閘道網址會附加查詢參數 ref、amountCents、currency。閘道應向以下 Webhook 網址 POST 回調以自動確認訂單。",
@@ -1435,7 +1461,7 @@ export const dict = {
     "checkout.summary": "订单摘要",
     "checkout.allPricesNote": "金额均以港币计。各品项条款：FOB - Hong Kong Office。",
     "checkout.paymentMethodsBlurb":
-      "我们接受多种付款方式——信用卡（经 Stripe）、银行转账／FPS,以及支付宝（KPay）。请在下方选择付款方式。",
+      "我们接受多种付款方式——信用卡（经 Stripe）、银行转账／FPS、支付宝（KPay）、WhatsApp（预填订单消息）及可选网上网关。请在下方选择。",
     "checkout.paymentMethodLabel": "付款方式",
     "checkout.stripeNote": "若选择信用卡,将在 Stripe 安全结账页完成付款。",
     "checkout.reserveCta":
@@ -1443,13 +1469,16 @@ export const dict = {
     "checkout.reserveFeeNote": "#1 不同付款方式可能会产生不同手续费。",
     "checkout.payStripe": "使用 Stripe 付款",
     "checkout.backToCart": "返回购物车",
-    "checkout.emailLabel": "电子邮箱（银行转账 / KPay 必填）",
-    "checkout.emailMissing": "请输入电子邮箱以使用银行转账或 KPay。",
+    "checkout.emailLabel": "电子邮箱（非银行卡结账必填）",
+    "checkout.emailMissing": "请输入电子邮箱以使用银行转账、KPay 或 WhatsApp 结账。",
     "checkout.nameLabel": "姓名（选填）",
     "checkout.phoneLabel": "电话（选填）",
     "checkout.payBank": "银行转账 / FPS",
     "checkout.payKpay": "支付宝（KPay）",
+    "checkout.payWhatsapp": "WhatsApp 订单消息",
     "checkout.payGenericGateway": "网上支付网关",
+    "checkout.whatsappNotConfigured":
+      "WhatsApp 结账尚未配置,请改用其他方式或联系专柜。",
     "checkout.altPendingNote": "我们在办公室确认收款后才会安排发货或取货。",
     "checkout.alt.title": "请完成付款",
     "checkout.alt.intro": "请按下列参考编号与金额付款。确认收款后我们才会扣减库存并处理订单。",
@@ -1458,12 +1487,17 @@ export const dict = {
     "checkout.alt.method": "方式",
     "checkout.alt.methodBank": "银行转账 / FPS",
     "checkout.alt.methodKpay": "支付宝（KPay）",
+    "checkout.alt.methodWhatsapp": "WhatsApp",
+    "checkout.alt.methodStripe": "Stripe",
     "checkout.alt.bankNotConfigured": "尚未设置银行／FPS 说明,请联系专柜或改用其他方式。",
     "checkout.alt.openKpay": "前往 KPay／支付宝",
     "checkout.alt.kpayNotConfigured": "后台尚未配置 KPay 链接,请联系专柜。",
     "checkout.alt.methodGeneric": "网上支付网关",
     "checkout.alt.openGenericGateway": "前往付款",
     "checkout.alt.genericGatewayNotConfigured": "后台尚未配置支付网关，请联系专柜。",
+    "checkout.alt.openWhatsapp": "打开 WhatsApp（已带订单内容）",
+    "checkout.alt.whatsappNotConfigured":
+      "后台尚未配置 WhatsApp 号码。订单已保存,请联系专柜并提供订单编号。",
     "checkout.alt.footerNote": "若您已完成付款,可安心关闭此页,我们会人工核对。",
     "checkout.alt.backHome": "返回首页",
 
@@ -1865,6 +1899,7 @@ export const dict = {
     "admin.settings.tabBank": "银行 / FPS",
     "admin.settings.tabKpay": "KPay / 支付宝",
     "admin.settings.tabGateway": "网上网关",
+    "admin.settings.tabWhatsapp": "WhatsApp 结账",
     "admin.settings.stripe": "Stripe",
     "admin.settings.stripeBlurb":
       "資料保存於資料库。若您清除此栏位,系統会回退使用對应的环境變数。",
@@ -1921,6 +1956,10 @@ export const dict = {
     "admin.settings.bankFpsInstructions": "银行／FPS 说明（可含简单 HTML）",
     "admin.settings.kpayAlipayBaseUrl": "KPay／支付宝入口网址",
     "admin.settings.saveAltPayments": "保存其他付款设置",
+    "admin.settings.whatsappCheckoutBlurb":
+      "设置后,顾客可在结账选择「WhatsApp 订单消息」。系统会先创建订单,再打开 WhatsApp 并带入预填消息至此号码。请填国家码+号码（仅数字,例如 85291234567）。同事在后台确认收款后标记已付款。",
+    "admin.settings.whatsappCheckoutNumber": "WhatsApp 号码（国家码+号码,仅数字）",
+    "admin.settings.saveWhatsappCheckout": "保存 WhatsApp 结账",
     "admin.settings.genericGateway": "网上支付网关",
     "admin.settings.genericGatewayBlurb":
       "将顾客转至第三方支付网关（如 WooCommerce Payments、PayMe、PayPal）。网关网址会附加查询参数 ref、amountCents、currency。网关应向以下 Webhook 地址 POST 回调以自动确认订单。",

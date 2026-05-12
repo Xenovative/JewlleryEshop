@@ -21,7 +21,7 @@ type ResolvedItem = {
   stock: number;
 };
 
-type CheckoutPayMethod = "stripe" | "bank_fps" | "kpay_alipay" | "generic_gateway";
+type CheckoutPayMethod = "stripe" | "bank_fps" | "kpay_alipay" | "generic_gateway" | "whatsapp";
 
 function optionClass(selected: boolean) {
   return [
@@ -43,6 +43,7 @@ export function CheckoutView() {
   const [phone, setPhone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<CheckoutPayMethod>("stripe");
   const [genericGatewayLabel, setGenericGatewayLabel] = useState<string | null>(null);
+  const [whatsappCheckout, setWhatsappCheckout] = useState(false);
 
   const refresh = async () => {
     const local = readCart();
@@ -67,15 +68,19 @@ export function CheckoutView() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/backoffice/generic-gateway/label")
-      .then((r) => r.ok ? r.json() : null)
+    fetch("/api/checkout/options")
+      .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.label !== undefined) setGenericGatewayLabel(d.label as string | null);
+        if (!d) return;
+        if (d.genericGatewayLabel !== undefined) {
+          setGenericGatewayLabel(d.genericGatewayLabel as string | null);
+        }
+        if (d.whatsappCheckout === true) setWhatsappCheckout(true);
       })
       .catch(() => {});
   }, []);
 
-  const payAlternate = async (method: "bank_fps" | "kpay_alipay" | "generic_gateway") => {
+  const payAlternate = async (method: "bank_fps" | "kpay_alipay" | "generic_gateway" | "whatsapp") => {
     setError(null);
     const trimmed = email.trim();
     if (!trimmed) {
@@ -96,7 +101,12 @@ export function CheckoutView() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Checkout failed");
+      if (!res.ok) {
+        if (data.error === "whatsapp_not_configured") {
+          throw new Error(t("checkout.whatsappNotConfigured"));
+        }
+        throw new Error(data.error ?? "Checkout failed");
+      }
       if (data.redirectUrl) {
         clearCart();
         window.dispatchEvent(new Event("cart:changed"));
@@ -138,6 +148,7 @@ export function CheckoutView() {
     "stripe",
     "bank_fps",
     "kpay_alipay",
+    ...(whatsappCheckout ? (["whatsapp"] as const) : []),
     ...(genericGatewayLabel !== null ? ["generic_gateway" as CheckoutPayMethod] : []),
   ];
 
@@ -145,6 +156,7 @@ export function CheckoutView() {
     if (m === "stripe") return t("checkout.payStripe");
     if (m === "bank_fps") return t("checkout.payBank");
     if (m === "kpay_alipay") return t("checkout.payKpay");
+    if (m === "whatsapp") return t("checkout.payWhatsapp");
     return genericGatewayLabel ?? t("checkout.payGenericGateway");
   };
 

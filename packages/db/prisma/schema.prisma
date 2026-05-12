@@ -153,6 +153,8 @@ model Settings {
   bankFpsInstructions String?
   /// KPay Alipay entry URL (query params ref / amount may be appended by the app)
   kpayAlipayBaseUrl   String?
+  /// WhatsApp Business number for prefilled checkout messages (digits with country code, e.g. 85291234567)
+  whatsappCheckoutNumber String?
   /// Admin mobile number for SMS alerts (E.164 format, e.g. +85212345678)
   adminPhone          String?
   /// Twilio Account SID for SMS alerts
@@ -173,7 +175,7 @@ model Settings {
 model Order {
   id              String   @id @default(cuid())
   stripeSessionId String?  @unique
-  /// "stripe" | "bank_fps" | "kpay_alipay"
+  /// "stripe" | "bank_fps" | "kpay_alipay" | "generic_gateway" | "whatsapp"
   paymentProvider  String   @default("stripe")
   status           String
   amountTotalCents Int

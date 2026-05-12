@@ -4,7 +4,8 @@ set -euo pipefail
 # Easy sync wrapper:
 # - Mirrors easy-deploy.sh prompt/confirm style
 # - Syncs project files to VPS with rsync
-# - Preserves destination .env, SQLite DB files, and apps/shop/public/uploads (rsync excludes)
+# - Preserves destination .env, SQLite under packages/db/prisma (*.db + WAL/journal),
+#   and apps/shop/public/uploads (rsync excludes)
 # - Rebuilds and restarts app service
 # - Does NOT touch SSL/certbot/domain/nginx config
 
@@ -105,6 +106,11 @@ RSYNC_FLAGS=(
   --exclude "*.db"
   --exclude "*.db-shm"
   --exclude "*.db-wal"
+  --exclude "*.db-journal"
+  --exclude "packages/db/prisma/*.db"
+  --exclude "packages/db/prisma/*.db-shm"
+  --exclude "packages/db/prisma/*.db-wal"
+  --exclude "packages/db/prisma/*.db-journal"
   --exclude "apps/shop/public/uploads/"
 )
 

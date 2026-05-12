@@ -32,6 +32,7 @@ export async function GET() {
     genericGatewayBaseUrl: s.genericGatewayBaseUrl,
     genericGatewayWebhookSecretMasked: maskKey(s.genericGatewayWebhookSecret),
     genericGatewayLabel: s.genericGatewayLabel,
+    whatsappCheckoutNumber: s.whatsappCheckoutNumber,
   });
 }
 
@@ -52,6 +53,7 @@ const Body = z.object({
   genericGatewayBaseUrl: z.string().optional(),
   genericGatewayWebhookSecret: z.string().optional(),
   genericGatewayLabel: z.string().optional(),
+  whatsappCheckoutNumber: z.string().optional(),
 });
 
 export async function PUT(req: Request) {
@@ -113,6 +115,9 @@ export async function PUT(req: Request) {
   if (parsed.data.genericGatewayLabel !== undefined) {
     data.genericGatewayLabel = parsed.data.genericGatewayLabel?.trim() || null;
   }
+  if (parsed.data.whatsappCheckoutNumber !== undefined) {
+    data.whatsappCheckoutNumber = parsed.data.whatsappCheckoutNumber?.trim() || null;
+  }
   await updateSettings(data);
   await audit(user, "update", "Settings", "singleton", undefined, {
     stripeSecretKeyChanged: parsed.data.stripeSecretKey !== undefined,
@@ -125,7 +130,8 @@ export async function PUT(req: Request) {
       parsed.data.rentalDepositPercentOfPrice !== undefined,
     alternatePaymentsChanged:
       parsed.data.bankFpsInstructions !== undefined ||
-      parsed.data.kpayAlipayBaseUrl !== undefined,
+      parsed.data.kpayAlipayBaseUrl !== undefined ||
+      parsed.data.whatsappCheckoutNumber !== undefined,
     twilioChanged:
       parsed.data.twilioAccountSid !== undefined ||
       parsed.data.twilioAuthToken !== undefined ||
